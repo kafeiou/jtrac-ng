@@ -47,10 +47,10 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac 2.3.3-2.1.
    - **Giai đoạn Map**: Phân tích từng ticket và tệp đính kèm (hỗ trợ tới 100.000 ký tự mỗi tệp, đọc file PDF, Word, Excel, TXT, LOG, CSV) thành bản tóm tắt trung gian.
    - **Giai đoạn Reduce**: Tổng hợp các tóm tắt thành 3 phần rõ ràng: Tóm tắt điều hành, Phát hiện chính & Giải pháp, Khuyến nghị hành động.
    - Đảm bảo khối `finally` dọn sạch thư mục tạm, không để lại rác trên đĩa cứng.
-4. **Đính kèm báo cáo HTML ngoại tuyến hoàn chỉnh (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)**:
-   - **Nội dung email siêu tinh gọn**: Chỉ hiển thị bảng tóm tắt ticket và đường dẫn, ngăn ngừa vỡ giao diện trên Outlook/Gmail di động.
-   - **Báo cáo HTML độc lập**: Tạo trực tiếp trong bộ nhớ qua `ByteArrayResource` (< 3ms, không tốn I/O đĩa).
-   - **Thiết kế hiện đại**: Đường viền bảng rõ nét (`border-collapse: collapse`), thẻ `<details>` đóng mở mượt mà, tự động chuyển Dark Mode và định dạng in ấn tối ưu.
+4. **Liên kết báo cáo Web lưu giữ 14 ngày & Hỗ trợ tải xuống HTML ngoại tuyến**:
+   - **Loại bỏ nguy cơ bị cổng an ninh email chặn**: Không còn gửi tệp đính kèm `.html` vốn hay bị cổng bảo mật (Exchange/Outlook/Gmail) chặn, thay bằng liên kết trực tiếp an toàn.
+   - **Vòng đời 14 ngày và tự động dọn dẹp hàng giờ (TTL Auto-Pruning)**: Máy chủ lưu trữ báo cáo an toàn trong 14 ngày và tự động xóa tệp hết hạn qua tác vụ hàng giờ, chi phí bảo trì bằng 0.
+   - **Khả năng sử dụng ngoại tuyến 100% với một cú nhấp chuột**: Thanh công cụ thường trực hỗ trợ tải tệp HTML ngoại tuyến (`JTrac-AI-Report-[Date].html`), tích hợp sẵn công cụ Mermaid.js cho môi trường cách ly không mạng.
 5. **Hướng dẫn viết Prompt đa ngôn ngữ**: Cung cấp tài liệu [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_vi.md) với 4 kịch bản thực chiến.
 6. **Nhóm theo Space, sắp xếp ID giảm dần & Tích hợp Mermaid.js ngoại tuyến 100%**:
    - **Bảng phân nhóm theo Space & Sắp xếp mới nhất trước (ID DESC)**: Tái cấu trúc bảng tóm tắt trong email và báo cáo HTML theo từng Space được cấp quyền kèm số lượng ticket; các ticket trong mỗi Space được sắp xếp theo số hiệu ID giảm dần (`ID DESC`). Nội dung email được giữ tối giản, không kèm cảnh báo Mermaid dư thừa.

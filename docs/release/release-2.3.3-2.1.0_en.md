@@ -50,10 +50,10 @@ Building upon the core modernization of 2.0.0, JTrac 2.3.3-2.1.0-beta introduces
      2. Key Findings & Resolution
      3. Next Actions & Recommendations
    - Guaranteed `finally` cleanup of temporary staging files, ensuring zero disk leaks.
-4. **Standalone Offline HTML Report Attachment (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)**:
-   - **Minimal Email Body**: Streamlined notification with ticket links, completely eliminating email client rendering breaks.
-   - **Full-featured Standalone HTML**: Built in-memory via `ByteArrayResource` (under 3ms, zero disk I/O).
-   - **Modern Design**: Crisp table borders (`border-collapse: collapse`), native `<details>` expandable cards, dark/light theme switching (`@media prefers-color-scheme: dark`), and print expansion.
+4. **14-Day Expiring Web Report Links & Offline HTML Download Support**:
+   - **Zero Email Gateway Blocking**: Emails no longer carry `.html` attachments that are prone to corporate email firewall rejections (Exchange/Outlook/Gmail), replaced by safe direct links.
+   - **14-Day Lifecycle & Automated Hourly Cleanup (TTL Auto-Pruning)**: The server retains reports for 14 days and automatically cleans up expired files via an hourly scheduler with zero maintenance overhead.
+   - **100% Offline Usable with One-Click Download**: The report features a sticky action bar supporting one-click download (`JTrac-AI-Report-[Date].html`), embedding the full Mermaid.js engine for complete air-gapped offline use.
 5. **Multilingual Prompt Engineering Guide & 4 Real-world Examples**:
    - Published comprehensive practical guides [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_en.md) across 8 languages.
 6. **Ticket Space Grouping, ID DESC Sorting & 100% Air-gapped Offline Mermaid.js Integration**:

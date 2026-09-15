@@ -31,7 +31,8 @@
     <bean id="defaultController" class="info.jtrac.web.DefaultMultiActionController">
         <property name="mappings">
             <props>
-                <prop key="/flow/item_view">itemViewHandler</prop>                     
+                <prop key="/flow/item_view">itemViewHandler</prop>
+                <prop key="/flow/report">reportHandler</prop>
             </props>
         </property>
         <property name="jtrac" ref="jtrac"/>

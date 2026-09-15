@@ -132,6 +132,9 @@ public class MailSenderAiTest {
         assertTrue("Must embed mermaid script tag", report.contains("<script id=\"mermaid-core-js\">"));
         assertTrue("Must initialize mermaid with theme detection", report.contains("prefers-color-scheme: dark"));
         assertTrue("Must call mermaid.render", report.contains("mermaid.render"));
+        assertTrue("Must have action bar styling", report.contains(".report-action-bar"));
+        assertTrue("Must have download function", report.contains("downloadReportHtml"));
+        assertTrue("Must have 14-day retention notice", report.contains("14-Day Retention"));
     }
 
     @Test

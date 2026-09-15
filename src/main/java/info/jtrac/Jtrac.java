@@ -134,6 +134,7 @@ public interface Jtrac extends UserDetailsService {
     //========================================================
     String getReleaseVersion();
     String getReleaseTimestamp();
+    String getJtracHome();
     //========================================================
     List<StoredSearch> loadAllStoredSearch();
     void storeStoredSearch(StoredSearch storedSearch);

@@ -47,10 +47,10 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac 2.3.3
    - **Map-Phase**: Analysiert Tickets und Dateianhänge (bis zu 100.000 Zeichen pro Datei; PDF, Word, Excel, TXT, LOG, CSV) in temporäre Zwischenberichte.
    - **Reduce-Phase**: Erstellt eine strukturierte Gesamtsynthese (Management-Summary, Ursachen & Lösungen, Handlungsempfehlungen).
    - Saubere Bereinigung über `finally`-Block ohne Rückstände auf der Festplatte.
-4. **Offline-fähiger HTML-Bericht als E-Mail-Anhang (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)**:
-   - **Schlanker E-Mail-Text**: Vermeidet Darstellungsprobleme in Mail-Clients durch Beschränkung auf Ticketübersicht und Links.
-   - **Vollständiger HTML-Anhang**: Direkt im Speicher via `ByteArrayResource` erzeugt (< 3ms, null Platten-I/O).
-   - **Modernes Design**: Klare Tabellenrahmen, aufklappbare `<details>`-Karten, automatische Dark-Mode-Anpassung und druckoptimiertes Layout.
+4. **14-Tage-Web-Berichtslinks & Offline-HTML-Download**:
+   - **Verlässliche Umgehung von E-Mail-Sicherheitsblockaden**: Keine `.html`-Dateianhänge mehr, die von E-Mail-Gateways (Exchange/Outlook/Gmail) blockiert werden; stattdessen Bereitstellung sicherer Direktlinks.
+   - **14 Tage Aufbewahrung mit stündlicher automatischer Bereinigung (TTL Auto-Pruning)**: Der Server speichert Berichte für 14 Tage und löscht abgelaufene Dateien stündlich ohne manuellen Verwaltungsaufwand.
+   - **100% offline nutzbar mit Ein-Klick-Download**: Feste Aktionsleiste im Web-Bericht zum Herunterladen der HTML-Datei (`JTrac-AI-Report-[Date].html`), inklusive eingebetteter Mermaid.js-Engine für autarken Offline-Betrieb.
 5. **Mehrsprachiger Prompt-Leitfaden mit Praxisbeispielen**: Bereitstellung von [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_de.md) in 8 Sprachen.
 6. **Ticket-Gruppierung nach Space, ID-Abwärtssortierung & 100% Offline-Mermaid.js-Integration**:
    - **Space-spezifische Untertabellen & Neueste-zuerst-Sortierung (ID DESC)**: Überarbeitung der E-Mail-Vorschautabelle und des HTML-Berichts zur Gruppierung der Tickets nach Projektbereich (Space) mit Ticketanzahl. Innerhalb jedes Spaces werden Tickets strikt nach Ticket-ID absteigend sortiert (`ID DESC`). Der E-Mail-Text bleibt aufgeräumt ohne störende Mermaid-Warnhinweise.

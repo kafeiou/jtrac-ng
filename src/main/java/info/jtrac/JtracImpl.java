@@ -358,7 +358,7 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
     }
 
     private void initMailSender(Map<String, String> config) {
-        this.mailSender = new MailSender(config, messageSource, defaultLocale);
+        this.mailSender = new MailSender(config, messageSource, defaultLocale, jtracHome);
     }
 
     private void initDefaultLocale(String localeString) {
@@ -1194,6 +1194,36 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
 
     public void executeHourlyTask() {
         logger.debug("hourly task called");
+        cleanExpiredAiReports();
+    }
+
+    private void cleanExpiredAiReports() {
+        if (jtracHome == null) {
+            return;
+        }
+        try {
+            File reportsDir = new File(jtracHome, "reports");
+            if (!reportsDir.exists() || !reportsDir.isDirectory()) {
+                return;
+            }
+            long cutoff = System.currentTimeMillis() - (14L * 24 * 60 * 60 * 1000); // 14 days
+            File[] files = reportsDir.listFiles();
+            if (files != null) {
+                int cleanedCount = 0;
+                for (File f : files) {
+                    if (f.isFile() && f.getName().endsWith(".html") && f.lastModified() < cutoff) {
+                        if (f.delete()) {
+                            cleanedCount++;
+                        }
+                    }
+                }
+                if (cleanedCount > 0) {
+                    logger.info("Hourly task: Cleaned up " + cleanedCount + " expired AI report file(s) (>14 days old)");
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to clean up expired AI reports in hourly task: " + e.getMessage());
+        }
     }
 
     private InboundMailReceiver inboundMailReceiver;

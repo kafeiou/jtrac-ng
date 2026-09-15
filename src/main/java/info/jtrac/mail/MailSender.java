@@ -38,6 +38,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.mail.Header;
 import javax.mail.Session;
@@ -83,7 +84,22 @@ public class MailSender {
 	private String derFile;
 	private String identity;
 
+	private String jtracHome;
+
+	public String getJtracHome() {
+		return jtracHome;
+	}
+
+	public void setJtracHome(String jtracHome) {
+		this.jtracHome = jtracHome;
+	}
+
 	public MailSender(Map<String, String> config, MessageSource messageSource, String defaultLocale) {
+		this(config, messageSource, defaultLocale, null);
+	}
+
+	public MailSender(Map<String, String> config, MessageSource messageSource, String defaultLocale, String jtracHome) {
+		this.jtracHome = jtracHome;
 		// initialize email sender
 		this.messageSource = messageSource;
 		this.defaultLocale = StringUtils.parseLocaleString(defaultLocale);
@@ -423,14 +439,15 @@ public class MailSender {
 			String subject = cleanSub.toLowerCase().startsWith("re:") ? cleanSub : prefix + cleanSub;
 			helper.setSubject(subject);
 
-			// 1. Generate standalone offline HTML report & attach as JTrac-AI-Report-[yyyyMMdd-HHmm].html
+			// 1. Generate standalone offline HTML report & save to server disk with 14-day retention
+			String token = UUID.randomUUID().toString();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmm");
 			String reportFilename = "JTrac-AI-Report-" + sdf.format(now) + ".html";
-			String standaloneHtml = buildStandaloneHtmlReport(cleanSub, aiContent, referencedItems, perTicketSummaries, locale, spaces, now);
-			byte[] htmlBytes = standaloneHtml.getBytes(StandardCharsets.UTF_8);
-			helper.addAttachment(reportFilename, new ByteArrayResource(htmlBytes), "text/html; charset=UTF-8");
+			String standaloneHtml = buildStandaloneHtmlReport(cleanSub, aiContent, referencedItems, perTicketSummaries, locale, spaces, now, token);
+			saveReportToDisk(token, standaloneHtml);
+			String reportUrl = url + "flow/report?token=" + token;
 
-			// 2. Build streamlined email body (Notice + Ticket list only, completely preventing client formatting breakage)
+			// 2. Build streamlined email body (Notice + Link Button + Ticket list only, completely preventing client formatting breakage)
 			StringBuilder sb = new StringBuilder();
 			sb.append("<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px; color: #24292e; line-height: 1.6;'>");
 
@@ -442,17 +459,24 @@ public class MailSender {
 			sb.append("<strong>\u67e5\u8a62\u4e3b\u65e8 / Query:</strong> ").append(escapeHtml(cleanSub));
 			sb.append("</div>");
 
-			// Attachment Guidance Callout
-			sb.append("<div style='background-color: #f0f7ff; border: 1px solid #cce3ff; border-left: 4px solid #0969da; border-radius: 6px; padding: 16px 20px; margin-bottom: 24px;'>");
-			sb.append("<div style='font-weight: 600; color: #0969da; font-size: 15px; margin-bottom: 8px;'>");
-			sb.append("\uD83D\uDCCE \u8a73\u7d30\u8a3a\u65b7\u5831\u544a\u5df2\u751f\u6210\u70ba\u96e2\u7dda HTML \u9644\u4ef6\uff1a").append(escapeHtml(reportFilename));
+			// Web Link & 14-Day Retention Action Callout
+			sb.append("<div style='background-color: #f0f7ff; border: 1px solid #cce3ff; border-left: 4px solid #0969da; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; text-align: center;'>");
+			sb.append("<div style='font-weight: 600; color: #0969da; font-size: 16px; margin-bottom: 8px;'>");
+			sb.append("\uD83D\uDCCA AI \u6df1\u5ea6\u8a3a\u65b7\u5831\u544a\uff08\u542b Mermaid \u6d41\u7a0b\u5716\uff09\u5df2\u751f\u6210");
 			sb.append("</div>");
-			sb.append("<div style='font-size: 13px; color: #333; line-height: 1.6;'>");
-			sb.append("\u70ba\u907f\u514d\u5404\u90f5\u4ef6\u5ba2\u6236\u7aef\uff08Outlook / Gmail / \u624b\u6a5f\u90f5\u4ef6\uff09\u8868\u683c\u6846\u7dda\u6d88\u5931\u8207\u6392\u7248\u932f\u4f4d\uff0c\u5b8c\u6574\u7684<strong>\u9ad8\u968e\u7e3d\u7d50\u5206\u6790\u3001\u554f\u984c\u6839\u56e0\u8a3a\u65b7\u3001\u5efa\u8b70\u65b9\u6848\u3001\u5404\u5de5\u55ae\u6df1\u5165\u6458\u8981\u8207\u6b77\u7a0b\u7d00\u9304</strong>\u5df2\u6574\u7406\u65bc\u96a8\u4fe1\u9644\u5e36\u7684 HTML \u5831\u544a\u4e2d\u3002<br/>");
-			sb.append("\u8acb\u76f4\u63a5\u4e0b\u8f09\u6216\u9ede\u64ca\u9644\u4ef6\u958b\u555f\uff0c\u5373\u53ef\u7372\u5f97\u6700\u4f73\u96e2\u7dda\u95b1\u8b80\u8207\u6e05\u6670\u8868\u683c\u6846\u7dda\u9ad4\u9a57\u3002");
-			sb.append("<div style='margin-top: 6px; font-size: 12px; color: #666;'>");
-			sb.append("(Full analysis, ticket diagnoses, and recommendations are compiled into the attached standalone HTML report. Please open the attachment in your browser for the best reading experience.)");
-			sb.append("</div></div></div>");
+			sb.append("<div style='font-size: 13px; color: #57606a; margin-bottom: 16px; line-height: 1.6;'>");
+			sb.append("\u5305\u542b\u9ad8\u968e\u7e3d\u7d50\u5206\u6790\u3001\u554f\u984c\u6839\u56e0\u8a3a\u65b7\u3001\u5efa\u8b70\u884c\u52d5\u65b9\u6848\u8207\u5de5\u55ae\u6b77\u7a0b\u7d00\u9304\u3002\u672c\u7dda\u4e0a\u5831\u544a\u4fdd\u7559 <strong>14 \u5929</strong>\u3002<br/>");
+			sb.append("(Full analysis with offline Mermaid flowcharts is ready. This online link is valid for <strong>14 days</strong>.)");
+			sb.append("</div>");
+			sb.append("<div style='margin-bottom: 14px;'>");
+			sb.append("<a href='").append(reportUrl).append("' style='background-color: #0969da; color: #ffffff !important; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600; display: inline-block; box-shadow: 0 2px 4px rgba(9,105,218,0.2);'>");
+			sb.append("\uD83D\uDCCA \u9ede\u6b64\u958b\u555f\u5b8c\u6574\u5831\u544a / Open Full Report");
+			sb.append("</a>");
+			sb.append("</div>");
+			sb.append("<div style='font-size: 12px; color: #656d76;'>");
+			sb.append("\uD83D\uDCE5 \u7db2\u9801\u9802\u90e8\u5177\u5099\u300c\u4e0b\u8f09\u96e2\u7dda HTML \u5831\u544a\u300d\u6309\u9215\uff0c\u53ef\u96a8\u6642\u4e0b\u8f09\u65bc\u672c\u6a5f\u6c38\u4e45\u7559\u5b58\u3002<br/>");
+			sb.append("(You can download the self-contained offline HTML report directly from the webpage for permanent keeping.)");
+			sb.append("</div></div>");
 
 			// Referenced Tickets List (Grouped by Space and ID DESC)
 			if (referencedItems != null && !referencedItems.isEmpty()) {
@@ -516,8 +540,28 @@ public class MailSender {
 		}
 	}
 
+	private void saveReportToDisk(String token, String htmlContent) {
+		try {
+			String home = (jtracHome != null && !jtracHome.trim().isEmpty()) ? jtracHome : (System.getProperty("user.home") + "/.jtrac");
+			File reportsDir = new File(home, "reports");
+			if (!reportsDir.exists()) {
+				reportsDir.mkdirs();
+			}
+			File reportFile = new File(reportsDir, token + ".html");
+			java.nio.file.Files.write(reportFile.toPath(), htmlContent.getBytes(StandardCharsets.UTF_8));
+			logger.info("Saved AI diagnostic report to " + reportFile.getAbsolutePath() + " (size: " + reportFile.length() + " bytes)");
+		} catch (Exception e) {
+			logger.error("Failed to save AI report to disk for token " + token, e);
+		}
+	}
+
 	public String buildStandaloneHtmlReport(String originalSubject, String aiContent, List<Item> referencedItems,
 										    Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, Date generatedDate) {
+		return buildStandaloneHtmlReport(originalSubject, aiContent, referencedItems, perTicketSummaries, locale, spaces, generatedDate, null);
+	}
+
+	public String buildStandaloneHtmlReport(String originalSubject, String aiContent, List<Item> referencedItems,
+										    Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, Date generatedDate, String token) {
 		SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String genDateStr = sdfFull.format(generatedDate != null ? generatedDate : new Date());
 		int ticketCount = (referencedItems != null) ? referencedItems.size() : 0;
@@ -684,11 +728,44 @@ public class MailSender {
 		html.append("  details[open], details { display: block !important; }\n");
 		html.append("  details > .details-content { display: block !important; }\n");
 		html.append("  details summary:after { display: none; }\n");
+		html.append("  .report-action-bar { display: none !important; }\n");
 		html.append("}\n");
+		html.append(".report-action-bar {\n");
+		html.append("  background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px;\n");
+		html.append("  padding: 12px 20px; margin-bottom: 24px; display: flex; justify-content: space-between;\n");
+		html.append("  align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);\n");
+		html.append("}\n");
+		html.append(".action-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }\n");
+		html.append(".action-badge {\n");
+		html.append("  display: inline-block; padding: 3px 10px; font-size: 12px; font-weight: 600;\n");
+		html.append("  border-radius: 12px; background-color: #fff8c5; color: #9a6700; border: 1px solid #d4a72c66;\n");
+		html.append("}\n");
+		html.append(".action-desc { font-size: 13px; color: var(--text-muted); }\n");
+		html.append(".download-btn {\n");
+		html.append("  background-color: var(--primary-color); color: #ffffff !important; padding: 8px 18px;\n");
+		html.append("  border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;\n");
+		html.append("  display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);\n");
+		html.append("  cursor: pointer; transition: background-color 0.2s;\n");
+		html.append("}\n");
+		html.append(".download-btn:hover { background-color: var(--primary-hover); text-decoration: none !important; }\n");
 		html.append("</style>\n");
 		html.append("</head>\n");
 		html.append("<body>\n");
 		html.append("<div class='container'>\n");
+		html.append("\n");
+		html.append("<!-- Action Bar (14-Day Retention & Offline Download) -->\n");
+		html.append("<div class='report-action-bar'>\n");
+		html.append("  <div class='action-bar-left'>\n");
+		html.append("    <span class='action-badge'>⏰ 線上保留 14 天 / 14-Day Retention</span>\n");
+		html.append("    <span class='action-desc'>此報告將於 14 天後自動過期清理。如需永久保存，可隨時點擊右側下載離線檔。</span>\n");
+		html.append("  </div>\n");
+		html.append("  <div class='action-bar-right'>\n");
+		String downloadUrl = (token != null) ? url + "flow/report?token=" + token + "&download=true" : "javascript:void(0)";
+		html.append("    <a href='").append(downloadUrl).append("' onclick='downloadReportHtml(this)' class='download-btn' id='dl-report-btn'>\n");
+		html.append("      📥 下載離線 HTML 報告 (Download Report)\n");
+		html.append("    </a>\n");
+		html.append("  </div>\n");
+		html.append("</div>\n");
 
 		// Header
 		html.append("<header class='header'>\n");
@@ -927,6 +1004,37 @@ public class MailSender {
 			html.append("});\n");
 			html.append("</script>\n");
 		}
+
+		html.append("<script>\n");
+		html.append("function downloadReportHtml(btn) {\n");
+		html.append("  if (window.location.protocol === 'file:' || !window.location.href.includes('token=')) {\n");
+		html.append("    var docClone = document.documentElement.cloneNode(true);\n");
+		html.append("    var blob = new Blob([docClone.outerHTML], { type: 'text/html;charset=utf-8' });\n");
+		html.append("    var a = document.createElement('a');\n");
+		html.append("    a.href = URL.createObjectURL(blob);\n");
+		html.append("    var rawTitle = document.title ? document.title.replace(/[^a-zA-Z0-9_\\-\\u4e00-\\u9fa5]/g, '_') : 'JTrac-AI-Report';\n");
+		html.append("    a.download = rawTitle + '.html';\n");
+		html.append("    document.body.appendChild(a);\n");
+		html.append("    a.click();\n");
+		html.append("    document.body.removeChild(a);\n");
+		html.append("  }\n");
+		html.append("}\n");
+		html.append("document.addEventListener('DOMContentLoaded', function() {\n");
+		html.append("  if (window.location.protocol === 'file:') {\n");
+		html.append("    var desc = document.querySelector('.action-desc');\n");
+		html.append("    if (desc) desc.textContent = '您正在瀏覽已下載之本機離線封裝檔案，包含完整離線 Mermaid 引擎，永久可用。';\n");
+		html.append("    var badge = document.querySelector('.action-badge');\n");
+		html.append("    if (badge) {\n");
+		html.append("      badge.textContent = '✓ 本機離線封存檔 (Offline Archive)';\n");
+		html.append("      badge.style.backgroundColor = '#dafbe1';\n");
+		html.append("      badge.style.color = '#1a7f37';\n");
+		html.append("      badge.style.borderColor = '#4ac26b66';\n");
+		html.append("    }\n");
+		html.append("    var dlBtn = document.getElementById('dl-report-btn');\n");
+		html.append("    if (dlBtn) dlBtn.style.display = 'none';\n");
+		html.append("  }\n");
+		html.append("});\n");
+		html.append("</script>\n");
 
 		html.append("</div>\n");
 		html.append("</body>\n");

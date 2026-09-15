@@ -50,10 +50,10 @@ JTrac 2.3.3-2.1.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了�
      2. 各工單關鍵發現與解法 (Key Findings & Resolution)
      3. 建議行動方案 (Next Actions & Recommendations)
    - 具備防呆機制與 `finally` 暫存目錄保證銷毀，零磁碟洩漏風險。
-4. **離線美化 HTML 診斷報告隨信附件 (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)**：
-   - **郵件內文極致精簡**：內文僅提供工單速覽表格與附件開啟導引卡片，徹底解決各郵件客戶端表格跑版與無框線問題。
-   - **全包式獨立 HTML 附件**：以純記憶體 `ByteArrayResource` 即時組裝串流發送（耗時 < 3ms，零磁碟 I/O）。
-   - **現代化設計**：包含清晰表格框線（`border-collapse: collapse; border: 1px solid`）、原生 `<details>` 折疊卡片、自動深淺色模式（`@media prefers-color-scheme: dark`）、列印全展開模式（`@media print`）。
+4. **線上 14 天安全 Web 報告連結與離線 HTML 一鍵下載 (14-Day Expiring Web Report & Offline Download)**：
+   - **徹底避開企業郵件閘道攔截**：郵件內文不再夾帶易被企業郵件閘道（Exchange/Outlook/Gmail）阻擋之 `.html` 附件，改為提供安全超連結直連開啟。
+   - **14 天生命週期與每小時自動清理 (TTL Auto-Pruning)**：伺服器安全儲存報告 14 天，利用每小時排程自動銷毀過期檔案，維護成本為 0，磁碟容量恆定。
+   - **100% 離線可用與一鍵下載**：報告頂部常駐操作列，支援收件人一鍵下載離線 HTML 檔案（`JTrac-AI-Report-[Date].html`）；下載之檔案內嵌完整 Mermaid.js 引擎，斷網隔離環境 100% 原生可用。
 5. **完整多語系 Prompt 指南與 4 大實戰範例**：
    - 建立 8 種語系之實戰指南 [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_zh-TW.md)，涵蓋障礙排查、工單追蹤、架構規範與版本升級等場景。
 6. **工單空間分組、ID 倒序排列與 100% 離線 Mermaid 流程圖引擎 (Space Grouping, ID DESC & Offline Mermaid.js)**：

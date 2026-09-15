@@ -47,10 +47,10 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac 2.3.3-2.1.0-
    - **Phase Map** : Analyse individuelle de chaque ticket et pièce jointe (jusqu'à 100 000 caractères par fichier ; PDF, Word, Excel, TXT, LOG, CSV) dans des synthèses temporaires.
    - **Phase Reduce** : Consolidation finale en 3 volets clairs (Synthèse de direction, Causes racines & solutions, Actions recommandées).
    - Nettoyage rigoureux garanti via des blocs `finally` sans encombrement disque.
-4. **Rapport HTML hors ligne complet en pièce jointe (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)** :
-   - **Corps d'e-mail allégé** : Tableau synthétique et liens directs uniquement, éliminant les problèmes de mise en page tronquée.
-   - **Rapport HTML autonome** : Généré en mémoire vive via `ByteArrayResource` (< 3ms, zéro I/O disque).
-   - **Design contemporain** : Bordures de tableau précises, cartes dépliantes `<details>`, mode sombre automatique et mise en page d'impression complète.
+4. **Liens de rapport Web valides 14 jours & Téléchargement HTML hors ligne** :
+   - **Élimination totale des blocages par les passerelles e-mail** : Suppression des pièces jointes `.html` souvent bloquées par les passerelles de messagerie d'entreprise (Exchange/Outlook/Gmail), remplacées par des liens Web sécurisés.
+   - **Cycle de vie de 14 jours et purge horaire automatisée (TTL Auto-Pruning)** : Le serveur conserve les rapports pendant 14 jours et détruit automatiquement les fichiers expirés via une tâche horaire sans frais de maintenance.
+   - **100% utilisable hors ligne et téléchargement en un clic** : Barre d'action permanente permettant de télécharger le rapport HTML (`JTrac-AI-Report-[Date].html`), avec moteur Mermaid.js autonome pour une utilisation sans connexion.
 5. **Guide de Prompts en 8 langues** : Consulter [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_fr.md).
 6. **Regroupement par Space, tri ID décroissant et intégration de Mermaid.js 100% hors ligne** :
    - **Sous-tableaux regroupés par Space & Tri du plus récent au plus ancien (ID DESC)** : Refonte des tableaux de synthèse par e-mail et des rapports HTML pour regrouper les tickets par espace de projet (Space) avec décompte ; au sein de chaque Space, les tickets sont triés par ID décroissant (`ID DESC`). Le corps de l'e-mail demeure épuré sans avertissement superflu sur Mermaid.

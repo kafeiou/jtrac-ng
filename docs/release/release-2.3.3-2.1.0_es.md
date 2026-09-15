@@ -47,10 +47,10 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac 2.3.3
    - **Fase Map**: Analiza tickets individuales y documentos adjuntos (hasta 100.000 caracteres por archivo; PDF, Word, Excel, TXT, LOG, CSV) generando resúmenes intermedios.
    - **Fase Reduce**: Elabora un informe estructurado final (Resumen ejecutivo, Causas y soluciones, Recomendaciones).
    - Limpieza garantizada mediante bloques `finally` sin archivos temporales residuales.
-4. **Informe HTML independiente adjunto en el correo (`JTrac-AI-Report-[yyyyMMdd-HHmm].html`)**:
-   - **Cuerpo de correo minimalista**: Contiene únicamente la tabla resumen y enlaces directos, evitando distorsiones visuales en clientes de correo.
-   - **Adjunto HTML completo**: Construido directamente en memoria mediante `ByteArrayResource` (< 3ms, sin I/O de disco).
-   - **Diseño moderno**: Bordes de tabla definidos, tarjetas desplegables `<details>`, adaptación automática al modo oscuro y formato de impresión optimizado.
+4. **Enlaces de informe Web con retención de 14 días y descarga de HTML offline**:
+   - **Eliminación total del bloqueo por pasarelas de correo**: Se suprimen los adjuntos `.html` propensos a bloqueos por gateways empresariales (Exchange/Outlook/Gmail), sustituyéndolos por enlaces seguros.
+   - **Ciclo de vida de 14 días y limpieza horaria automática (TTL Auto-Pruning)**: El servidor conserva los informes 14 días y elimina automáticamente los archivos vencidos mediante una tarea programada cada hora.
+   - **100% utilizable sin conexión y descarga con un clic**: Barra de acciones persistente en el informe web para descargar el archivo HTML (`JTrac-AI-Report-[Date].html`), con el motor Mermaid.js integrado para funcionamiento autónomo offline.
 5. **Guía de Prompts en 8 idiomas**: Documento práctico disponible en [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_es.md).
 6. **Agrupación por Space, orden descendente por ID e integración de Mermaid.js 100% offline**:
    - **Subtablas agrupadas por Space y orden descendente de ID (ID DESC)**: Reestructuración de la tabla de resumen por correo y del informe HTML para agrupar los tickets por espacio de proyecto (Space) con encabezado de recuento; dentro de cada Space los tickets se ordenan de más reciente a más antiguo (`ID DESC`). El cuerpo del correo se mantiene limpio sin avisos innecesarios de Mermaid.
