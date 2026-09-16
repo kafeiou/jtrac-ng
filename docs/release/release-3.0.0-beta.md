@@ -1,14 +1,14 @@
-# JTrac Release Notes - 2.3.3-2.1.0-beta
+# JTrac NG Release Notes - 3.0.0-beta
 
-[English](release-2.3.3-2.1.0_en.md) | [繁體中文](release-2.3.3-2.1.0_zh-TW.md) | [简体中文](release-2.3.3-2.1.0_zh-CN.md) | [日本語](release-2.3.3-2.1.0_ja.md) | [Tiếng Việt](release-2.3.3-2.1.0_vi.md) | [Deutsch](release-2.3.3-2.1.0_de.md) | [Español](release-2.3.3-2.1.0_es.md) | [Français](release-2.3.3-2.1.0_fr.md)
+[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
-[![Version](https://img.shields.io/badge/Version-2.3.3--2.1.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-2.3.3-2.1.0_en.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_en.md)
 [![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
 [![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
 
@@ -31,7 +31,7 @@
 
 ## 1. Core Highlights Overview
 
-Building upon the core modernization of 2.0.0, JTrac 2.3.3-2.1.0-beta introduces the revolutionary **AI Query Copilot (powered by Ollama)**, upgrades the foundational XML engine to eliminate Java 11 reflective access warnings, dramatically enhances UI accessibility (4-stage font scaling with A+++ mode and 3-state dark/light themes), and reinforces production security.
+Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces the revolutionary **AI Query Copilot (powered by Ollama)**, upgrades the foundational XML engine to eliminate Java 11 reflective access warnings, dramatically enhances UI accessibility (4-stage font scaling with A+++ mode and 3-state dark/light themes), and reinforces production security.
 
 ---
 
@@ -54,6 +54,8 @@ Building upon the core modernization of 2.0.0, JTrac 2.3.3-2.1.0-beta introduces
    - **Zero Email Gateway Blocking**: Emails no longer carry `.html` attachments that are prone to corporate email firewall rejections (Exchange/Outlook/Gmail), replaced by safe direct links.
    - **14-Day Lifecycle & Automated Hourly Cleanup (TTL Auto-Pruning)**: The server retains reports for 14 days and automatically cleans up expired files via an hourly scheduler with zero maintenance overhead.
    - **100% Offline Usable with One-Click Download**: The report features a sticky action bar supporting one-click download (`JTrac-AI-Report-[Date].html`), embedding the full Mermaid.js engine for complete air-gapped offline use.
+   - **Standalone HTML**: Built in-memory via `ByteArrayResource` (under 3ms, zero disk I/O).
+   - **Modern Design**: Crisp table borders (`border-collapse: collapse`), native `<details>` expandable cards, dark/light theme switching (`@media prefers-color-scheme: dark`), and print expansion.
 5. **Multilingual Prompt Engineering Guide & 4 Real-world Examples**:
    - Published comprehensive practical guides [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_en.md) across 8 languages.
 6. **Ticket Space Grouping, ID DESC Sorting & 100% Air-gapped Offline Mermaid.js Integration**:
@@ -120,9 +122,12 @@ Building upon the core modernization of 2.0.0, JTrac 2.3.3-2.1.0-beta introduces
    - Detects text attachment encoding and injects charset headers to prevent garbled text.
 5. **Context-Relative Logo Resolution**:
    - Resolves system header logo paths correctly behind reverse proxies.
-6. **Docker Build Script Guidance & Git Tag Conflict Prevention**:
-   - Added startup troubleshooting tips to `docker/build.bat` and `docker/build.sh` with one-click sync instructions (`git fetch --tags -f && git reset --hard origin/master`) for build machines encountering tag clobbering or local build diffs.
-   - Expanded `docker/` documentation across all 8 supported languages with troubleshooting guides for build environment synchronization.
+6. **Docker Build Safeguards & Git Sync Guidance**:
+   - Added startup prompts to `docker/build.bat` and `docker/build.sh` terminals, reminding users of the one-click synchronization command (`git fetch --tags -f && git reset --hard origin/master`) when encountering tag conflicts or file changes before compilation.
+   - Provided comprehensive 8-language build documentation in `docker/`, appending troubleshooting and tag conflict resolution guides.
+7. **JTrac NG Rebranding & Semantic Versioning Leap (v3.0.0-beta)**:
+   - Officially rebranded the project to **JTrac NG** (Next Generation) and bumped version to **3.0.0-beta**, eliminating 15-year-old search collisions with legacy JTrac 2.1.0/2.3.x and dramatically boosting Google SEO indexation.
+   - Migrated official repository to [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), synchronizing web footers, mobile navigation bar, and Maven POM descriptors.
 
 ---
 

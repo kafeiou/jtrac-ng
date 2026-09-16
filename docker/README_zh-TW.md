@@ -1,8 +1,8 @@
-# JTrac Docker 容器化建置與部署 (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker 容器化建置與部署 (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-本目錄提供 JTrac 現代化版本之原生 Docker 多階段建置與容器化執行環境。
+本目錄提供 JTrac NG 現代化版本之原生 Docker 多階段建置與容器化執行環境。
 
 ---
 
@@ -23,8 +23,8 @@
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 服務啟動後，使用瀏覽器開啟：`http://localhost:8888/`
@@ -69,7 +69,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 若您在專屬的 Docker 編譯機器或測試伺服器上執行 `git pull` 遇到失敗，常見原因與排除指令如下：
 
 1. **Tag 遭到遠端覆蓋導致報錯 (`would clobber existing tag`)**：
-   當版本 Tag（如 `2.3.3-2.1.0-beta`）在遠端重新指定到新 Commit 時，Git 基於保護機制會拒絕自動覆蓋本地舊 Tag。請加上 `-f` 強制拉取：
+   當版本 Tag（如 `3.0.0-beta`）在遠端重新指定到新 Commit 時，Git 基於保護機制會拒絕自動覆蓋本地舊 Tag。請加上 `-f` 強制拉取：
    ```bash
    git pull --tags -f
    ```

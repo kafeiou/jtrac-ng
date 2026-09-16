@@ -1,8 +1,8 @@
-# Đóng gói & Triển khai JTrac Docker (Jetty 12.x + Eclipse Temurin 17+)
+# Đóng gói & Triển khai JTrac NG Docker (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-Thư mục này cung cấp môi trường xây dựng nhiều giai đoạn (Multi-stage Build) và triển khai container Docker gốc cho phiên bản JTrac hiện đại hóa.
+Thư mục này cung cấp môi trường xây dựng nhiều giai đoạn (Multi-stage Build) và triển khai container Docker gốc cho phiên bản JTrac NG hiện đại hóa.
 
 ---
 
@@ -23,8 +23,8 @@ Từ thư mục `docker`, sử dụng thư mục gốc của dự án (`..`) là
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Mở `http://localhost:8888/` trong trình duyệt (tài khoản mặc định: `admin` / `admin`).
@@ -65,7 +65,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 Nếu lệnh `git pull` trên máy chủ build Docker hoặc máy kiểm thử bị lỗi, hãy áp dụng các giải pháp sau:
 
 1. **Lỗi từ chối ghi đè thẻ Tag (`would clobber existing tag`)**:
-   Khi một thẻ phiên bản (như `2.3.3-2.1.0-beta`) được cập nhật cưỡng bức trên kho lưu trữ từ xa, Git mặc định sẽ chặn việc ghi đè. Hãy thêm cờ `-f`:
+   Khi một thẻ phiên bản (như `3.0.0-beta`) được cập nhật cưỡng bức trên kho lưu trữ từ xa, Git mặc định sẽ chặn việc ghi đè. Hãy thêm cờ `-f`:
    ```bash
    git pull --tags -f
    ```

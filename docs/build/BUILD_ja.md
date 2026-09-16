@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-本ガイドでは、Apache Maven を使用した JTrac 2.3.3-2.1.0-beta のコンパイルおよびパッケージング手順、Maven ライフサイクル、依存関係キャッシュ機構、WAR および CLI の内部構造、Web コンテナ適合マトリクス、トラブルシューティングについて詳細に解説します。
+本ガイドでは、Apache Maven を使用した JTrac NG 3.0.0-beta のコンパイルおよびパッケージング手順、Maven ライフサイクル、依存関係キャッシュ機構、WAR および CLI の内部構造、Web コンテナ適合マトリクス、トラブルシューティングについて詳細に解説します。
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Web コンテナ適合マトリクス (Web Container Matrix)
 
-JTrac 2.3.3-2.1.0-beta は Servlet 4.0 仕様（`javax.servlet`）に準拠しており、生成された WAR ファイルは主要なコンテナへそのままデプロイ可能です：
+JTrac NG 3.0.0-beta は Servlet 4.0 仕様（`javax.servlet`）に準拠しており、生成された WAR ファイルは主要なコンテナへそのままデプロイ可能です：
 
 | Web コンテナ | 対応バージョン | デプロイ方式 |
 |---|---|---|

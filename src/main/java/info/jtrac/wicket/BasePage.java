@@ -80,7 +80,7 @@ public abstract class BasePage extends WebPage {
         add(new HeaderPanel().setRenderBodyOnly(true));
         String jtracVersion = getJtrac().getReleaseVersion();
         add(new Label("version", jtracVersion));
-        add(new Label("title", "JTrac"));
+        add(new Label("title", "JTrac NG"));
     }
 
     @Override

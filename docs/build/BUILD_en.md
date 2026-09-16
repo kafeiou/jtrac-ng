@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-This guide provides comprehensive instructions on compiling and packaging the JTrac 2.3.3-2.1.0-beta project with Apache Maven, covering the Maven lifecycle, dependency caching, WAR and CLI archive internal structures, web container deployment verification, and build troubleshooting.
+This guide provides comprehensive instructions on compiling and packaging the JTrac NG 3.0.0-beta project with Apache Maven, covering the Maven lifecycle, dependency caching, WAR and CLI archive internal structures, web container deployment verification, and build troubleshooting.
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Web Container Compatibility & Deployment Matrix
 
-JTrac 2.3.3-2.1.0-beta conforms to the Servlet 4.0 specification (`javax.servlet`). The built WAR can be deployed directly onto modern containers:
+JTrac NG 3.0.0-beta conforms to the Servlet 4.0 specification (`javax.servlet`). The built WAR can be deployed directly onto modern containers:
 
 | Container | Supported Versions | Deployment Method |
 |---|---|---|

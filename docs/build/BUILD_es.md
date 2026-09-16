@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-Esta guía detalla cómo compilar y empaquetar el proyecto JTrac 2.3.3-2.1.0-beta utilizando Apache Maven, cubriendo el ciclo de vida de Maven, la caché de dependencias, las estructuras internas de los paquetes WAR y CLI, la matriz de verificación en contenedores Web y la resolución de problemas de compilación.
+Esta guía detalla cómo compilar y empaquetar el proyecto JTrac NG 3.0.0-beta utilizando Apache Maven, cubriendo el ciclo de vida de Maven, la caché de dependencias, las estructuras internas de los paquetes WAR y CLI, la matriz de verificación en contenedores Web y la resolución de problemas de compilación.
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Matriz de Compatibilidad con Contenedores Web
 
-JTrac 2.3.3-2.1.0-beta cumple con la especificación Servlet 4.0 (`javax.servlet`). El archivo WAR puede desplegarse directamente en contenedores modernos:
+JTrac NG 3.0.0-beta cumple con la especificación Servlet 4.0 (`javax.servlet`). El archivo WAR puede desplegarse directamente en contenedores modernos:
 
 | Contenedor Web | Versiones Compatibles | Método de Despliegue |
 |---|---|---|

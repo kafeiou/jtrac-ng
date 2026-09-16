@@ -1,14 +1,14 @@
-# JTrac リリースノート (Release Notes) - 2.3.3-2.1.0-beta
+# JTrac NG リリースノート (Release Notes) - 3.0.0-beta
 
-[English](release-2.3.3-2.1.0_en.md) | [繁體中文](release-2.3.3-2.1.0_zh-TW.md) | [简体中文](release-2.3.3-2.1.0_zh-CN.md) | [日本語](release-2.3.3-2.1.0_ja.md) | [Tiếng Việt](release-2.3.3-2.1.0_vi.md) | [Deutsch](release-2.3.3-2.1.0_de.md) | [Español](release-2.3.3-2.1.0_es.md) | [Français](release-2.3.3-2.1.0_fr.md)
+[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
-[![Version](https://img.shields.io/badge/Version-2.3.3--2.1.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-2.3.3-2.1.0_ja.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_ja.md)
 [![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
 [![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
 
@@ -31,7 +31,7 @@
 
 ## 1. バージョン概要と主要ハイライト
 
-JTrac 2.3.3-2.1.0-beta は、2.0.0 のアーキテクチャ刷新を土台として、革新的な **AI メール問い合わせアシスタント (Ollama 連携 AI Query Copilot)** を導入。基盤 XML パーサーを更新して Java 11 環境での非推奨リフレクション警告を完全に解消し、UI アクセシビリティ（4段階フォント拡大と A+++ モード、3ステートテーマ切替）および本番セキュリティを大幅に強化しました。
+JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として、革新的な **AI メール問い合わせアシスタント (Ollama 連携 AI Query Copilot)** を導入。基盤 XML パーサーを更新して Java 11 環境での非推奨リフレクション警告を完全に解消し、UI アクセシビリティ（4段階フォント拡大と A+++ モード、3ステートテーマ切替）および本番セキュリティを大幅に強化しました。
 
 ---
 
@@ -108,6 +108,9 @@ JTrac 2.3.3-2.1.0-beta は、2.0.0 のアーキテクチャ刷新を土台とし
 6. **Docker ビルドスクリプトのガイダンスと Git Tag 競合防止**:
    - `docker/build.bat` および `docker/build.sh` に起動時ヒントを追加し、ビルドマシンで Tag の上書きやローカル差分が発生した際の一発同期コマンド（`git fetch --tags -f && git reset --hard origin/master`）を案内。
    - `docker/` 配下に 8 言語対応のビルドガイドを整備し、トラブルシューティング章を追加。
+7. **JTrac NG へのリブランディングおよびセマンティックバージョニング躍進 (v3.0.0-beta)**：
+   - プロジェクト名称を **JTrac NG** (Next Generation) に一新し、バージョンを **3.0.0-beta** に繰り上げ。15年前の旧 JTrac 2.1.0/2.3.x との検索競合を根本解消し、Google SEO での独立した露出を飛躍的に強化。
+   - 公式リポジトリ URL を [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng) へ完全移行し、Web フッター、モバイルナビゲーション、Maven POM を同期更新。
 
 ---
 

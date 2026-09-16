@@ -1,6 +1,8 @@
-# JTrac
+# JTrac NG
 
-This project is derived from JTrac 2.3.3 (https://jtrac.info). It is dedicated to providing a lightweight, highly compatible Q&A text record and tracking system with offline static archiving capabilities and an intuitive user interface, making it exceptionally well-suited for knowledge management, supported by attachments for complex workflows.
+This project is derived from [JTrac 2.3.3](https://sourceforge.net/projects/j-trac/). **JTrac NG** is dedicated to providing a lightweight, modern, and AI-powered Q&A record and issue tracking system with offline static archiving capabilities, an intuitive responsive user interface, and seamless attachment support for complex workflows.
+
+Repository: **[https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng)**
 
 ---
 
@@ -8,9 +10,9 @@ This project is derived from JTrac 2.3.3 (https://jtrac.info). It is dedicated t
 
 ### Option 1: Pre-packaged Standalone Bundle (GitHub Releases)
 
-Pre-built standalone distributions bundling Jetty 10.x and JTrac are available on GitHub Releases:
+Pre-built standalone distributions bundling Jetty 12.x and JTrac NG are available on [GitHub Releases](https://github.com/kafeiou/jtrac-ng/releases):
 
-1. Download the latest `jtrac-2.3.3-x.x.x.zip` from GitHub Releases.
+1. Download the latest `jtrac-ng-3.0.0-beta.zip` from GitHub Releases.
 2. Unzip the downloaded archive to your preferred directory.
 3. Start the server:
    - **Windows**: Double-click or run `start.bat`
@@ -25,20 +27,19 @@ Pre-built standalone distributions bundling Jetty 10.x and JTrac are available o
 
 ---
 
-### Option 2: Run with Docker Hub Image (`inmethod/jtrac`)
+### Option 2: Run with Docker Container
 
-A ready-to-run container image based on Eclipse Temurin 17+, Jetty 12.x, and full multilingual fonts is published on Docker Hub:
-**[https://hub.docker.com/r/inmethod/jtrac](https://hub.docker.com/r/inmethod/jtrac)**
+A ready-to-run container image based on Eclipse Temurin 17+, Jetty 12.x, and full multilingual fonts can be built or run directly via Docker:
 
 Run directly with Docker:
 ```bash
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac:latest
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Access the application at `http://localhost:8888/`.
 
 > [!NOTE]
-> If you prefer to build the Docker image locally from source code, refer to the [`docker/README.md`](docker/README.md) guide.
+> To build the Docker image locally from source code, refer to the [`docker/README.md`](docker/README.md) guide.
 
 ---
 
@@ -46,7 +47,7 @@ Access the application at `http://localhost:8888/`.
 
 All detailed project specifications, technical guides, and multilingual documentation are organized in the [`docs/`](docs/) directory:
 
-- **Release Notes (2.3.3-2.1.0-beta)**: [`docs/release/release-2.3.3-2.1.0_en.md`](docs/release/release-2.3.3-2.1.0_en.md)
+- **Release Notes (3.0.0-beta)**: [`docs/release/release-3.0.0-beta_en.md`](docs/release/release-3.0.0-beta_en.md)
 - **Release Notes (2.3.3-2.0.0)**: [`docs/release/release-2.3.3-2.0.0_en.md`](docs/release/release-2.3.3-2.0.0_en.md)
 - **Release Notes (2.3.3-1.0.0)**: [`docs/release/release-2.3.3-1.0.0_en.md`](docs/release/release-2.3.3-1.0.0_en.md)
 - **AI Query Copilot & Prompt Guide (8 Languages)**: [`docs/llm/PROMPT_EXAMPLES_en.md`](docs/llm/PROMPT_EXAMPLES_en.md)

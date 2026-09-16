@@ -2,16 +2,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>info.jtrac</groupId>
-    <artifactId>jtrac</artifactId>
+    <artifactId>jtrac-ng</artifactId>
     <packaging>war</packaging>
-    <version>2.3.3-2.1.0-beta</version>
-    <name>JTrac</name>
+    <version>3.0.0-beta</version>
+    <name>JTrac NG</name>
     <description>
-        JTrac is a generic issue-tracking web-application that can be easily customized by adding custom fields 
-        and drop-downs. Features include customizable workflow, field level permissions, e-mail integration, 
-        file attachments and a detailed history view.
+        JTrac NG is a modern, lightweight, and AI-powered issue-tracking web-application derived from JTrac 2.3.3.
     </description>
-    <url>https://sourceforge.net/projects/j-trac/</url>
+    <url>https://github.com/kafeiou/jtrac-ng</url>
 
     <licenses>
         <license>
@@ -21,8 +19,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:https://j-trac.svn.sourceforge.net/svnroot/j-trac/trunk/jtrac</connection>
-        <url>http://j-trac.svn.sourceforge.net/viewvc/j-trac/trunk/jtrac/</url>
+        <connection>scm:git:https://github.com/kafeiou/jtrac-ng.git</connection>
+        <developerConnection>scm:git:https://github.com/kafeiou/jtrac-ng.git</developerConnection>
+        <url>https://github.com/kafeiou/jtrac-ng</url>
     </scm>
 
     <distributionManagement>

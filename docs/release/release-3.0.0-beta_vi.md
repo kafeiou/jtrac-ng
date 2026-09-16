@@ -1,14 +1,14 @@
-# Ghi chú Phát hành JTrac (Release Notes) - 2.3.3-2.1.0-beta
+# Ghi chú Phát hành JTrac NG (Release Notes) - 3.0.0-beta
 
-[English](release-2.3.3-2.1.0_en.md) | [繁體中文](release-2.3.3-2.1.0_zh-TW.md) | [简体中文](release-2.3.3-2.1.0_zh-CN.md) | [日本語](release-2.3.3-2.1.0_ja.md) | [Tiếng Việt](release-2.3.3-2.1.0_vi.md) | [Deutsch](release-2.3.3-2.1.0_de.md) | [Español](release-2.3.3-2.1.0_es.md) | [Français](release-2.3.3-2.1.0_fr.md)
+[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
-[![Version](https://img.shields.io/badge/Version-2.3.3--2.1.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-2.3.3-2.1.0_vi.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_vi.md)
 [![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
 [![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
 
@@ -31,7 +31,7 @@
 
 ## 1. Tổng quan về các điểm nổi bật
 
-Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac 2.3.3-2.1.0-beta giới thiệu **Trợ lý truy vấn Email AI (AI Query Copilot tích hợp Ollama)**, nâng cấp trình phân tích cú pháp XML để loại bỏ hoàn toàn cảnh báo truy cập phản chiếu trên Java 11, tăng cường khả năng tiếp cận (chế độ phóng chữ 4 mức với A+++, chuyển đổi theme sáng/tối 3 trạng thái) và củng cố bảo mật toàn diện.
+Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-beta giới thiệu **Trợ lý truy vấn Email AI (AI Query Copilot tích hợp Ollama)**, nâng cấp trình phân tích cú pháp XML để loại bỏ hoàn toàn cảnh báo truy cập phản chiếu trên Java 11, tăng cường khả năng tiếp cận (chế độ phóng chữ 4 mức với A+++, chuyển đổi theme sáng/tối 3 trạng thái) và củng cố bảo mật toàn diện.
 
 ---
 
@@ -104,6 +104,9 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac 2.3.3-2.1.
 5. **Hướng dẫn tập lệnh Docker Build & Phòng chống xung đột thẻ Git**:
    - Thêm thông báo hướng dẫn khi khởi chạy trong `docker/build.bat` và `docker/build.sh` với lệnh đồng bộ nhanh (`git fetch --tags -f && git reset --hard origin/master`) khi gặp lỗi ghi đè thẻ Tag hoặc sai khác mã nguồn.
    - Hoàn thiện tài liệu `docker/` chuẩn 8 ngôn ngữ kèm mục xử lý sự cố đồng bộ.
+7. **Tái định vị thương hiệu JTrac NG & Nâng cấp phiên bản ngữ nghĩa (v3.0.0-beta)**:
+   - Chính thức nâng cấp thương hiệu dự án thành **JTrac NG** (Next Generation) và nhảy vọt phiên bản lên **3.0.0-beta**, giải quyết triệt để xung đột tìm kiếm 15 năm với bản cũ 2.1.0/2.3.x trên Google SEO.
+   - Di chuyển kho lưu trữ chính thức sang [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), đồng bộ chân trang Web, thanh điều hướng di động và mô tả Maven POM.
 
 ---
 

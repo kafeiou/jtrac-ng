@@ -1,8 +1,8 @@
-# JTrac Docker-Paketierung & Bereitstellung (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker-Paketierung & Bereitstellung (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-Dieses Verzeichnis enthält native Docker-Multi-Stage-Build-Konfigurationen und containerisierte Laufzeitumgebungen für das modernisierte JTrac.
+Dieses Verzeichnis enthält native Docker-Multi-Stage-Build-Konfigurationen und containerisierte Laufzeitumgebungen für das modernisierte JTrac NG.
 
 ---
 
@@ -23,8 +23,8 @@ Wechseln Sie in das Verzeichnis `docker` und führen Sie den Build mit dem Proje
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Öffnen Sie `http://localhost:8888/` im Browser (Standardzugangsdaten: `admin` / `admin`).
@@ -65,7 +65,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 Wenn `git pull` auf einer dedizierten Build- oder Testmaschine fehlschlägt, nutzen Sie folgende Befehle:
 
 1. **Tag-Überschreibungsfehler (`would clobber existing tag`)**:
-   Wurde ein Versions-Tag (z. B. `2.3.3-2.1.0-beta`) im Remote-Repository überschrieben, verweigert Git standardmäßig das Überschreiben. Verwenden Sie `-f`:
+   Wurde ein Versions-Tag (z. B. `3.0.0-beta`) im Remote-Repository überschrieben, verweigert Git standardmäßig das Überschreiben. Verwenden Sie `-f`:
    ```bash
    git pull --tags -f
    ```

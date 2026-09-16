@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-本指南详细说明如何使用 Apache Maven 编译与打包 JTrac 2.3.3-2.1.0-beta 项目，深入解析 Maven 生命周期、依赖缓存管理、WAR 与 CLI 封装结构、Web 容器验证矩阵，以及常见编译问题之排查指引。
+本指南详细说明如何使用 Apache Maven 编译与打包 JTrac NG 3.0.0-beta 项目，深入解析 Maven 生命周期、依赖缓存管理、WAR 与 CLI 封装结构、Web 容器验证矩阵，以及常见编译问题之排查指引。
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Web 容器兼容性与部署矩阵 (Web Container Matrix)
 
-JTrac 2.3.3-2.1.0-beta 核心采用 Servlet 4.0 规范（`javax.servlet`），编译完成后的 WAR 包可直接部署至主流现代 Web 容器：
+JTrac NG 3.0.0-beta 核心采用 Servlet 4.0 规范（`javax.servlet`），编译完成后的 WAR 包可直接部署至主流现代 Web 容器：
 
 | Web 容器 | 版本支持 | 部署方式 |
 |---|---|---|

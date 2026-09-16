@@ -1,8 +1,8 @@
-# JTrac Docker Packaging & Deployment (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker Packaging & Deployment (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-This directory provides native multi-stage Docker packaging and containerized runtime deployment environments for modernized JTrac.
+This directory provides native multi-stage Docker packaging and containerized runtime deployment environments for modernized JTrac NG.
 
 ---
 
@@ -23,8 +23,8 @@ From the `docker/` directory, build the image using the project root (`..`) as t
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Open `http://localhost:8888/` in your browser (default credentials: `admin` / `admin`).
@@ -68,7 +68,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 If `git pull` fails on your dedicated Docker build machine or test server, use the following quick solutions:
 
 1. **Tag Overwrite Rejection (`would clobber existing tag`)**:
-   When a release tag (such as `2.3.3-2.1.0-beta`) is force-updated on the remote repository, Git protects existing local tags by default. Force update local tags with `-f`:
+   When a release tag (such as `3.0.0-beta`) is force-updated on the remote repository, Git protects existing local tags by default. Force update local tags with `-f`:
    ```bash
    git pull --tags -f
    ```

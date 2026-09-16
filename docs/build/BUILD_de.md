@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-Dieser Leitfaden beschreibt ausführlich die Kompilierung und das Packaging des JTrac 2.3.3-2.1.0-beta-Projekts mit Apache Maven. Er behandelt den Maven-Lebenszyklus, das Abhängigkeitscaching, die WAR- und CLI-Paketstrukturen, die Web-Container-Verifikationsmatrix sowie die Fehlerbehebung beim Build.
+Dieser Leitfaden beschreibt ausführlich die Kompilierung und das Packaging des JTrac NG 3.0.0-beta-Projekts mit Apache Maven. Er behandelt den Maven-Lebenszyklus, das Abhängigkeitscaching, die WAR- und CLI-Paketstrukturen, die Web-Container-Verifikationsmatrix sowie die Fehlerbehebung beim Build.
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Web-Container-Kompatibilitätsmatrix
 
-JTrac 2.3.3-2.1.0-beta entspricht der Servlet 4.0-Spezifikation (`javax.servlet`). Das erstellte WAR kann direkt auf modernen Web-Containern bereitgestellt werden:
+JTrac NG 3.0.0-beta entspricht der Servlet 4.0-Spezifikation (`javax.servlet`). Das erstellte WAR kann direkt auf modernen Web-Containern bereitgestellt werden:
 
 | Web-Container | Unterstützte Versionen | Bereitstellungsmethode |
 |---|---|---|

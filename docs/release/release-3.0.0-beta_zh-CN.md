@@ -1,14 +1,14 @@
-# JTrac 发布说明 (Release Notes) - 2.3.3-2.1.0-beta
+# JTrac NG 发布说明 (Release Notes) - 3.0.0-beta
 
-[English](release-2.3.3-2.1.0_en.md) | [繁體中文](release-2.3.3-2.1.0_zh-TW.md) | [简体中文](release-2.3.3-2.1.0_zh-CN.md) | [日本語](release-2.3.3-2.1.0_ja.md) | [Tiếng Việt](release-2.3.3-2.1.0_vi.md) | [Deutsch](release-2.3.3-2.1.0_de.md) | [Español](release-2.3.3-2.1.0_es.md) | [Français](release-2.3.3-2.1.0_fr.md)
+[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
-[![Version](https://img.shields.io/badge/Version-2.3.3--2.1.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-2.3.3-2.1.0_zh-CN.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_zh-CN.md)
 [![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
 [![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
 
@@ -31,7 +31,7 @@
 
 ## 一、版本核心亮点概述
 
-JTrac 2.3.3-2.1.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革命性的 **AI 智慧邮件查询秘书 (AI Query Copilot with Ollama)**、升级底层 XML 解析器彻底消除 Java 11 反射访问警告、大幅强化用户界面无障碍体验（四段式字号缩放与 A+++ 模式、三态深浅主题）、以及全方位的生产安全防护网。
+JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革命性的 **AI 智慧邮件查询秘书 (AI Query Copilot with Ollama)**、升级底层 XML 解析器彻底消除 Java 11 反射访问警告、大幅强化用户界面无障碍体验（四段式字号缩放与 A+++ 模式、三态深浅主题）、以及全方位的生产安全防护网。
 
 ---
 
@@ -115,6 +115,9 @@ JTrac 2.3.3-2.1.0-beta 在 2.0.0 核心现代化架构的基础上，引进了�
 6. **Docker 构建脚本防呆与 Git 同步指引 (Docker Build Tips & Sync Guidance)**：
    - 于 `docker/build.bat` 与 `docker/build.sh` 终端加入启动提示，提醒编译前遇到 Tag 冲突或文件变动时之一键同步命令（`git fetch --tags -f && git reset --hard origin/master`）。
    - 于 `docker/` 提供完整 8 语系构建说明文件，追加常见问题与 Tag 冲突排除指引。
+7. **JTrac NG 品牌重塑与语义化版本跃升 (JTrac NG Rebranding & v3.0.0-beta)**：
+   - 项目全面升级为 **JTrac NG**（Next Generation），版本号跃升为 **3.0.0-beta**，彻底告别 15 年前老旧 JTrac 2.1.0/2.3.x 历史搜索冲突，大幅提升 Google SEO 独立识别度与曝光度。
+   - 官方仓库地址全面迁移至 [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng)，网页页脚、移动端导航栏与 Maven POM 描述文件同步更新。
 
 ---
 

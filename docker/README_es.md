@@ -1,8 +1,8 @@
-# Empaquetado y Despliegue con Docker de JTrac (Jetty 12.x + Eclipse Temurin 17+)
+# Empaquetado y Despliegue con Docker de JTrac NG (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-Este directorio proporciona un entorno nativo de construcción multietapa (Multi-stage Build) y despliegue en contenedores para JTrac modernizado.
+Este directorio proporciona un entorno nativo de construcción multietapa (Multi-stage Build) y despliegue en contenedores para JTrac NG modernizado.
 
 ---
 
@@ -23,8 +23,8 @@ Desde el directorio `docker`, ejecute la compilación utilizando la raíz del pr
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Abra `http://localhost:8888/` en su navegador (credenciales por defecto: `admin` / `admin`).
@@ -65,7 +65,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 Si el comando `git pull` falla en su servidor de compilación o máquina de pruebas:
 
 1. **Rechazo por sobrescritura de Tag (`would clobber existing tag`)**:
-   Cuando un Tag de versión (ej. `2.3.3-2.1.0-beta`) se actualiza forzadamente en el repositorio remoto, Git bloquea la sobreescritura local. Añada `-f`:
+   Cuando un Tag de versión (ej. `3.0.0-beta`) se actualiza forzadamente en el repositorio remoto, Git bloquea la sobreescritura local. Añada `-f`:
    ```bash
    git pull --tags -f
    ```

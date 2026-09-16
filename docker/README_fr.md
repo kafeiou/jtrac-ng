@@ -1,8 +1,8 @@
-# Empaquetage et Déploiement Docker de JTrac (Jetty 12.x + Eclipse Temurin 17+)
+# Empaquetage et Déploiement Docker de JTrac NG (Jetty 12.x + Eclipse Temurin 17+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
-Ce répertoire propose un environnement natif de build multi-étapes (Multi-stage Build) et de déploiement en conteneur Docker pour JTrac modernisé.
+Ce répertoire propose un environnement natif de build multi-étapes (Multi-stage Build) et de déploiement en conteneur Docker pour JTrac NG modernisé.
 
 ---
 
@@ -23,8 +23,8 @@ Depuis le répertoire `docker`, lancez le build en utilisant la racine du projet
 
 ```bash
 cd docker
-docker build -f Dockerfile -t jtrac:latest -t jtrac:2.3.3-2.1.0-beta ..
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac jtrac:latest
+docker build -f Dockerfile -t jtrac-ng:latest -t jtrac-ng:3.0.0-beta ..
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
 ```
 
 Ouvrez `http://localhost:8888/` dans votre navigateur (identifiants par défaut : `admin` / `admin`).
@@ -65,7 +65,7 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac
 Si la commande `git pull` échoue sur votre serveur de build ou environnement de test :
 
 1. **Rejet d'écrasement de Tag (`would clobber existing tag`)** :
-   Lorsqu'un Tag de version (ex. `2.3.3-2.1.0-beta`) est mis à jour de force sur le dépôt distant, Git bloque son écrasement local par sécurité. Ajoutez `-f` :
+   Lorsqu'un Tag de version (ex. `3.0.0-beta`) est mis à jour de force sur le dépôt distant, Git bloque son écrasement local par sécurité. Ajoutez `-f` :
    ```bash
    git pull --tags -f
    ```

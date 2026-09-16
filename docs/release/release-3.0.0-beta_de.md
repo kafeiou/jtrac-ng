@@ -1,14 +1,14 @@
-# JTrac Versionshinweise (Release Notes) - 2.3.3-2.1.0-beta
+# JTrac NG Versionshinweise (Release Notes) - 3.0.0-beta
 
-[English](release-2.3.3-2.1.0_en.md) | [繁體中文](release-2.3.3-2.1.0_zh-TW.md) | [简体中文](release-2.3.3-2.1.0_zh-CN.md) | [日本語](release-2.3.3-2.1.0_ja.md) | [Tiếng Việt](release-2.3.3-2.1.0_vi.md) | [Deutsch](release-2.3.3-2.1.0_de.md) | [Español](release-2.3.3-2.1.0_es.md) | [Français](release-2.3.3-2.1.0_fr.md)
+[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
-[![Version](https://img.shields.io/badge/Version-2.3.3--2.1.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-2.3.3-2.1.0_de.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_de.md)
 [![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
 [![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
 
@@ -31,7 +31,7 @@
 
 ## 1. Wichtigste Highlights im Überblick
 
-Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac 2.3.3-2.1.0-beta den innovativen **KI-E-Mail-Abfrageassistenten (AI Query Copilot via Ollama)** ein, aktualisiert die zugrundeliegende XML-Engine zur vollständigen Behebung von Java-11-Warnungen, verbessert die Barrierefreiheit der Benutzeroberfläche (4-stufige Schriftgrößenskalierung mit A+++-Modus, 3-Zustands-Theme-Umschalter) und verstärkt die Systemsicherheit.
+Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.0.0-beta den innovativen **KI-E-Mail-Abfrageassistenten (AI Query Copilot via Ollama)** ein, aktualisiert die zugrundeliegende XML-Engine zur vollständigen Behebung von Java-11-Warnungen, verbessert die Barrierefreiheit der Benutzeroberfläche (4-stufige Schriftgrößenskalierung mit A+++-Modus, 3-Zustands-Theme-Umschalter) und verstärkt die Systemsicherheit.
 
 ---
 
@@ -103,6 +103,9 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac 2.3.3
 5. **Docker-Build-Skripte & Git-Tag-Konfliktbehebung**:
    - Startmeldungen in `docker/build.bat` und `docker/build.sh` mit Schnell-Synchronisierungsanweisungen (`git fetch --tags -f && git reset --hard origin/master`) bei Tag-Überschreibungen oder lokalen Build-Artefakten hinzugefügt.
    - Vollständige 8-sprachige `docker/`-Dokumentation mit Anleitungen zur Fehlerbehebung bei der Quellcodesynchronisierung bereitgestellt.
+7. **Rebranding zu JTrac NG & Versionssprung auf Semantic Versioning (v3.0.0-beta)**:
+   - Offizielles Rebranding zu **JTrac NG** (Next Generation) und Versionssprung auf **3.0.0-beta**, wodurch 15 Jahre alte Suchkollisionen mit Legacy-JTrac 2.1.0/2.3.x eliminiert und die Google-SEO-Auffindbarkeit maximiert werden.
+   - Vollständige Migration des offiziellen Repositorys nach [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), inklusive Synchronisation der Web-Footer, mobilen Navigationsleiste und Maven-POMs.
 
 ---
 

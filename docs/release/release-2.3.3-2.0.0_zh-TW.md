@@ -1,4 +1,4 @@
-# JTrac 發布說明 (Release Notes) - 2.3.3-2.0.0
+# JTrac NG 發布說明 (Release Notes) - 2.3.3-2.0.0
 
 [English](release-2.3.3-2.0.0_en.md) | [繁體中文](release-2.3.3-2.0.0_zh-TW.md) | [简体中文](release-2.3.3-2.0.0_zh-CN.md) | [日本語](release-2.3.3-2.0.0_ja.md) | [Tiếng Việt](release-2.3.3-2.0.0_vi.md) | [Deutsch](release-2.3.3-2.0.0_de.md) | [Español](release-2.3.3-2.0.0_es.md) | [Français](release-2.3.3-2.0.0_fr.md)
 
@@ -73,8 +73,8 @@
 
 ## 📜 歷史版本 (Release History)
 
-- **下一版本 (預覽)**：[JTrac 發布說明 - 2.3.3-2.1.0-beta](release-2.3.3-2.1.0_zh-TW.md)
-- **前一版本**：[JTrac 發布說明 - 2.3.3-1.0.0](release-2.3.3-1.0.0_zh-TW.md)
+- **下一版本 (預覽)**：[JTrac NG 發布說明 - 3.0.0-beta](release-3.0.0-beta_zh-TW.md)
+- **前一版本**：[JTrac NG 發布說明 - 2.3.3-1.0.0](release-2.3.3-1.0.0_zh-TW.md)
 
 ---
 

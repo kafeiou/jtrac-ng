@@ -2,7 +2,7 @@
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-Tài liệu này hướng dẫn chi tiết cách sử dụng Apache Maven để biên dịch và đóng gói dự án JTrac 2.3.3-2.1.0-beta, phân tích vòng đời Maven, cơ chế lưu bộ nhớ đệm thư viện, cấu trúc gói WAR và CLI, ma trận kiểm thử Web Container và xử lý sự cố biên dịch.
+Tài liệu này hướng dẫn chi tiết cách sử dụng Apache Maven để biên dịch và đóng gói dự án JTrac NG 3.0.0-beta, phân tích vòng đời Maven, cơ chế lưu bộ nhớ đệm thư viện, cấu trúc gói WAR và CLI, ma trận kiểm thử Web Container và xử lý sự cố biên dịch.
 
 ---
 
@@ -102,7 +102,7 @@ jtrac.war
 
 ## 5. Ma trận Tương thích Web Container
 
-JTrac 2.3.3-2.1.0-beta tuân thủ chuẩn Servlet 4.0 (`javax.servlet`). Tệp WAR có thể triển khai trực tiếp trên các máy chủ hiện đại:
+JTrac NG 3.0.0-beta tuân thủ chuẩn Servlet 4.0 (`javax.servlet`). Tệp WAR có thể triển khai trực tiếp trên các máy chủ hiện đại:
 
 | Web Container | Phiên bản Hỗ trợ | Phương thức Triển khai |
 |---|---|---|
