@@ -82,6 +82,7 @@ public class Config implements Serializable {
         PARAMS.add("llm.ollama.api.key");
         PARAMS.add("llm.ollama.timeout");
         PARAMS.add("llm.retrieval.max_tickets");
+        PARAMS.add("lucene.analyzer.version");
 
         BOOLEAN_PARAMS = new LinkedHashSet<String>();
         BOOLEAN_PARAMS.add("mail.server.starttls.enable");

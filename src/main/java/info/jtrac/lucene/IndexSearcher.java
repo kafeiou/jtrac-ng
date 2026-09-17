@@ -71,18 +71,31 @@ public class IndexSearcher {
     }
 
     public List<Long> findItemIdsContainingText(String text) {
+        if (text == null || text.trim().length() == 0) {
+            return Collections.emptyList();
+        }
+
         QueryParser parser = new QueryParser(Version.LUCENE_29, "text", analyzer);
         parser.setDefaultOperator(QueryParser.Operator.OR);
+        parser.setAllowLeadingWildcard(true);
+        parser.setPhraseSlop(2);
+
         Query query;
+        String expandedText = expandQueryText(text);
         try {
-            query = parser.parse(text);
-        } catch (ParseException e) {
-            logger.debug("Query parsing failed for raw text '{}', attempting escaped fallback: {}", text, e.getMessage());
+            query = parser.parse(expandedText);
+        } catch (ParseException pe0) {
+            logger.debug("Query parsing failed for expanded text '{}', attempting raw text: {}", expandedText, pe0.getMessage());
             try {
-                query = parser.parse(QueryParser.escape(text));
-            } catch (ParseException pe) {
-                logger.warn("Query parsing failed for escaped '{}': {}", text, pe.getMessage());
-                throw new SearchQueryParseException(pe.getMessage(), pe);
+                query = parser.parse(text);
+            } catch (ParseException e) {
+                logger.debug("Query parsing failed for raw text '{}', attempting escaped fallback: {}", text, e.getMessage());
+                try {
+                    query = parser.parse(QueryParser.escape(text));
+                } catch (ParseException pe) {
+                    logger.warn("Query parsing failed for escaped '{}': {}", text, pe.getMessage());
+                    throw new SearchQueryParseException(pe.getMessage(), pe);
+                }
             }
         }
 
@@ -132,7 +145,7 @@ public class IndexSearcher {
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 Long id = ItemIdHitExtractor.extractItemId(doc);
-                if (id != null) {
+                if (id != null && !hitIds.contains(id)) {
                     hitIds.add(id);
                 }
             }
@@ -190,4 +203,51 @@ public class IndexSearcher {
         return false;
     }
 
+    protected String expandQueryText(String text) {
+        if (text == null) {
+            return null;
+        }
+        String trimmed = text.trim();
+        if (trimmed.isEmpty()) {
+            return trimmed;
+        }
+        // If quoted or already contains wildcard or lucene field syntax, preserve as-is
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            return trimmed;
+        }
+        if (trimmed.indexOf('*') != -1 || trimmed.indexOf('?') != -1 || trimmed.indexOf(':') != -1) {
+            return trimmed;
+        }
+
+        String[] tokens = trimmed.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
+            if (token.isEmpty()) {
+                continue;
+            }
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            if (isEligibleForWildcard(token)) {
+                sb.append("(").append(token).append(" OR ").append(token).append("*)");
+            } else {
+                sb.append(token);
+            }
+        }
+        return sb.length() > 0 ? sb.toString() : trimmed;
+    }
+
+    private boolean isEligibleForWildcard(String token) {
+        if (token == null || token.length() < 2) {
+            return false;
+        }
+        for (int i = 0; i < token.length(); i++) {
+            char c = token.charAt(i);
+            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-') {
+                return false;
+            }
+        }
+        return true;
+    }
 }

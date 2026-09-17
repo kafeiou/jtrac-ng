@@ -55,6 +55,7 @@ public class JtracAnalyzer extends Analyzer {
         StandardTokenizer tokenizer = new StandardTokenizer(Version.LUCENE_29, reader);
         TokenStream result = new StandardFilter(tokenizer);
         result = new LowerCaseFilter(result);
+        result = new SubTokenFilter(result);
         if (stopWords != null) {
             result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
         }
@@ -76,6 +77,7 @@ public class JtracAnalyzer extends Analyzer {
             streams.tokenStream = new StandardTokenizer(Version.LUCENE_29, reader);
             TokenStream result = new StandardFilter(streams.tokenStream);
             result = new LowerCaseFilter(result);
+            result = new SubTokenFilter(result);
             if (stopWords != null) {
                 result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
             }

@@ -106,6 +106,12 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
 7. **Rebranding zu JTrac NG & Versionssprung auf Semantic Versioning (v3.0.0-beta)**:
    - Offizielles Rebranding zu **JTrac NG** (Next Generation) und Versionssprung auf **3.0.0-beta**, wodurch 15 Jahre alte Suchkollisionen mit Legacy-JTrac 2.1.0/2.3.x eliminiert und die Google-SEO-Auffindbarkeit maximiert werden.
    - Vollständige Migration des offiziellen Repositorys nach [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), inklusive Synchronisation der Web-Footer, mobilen Navigationsleiste und Maven-POMs.
+8. **Modernisierung der Lucene-Volltextsuche & Historienanzeige (Sub-Tokens, Wildcard-Erweiterung & Standard-Historienansicht)**:
+   - **Sub-Token-Filter (`SubTokenFilter`)**: Teilt E-Mail-Adressen (z. B. `user@gmail.com`) und zusammengesetzte Dateinamen (z. B. `thunderbird_gmail.pdf`) in Teil-Tokens (`user`, `gmail`, `com`, `thunderbird`, `pdf`) auf, sodass Suchen nach `gmail` E-Mails und Anhänge zuverlässig finden.
+   - **Intelligente Wildcard-Erweiterung & Führende Platzhalter**: Erweitert Suchbegriffe automatisch zu `(term OR term*)`, aktiviert `allowLeadingWildcard = true` für `*begriff*` und unterstützt Phrasen-Toleranz (`phraseSlop = 2`).
+   - **Globaler Standard für Historienanzeige (`showHistory = true`)**: Zeigt in Ticketlisten standardmäßig alle Revisionskommentare direkt an.
+   - **Automatischer Hintergrund-Reindex beim Start**: Erkennt Aktualisierungen der Analyzer-Version (`lucene.analyzer.version = 3.0.0-subtoken-v1`) und stößt eine asynchrone Neuindizierung an.
+   - **Docker-Hub-Migration**: Dokumentation in allen 8 Sprachen auf `kafeiou/jtrac-ng:latest` aktualisiert.
 
 ---
 

@@ -52,10 +52,10 @@ docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:la
 
 ### 方法 3: Docker Hub 公式イメージの実行
 
-**[https://hub.docker.com/r/inmethod/jtrac](https://hub.docker.com/r/inmethod/jtrac)**
+**[https://hub.docker.com/r/kafeiou/jtrac-ng](https://hub.docker.com/r/kafeiou/jtrac-ng)**
 
 ```bash
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac:latest
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng kafeiou/jtrac-ng:latest
 ```
 
 ---

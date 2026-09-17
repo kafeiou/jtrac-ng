@@ -111,6 +111,12 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
 7. **JTrac NG へのリブランディングおよびセマンティックバージョニング躍進 (v3.0.0-beta)**：
    - プロジェクト名称を **JTrac NG** (Next Generation) に一新し、バージョンを **3.0.0-beta** に繰り上げ。15年前の旧 JTrac 2.1.0/2.3.x との検索競合を根本解消し、Google SEO での独立した露出を飛躍的に強化。
    - 公式リポジトリ URL を [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng) へ完全移行し、Web フッター、モバイルナビゲーション、Maven POM を同期更新。
+8. **Lucene 全文検索および履歴表示の包括的近代化 (サブトークン分解・ワイルドカード拡張・履歴表示デフォルト化)**：
+   - **サブトークン分詞器 (`SubTokenFilter`)**：メールアドレス（例: `user@gmail.com`）や複合ファイル名（例: `thunderbird_gmail.pdf`）を構成要素トークン（`user`, `gmail`, `com`, `thunderbird`, `pdf`）へ自動分割。単一単語 `gmail` の検索でメールや添付ファイル名を自然かつ確実にヒット。
+   - **スマートクエリ拡張と先頭ワイルドカード対応**：単語を自動的に `(term OR term*)` に拡張、`allowLeadingWildcard = true` により任意位置の一致に対応、さらに日本語・中国語のフレーズスロップ `phraseSlop = 2` を有効化し、間隔の空いた語句も柔軟にマッチ。
+   - **履歴一覧表示の全面デフォルト化 (`showHistory = true`)**：スペース閲覧やキーワード検索において各履歴リビジョンを一覧表示し、コメント内容を直接把握可能に。
+   - **起動時のインデックス自動非同期再構築**：分詞器バージョン更新（`lucene.analyzer.version = 3.0.0-subtoken-v1`）を検出し、コンテナ起動完了後にバックグラウンドで既存チケットのインデックスを自動再構築。
+   - **Docker Hub イメージの移行**：8言語のビルドガイドで Docker Hub 参照先を `kafeiou/jtrac-ng:latest` に更新。
 
 ---
 

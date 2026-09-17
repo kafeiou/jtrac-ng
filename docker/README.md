@@ -55,10 +55,10 @@ Convenient helper scripts are provided in this directory:
 ### Method 3: Run Pre-built Image from Docker Hub
 
 You can also run the official pre-built image directly from Docker Hub:
-**[https://hub.docker.com/r/inmethod/jtrac](https://hub.docker.com/r/inmethod/jtrac)**
+**[https://hub.docker.com/r/kafeiou/jtrac-ng](https://hub.docker.com/r/kafeiou/jtrac-ng)**
 
 ```bash
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac inmethod/jtrac:latest
+docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng kafeiou/jtrac-ng:latest
 ```
 
 ---

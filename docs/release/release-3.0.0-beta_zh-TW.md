@@ -126,6 +126,12 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
 7. **JTrac NG 品牌重塑與語義化版本躍升 (JTrac NG Rebranding & v3.0.0-beta)**：
    - 專案全面升級為 **JTrac NG**（Next Generation），版本號躍升為 **3.0.0-beta**，徹底告別 15 年前老舊 JTrac 2.1.0/2.3.x 歷史搜尋衝突，大幅提升 Google SEO 獨立識別度與曝光度。
    - 官方倉庫網址全面遷移至 [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng)，網頁頁尾、行動端導覽列與 Maven POM 描述檔同步更新。
+8. **Lucene 全文檢索與歷史歷程全面現代化 (Subtokens, Wildcard Expansion & Show History Default)**：
+   - **子詞分詞器 (`SubTokenFilter`)**：自動將 Email 信箱（如 `user@gmail.com`）與複合檔名（如 `thunderbird_gmail.pdf`）拆解出子詞 Token（`user`、`gmail`、`com`、`thunderbird`、`pdf`），使搜尋單詞 `gmail` 時能自然精準命中信箱與附件。
+   - **智慧查詢萬用字元擴展與前置星號支援**：單詞自動展開為 `(term OR term*)`，啟用 `allowLeadingWildcard = true` 支援 `*關鍵字*` 任意位置比對，並配置中文片語容錯 `phraseSlop = 2`，使「申請帳號」能順利比對「申請開放帳號」。
+   - **全面預設展開歷史記錄 (`showHistory = true`)**：不論專案空間瀏覽或快速搜尋，清單一律預設展開每筆歷史修訂，直接呈現留言討論脈絡。
+   - **系統啟動自動非同步重建索引**：自動偵測分詞器升級版本（`lucene.analyzer.version = 3.0.0-subtoken-v1`），於容器啟動後在背景非同步重建歷史工單 Lucene 索引。
+   - **Docker Hub 映像檔遷移**：同步將 8 國語系建置手冊中的 Docker Hub 映像檔指向 `kafeiou/jtrac-ng:latest`。
 
 ---
 

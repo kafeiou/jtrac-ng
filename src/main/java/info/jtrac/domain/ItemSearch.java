@@ -48,7 +48,7 @@ public class ItemSearch implements Serializable {
     private long resultCount;
     private String sortFieldName = "id";
     private boolean sortDescending = true;
-    private boolean showHistory;    
+    private boolean showHistory = true;    
     private boolean batchMode;
 
     private long selectedItemId;
@@ -73,7 +73,7 @@ public class ItemSearch implements Serializable {
     }      
 
     public void initFromPageParameters(PageParameters params, User user, Jtrac jtrac) {       
-        showHistory = params.get("showHistory").toBoolean(false);
+        showHistory = params.get("showHistory").toBoolean(true);
 		try {
 			pageSize = params.get("pageSize").toInt(Integer.parseInt(jtrac.loadConfig("items.search.num")));
 		} catch (RuntimeException rtex) { /* ignore, the default is fine */ }
@@ -150,6 +150,8 @@ public class ItemSearch implements Serializable {
         }        
         if(showHistory) {
             params.set("showHistory", "true");
+        } else {
+            params.set("showHistory", "false");
         }
         if(pageSize != 25) {
             params.set("pageSize", pageSize + "");

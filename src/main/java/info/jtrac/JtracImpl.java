@@ -336,12 +336,17 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         initSessionTimeout(config.get("session.timeout"));
         initBackupServices();
 
-        // Proactively rebuild Lucene indexes in background if legacy data was migrated
+        // Proactively rebuild Lucene indexes in background if legacy data was migrated or analyzer upgraded
         boolean dbMigrated = HsqldbDatabaseMigrator.isDatabaseMigrated();
-        if (attachmentsMigrated || dbMigrated) {
-            logger.info("Legacy data migration detected (attachmentsMigrated={}, dbMigrated={}). Lucene index rebuild will be scheduled upon container startup completion.",
-                    attachmentsMigrated, dbMigrated);
+        String analyzerVersion = config.get("lucene.analyzer.version");
+        boolean analyzerUpgraded = !"3.0.0-subtoken-v1".equals(analyzerVersion);
+        if (attachmentsMigrated || dbMigrated || analyzerUpgraded) {
+            logger.info("Lucene index rebuild required (attachmentsMigrated={}, dbMigrated={}, analyzerUpgraded={}). Rebuild will be scheduled upon container startup completion.",
+                    attachmentsMigrated, dbMigrated, analyzerUpgraded);
             this.needsIndexRebuildAfterStartup = true;
+            if (analyzerUpgraded) {
+                storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v1"));
+            }
         }
     }
 

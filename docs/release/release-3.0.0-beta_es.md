@@ -106,6 +106,12 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 7. **Rebranding a JTrac NG y salto a versionado semántico (v3.0.0-beta)**:
    - Cambio oficial de identidad del proyecto a **JTrac NG** (Next Generation) y salto de versión a **3.0.0-beta**, eliminando colisiones de búsqueda de hace 15 años con el antiguo JTrac 2.1.0/2.3.x y maximizando el SEO en Google.
    - Migración completa del repositorio oficial a [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), sincronizando el pie de página, la barra de navegación móvil y el descriptor Maven POM.
+8. **Modernización de la búsqueda Lucene y vista del historial (Sub-tokens, comodines y visualización de historial por defecto)**:
+   - **Filtro de subtokens (`SubTokenFilter`)**: Divide direcciones de correo (ej. `user@gmail.com`) y nombres de archivo compuestos (ej. `thunderbird_gmail.pdf`) en subtokens (`user`, `gmail`, `com`, `thunderbird`, `pdf`), permitiendo que búsquedas de `gmail` encuentren correos y adjuntos.
+   - **Expansión inteligente y comodines iniciales**: Expande términos a `(term OR term*)`, activa `allowLeadingWildcard = true` para `*palabra*` y soporta tolerancia de frases (`phraseSlop = 2`).
+   - **Historial activado por defecto (`showHistory = true`)**: Muestra todas las revisiones y comentarios directamente en las listas de tickets.
+   - **Reindexación automática en segundo plano al iniciar**: Detecta la actualización del analizador (`lucene.analyzer.version = 3.0.0-subtoken-v1`) y reindexa de forma asíncrona.
+   - **Migración a Docker Hub**: Documentación en 8 idiomas actualizada a `kafeiou/jtrac-ng:latest`.
 
 ---
 

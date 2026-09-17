@@ -107,6 +107,12 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 7. **Tái định vị thương hiệu JTrac NG & Nâng cấp phiên bản ngữ nghĩa (v3.0.0-beta)**:
    - Chính thức nâng cấp thương hiệu dự án thành **JTrac NG** (Next Generation) và nhảy vọt phiên bản lên **3.0.0-beta**, giải quyết triệt để xung đột tìm kiếm 15 năm với bản cũ 2.1.0/2.3.x trên Google SEO.
    - Di chuyển kho lưu trữ chính thức sang [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), đồng bộ chân trang Web, thanh điều hướng di động và mô tả Maven POM.
+8. **Hiện đại hóa toàn diện tìm kiếm toàn văn Lucene và xem lịch sử (Tách Sub-token, mở rộng ký tự đại diện & mặc định hiển thị lịch sử)**:
+   - **Bộ tách Sub-token (`SubTokenFilter`)**: Tự động phân tách Email (ví dụ `user@gmail.com`) và tên tệp phức hợp (ví dụ `thunderbird_gmail.pdf`) thành các token thành phần (`user`, `gmail`, `com`, `thunderbird`, `pdf`), giúp tìm kiếm từ đơn `gmail` khớp chính xác email và tệp đính kèm.
+   - **Mở rộng truy vấn thông minh & hỗ trợ ký tự đại diện đứng đầu**: Tự động mở rộng từ khóa thành `(term OR term*)`, kích hoạt `allowLeadingWildcard = true` cho truy vấn `*từkhóa*`, hỗ trợ dung sai cụm từ tiếng Trung (`phraseSlop = 2`).
+   - **Mặc định hiển thị lịch sử (`showHistory = true`)**: Hiển thị chi tiết từng lần sửa đổi và bình luận trực tiếp trên danh sách phiếu công việc.
+   - **Tự động xây dựng lại chỉ mục bất đồng bộ khi khởi động**: Phát hiện nâng cấp phiên bản bộ phân tích (`lucene.analyzer.version = 3.0.0-subtoken-v1`) và tự động chạy lại chỉ mục trong nền sau khi khởi động.
+   - **Di chuyển Docker Hub**: Cập nhật tài liệu 8 ngôn ngữ sang `kafeiou/jtrac-ng:latest`.
 
 ---
 
