@@ -493,7 +493,31 @@ public class HibernateJtracDao implements JtracDao {
     }
 
     public void storeConfig(Config config) {
-        getCurrentSession().merge(config);
+        Session session;
+        boolean isNew = false;
+        Transaction tx = null;
+        try {
+            session = sessionFactory.getCurrentSession();
+        } catch (org.hibernate.HibernateException e) {
+            session = sessionFactory.openSession();
+            tx = session.beginTransaction();
+            isNew = true;
+        }
+        try {
+            session.merge(config);
+            if (tx != null) {
+                tx.commit();
+            }
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw (e instanceof RuntimeException) ? (RuntimeException) e : new RuntimeException(e);
+        } finally {
+            if (isNew && session != null) {
+                session.close();
+            }
+        }
     }
 
     public Config loadConfig(String param) {
@@ -688,6 +712,7 @@ public class HibernateJtracDao implements JtracDao {
             ensureDefaultConfig(session, "llm.ollama.model", "llama3.2");
             ensureDefaultConfig(session, "llm.ollama.timeout", "60");
             ensureDefaultConfig(session, "llm.retrieval.max_tickets", "50");
+            ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-subtoken-v1");
 
             List<SpaceSequence> ssList = session.createQuery("from SpaceSequence", SpaceSequence.class).getResultList();
             Map<Long, SpaceSequence> ssMap = new HashMap<Long, SpaceSequence>(ssList.size());

@@ -344,9 +344,6 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
             logger.info("Lucene index rebuild required (attachmentsMigrated={}, dbMigrated={}, analyzerUpgraded={}). Rebuild will be scheduled upon container startup completion.",
                     attachmentsMigrated, dbMigrated, analyzerUpgraded);
             this.needsIndexRebuildAfterStartup = true;
-            if (analyzerUpgraded) {
-                storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v1"));
-            }
         }
     }
 
@@ -1157,6 +1154,12 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         }
         batchInfo.setComplete(true);
         logger.info("indexing completed successfully, total indexed: " + batchInfo.getCurrentPosition());
+        try {
+            storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v1"));
+            logger.info("updated lucene.analyzer.version to 3.0.0-subtoken-v1 upon successful index rebuild");
+        } catch (Exception e) {
+            logger.warn("failed to update lucene.analyzer.version config after rebuild: " + e.getMessage(), e);
+        }
     }
 
     private List<Item> indexBatch(int currentFirst, int batchSize, BatchInfo batchInfo) {
