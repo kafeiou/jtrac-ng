@@ -38,6 +38,7 @@ import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
 import info.jtrac.lucene.IndexSearcher;
 import info.jtrac.lucene.Indexer;
+import info.jtrac.lucene.SearchResultHits;
 import info.jtrac.mail.InboundMailReceiver;
 import info.jtrac.mail.MailSender;
 import info.jtrac.tools.HsqldbDatabaseMigrator;
@@ -637,18 +638,39 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
     public List<Item> findItems(ItemSearch itemSearch) {
         String searchText = itemSearch.getSearchText();
         if (searchText != null) {
-            List<Long> hits = new ArrayList<Long>(indexSearcher.findItemIdsContainingText(searchText));
-            List<Item> smartItems = findItemsBySmartRefId(searchText, itemSearch.getSpace());
-            for (Item si : smartItems) {
-                if (!hits.contains(si.getId())) {
-                    hits.add(si.getId());
+            SearchResultHits hits = indexSearcher.findHitsContainingText(searchText);
+            List<Long> itemIds = new ArrayList<Long>(hits.getItemIds());
+            List<Long> historyIds = new ArrayList<Long>(hits.getHistoryIds());
+
+            // If an item document matched (e.g. summary or detail contains keyword), ensure its initial history is included
+            if (!hits.getItemLevelHitItemIds().isEmpty()) {
+                List<Long> firstHistoryIds = dao.findFirstHistoryIdsForItems(hits.getItemLevelHitItemIds());
+                for (Long fId : firstHistoryIds) {
+                    if (!historyIds.contains(fId)) {
+                        historyIds.add(fId);
+                    }
                 }
             }
-            if (hits.size() == 0) {
+
+            // Smart refId matching (e.g. searching '339' or 'DEMO-339')
+            List<Item> smartItems = findItemsBySmartRefId(searchText, itemSearch.getSpace());
+            for (Item si : smartItems) {
+                if (!itemIds.contains(si.getId())) {
+                    itemIds.add(si.getId());
+                }
+                for (History h : si.getHistory()) {
+                    if (!historyIds.contains(h.getId())) {
+                        historyIds.add(h.getId());
+                    }
+                }
+            }
+
+            if (itemIds.isEmpty() && historyIds.isEmpty()) {
                 itemSearch.setResultCount(0);
                 return Collections.<Item>emptyList();
             }
-            itemSearch.setItemIds(hits);
+            itemSearch.setItemIds(itemIds);
+            itemSearch.setHistoryIds(historyIds);
         }
         return dao.findItems(itemSearch);
     }

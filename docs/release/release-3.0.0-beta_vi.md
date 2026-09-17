@@ -111,6 +111,7 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
    - **Bộ tách Sub-token (`SubTokenFilter`)**: Tự động phân tách Email (ví dụ `user@gmail.com`) và tên tệp phức hợp (ví dụ `thunderbird_gmail.pdf`) thành các token thành phần (`user`, `gmail`, `com`, `thunderbird`, `pdf`), giúp tìm kiếm từ đơn `gmail` khớp chính xác email và tệp đính kèm.
    - **Mở rộng truy vấn thông minh & hỗ trợ ký tự đại diện đứng đầu**: Tự động mở rộng từ khóa thành `(term OR term*)`, kích hoạt `allowLeadingWildcard = true` cho truy vấn `*từkhóa*`, hỗ trợ dung sai cụm từ tiếng Trung (`phraseSlop = 2`).
    - **Mặc định hiển thị lịch sử (`showHistory = true`)**: Hiển thị chi tiết từng lần sửa đổi và bình luận trực tiếp trên danh sách phiếu công việc.
+   - **Lọc lịch sử thông minh khi tìm kiếm từ khóa (Smart History Filtering)**: Khi bật chế độ xem lịch sử và thực hiện tìm kiếm, hệ thống lọc thông minh chỉ hiển thị bản ghi mở đầu hoặc các nhận xét sửa đổi thực sự chứa từ khóa, tự động ẩn các lịch sử thay đổi trạng thái không liên quan.
    - **Tự động xây dựng lại chỉ mục bất đồng bộ khi khởi động**: Phát hiện nâng cấp phiên bản bộ phân tích (`lucene.analyzer.version = 3.0.0-subtoken-v1`) và tự động chạy lại chỉ mục trong nền sau khi khởi động.
    - **Di chuyển Docker Hub**: Cập nhật tài liệu 8 ngôn ngữ sang `kafeiou/jtrac-ng:latest`.
 

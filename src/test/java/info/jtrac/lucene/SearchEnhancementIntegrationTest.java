@@ -114,4 +114,35 @@ public class SearchEnhancementIntegrationTest {
         PageParameters queryString = search.getAsQueryString();
         Assert.assertEquals("false", queryString.get("showHistory").toString());
     }
+
+    @Test
+    public void testSmartHistoryFilteringWithHits() {
+        Item item = new Item();
+        item.setId(301);
+        item.setSummary("設定工單");
+        item.setDetail("請聯繫 service@gmail.com 處理");
+        indexer.index(item);
+
+        info.jtrac.domain.History h1 = new info.jtrac.domain.History(item);
+        h1.setId(1001);
+        h1.setParent(item);
+        item.add(h1);
+        indexer.index(h1);
+
+        info.jtrac.domain.History h2 = new info.jtrac.domain.History();
+        h2.setId(1002);
+        h2.setParent(item);
+        h2.setComment("狀態更新為已完成");
+        indexer.index(h2);
+
+        SearchResultHits hits = searcher.findHitsContainingText("gmail");
+        Assert.assertTrue("item 301 must be in itemIds", hits.getItemIds().contains(301L));
+        Assert.assertTrue("history 1001 must be in historyIds", hits.getHistoryIds().contains(1001L));
+        Assert.assertFalse("history 1002 without keyword must NOT be in historyIds", hits.getHistoryIds().contains(1002L));
+
+        ItemSearch search = new ItemSearch((info.jtrac.domain.User) null);
+        search.setShowHistory(true);
+        search.setHistoryIds(hits.getHistoryIds());
+        Assert.assertNotNull("Criteria must be generated with historyIds", search.getCriteriaForCount());
+    }
 }

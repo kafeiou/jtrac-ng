@@ -54,6 +54,7 @@ public class ItemSearch implements Serializable {
     private long selectedItemId;
     private String relatingItemRefId;
     private Collection<Long> itemIds;
+    private Collection<Long> historyIds;
 
     private List<ColumnHeading> columnHeadings;
     private Map<String, FilterCriteria> filterCriteriaMap = new LinkedHashMap<String, FilterCriteria>();
@@ -238,8 +239,18 @@ public class ItemSearch implements Serializable {
             } else {
                 parent.add(Restrictions.eq("space", space));
             } 
-            if (itemIds != null) {
-                parent.add(Restrictions.in("id", itemIds));
+            if (historyIds != null) {
+                if (historyIds.isEmpty()) {
+                    criteria.add(Restrictions.sqlRestriction("1=0"));
+                } else {
+                    criteria.add(Restrictions.in("id", historyIds));
+                }
+            } else if (itemIds != null) {
+                if (itemIds.isEmpty()) {
+                    parent.add(Restrictions.sqlRestriction("1=0"));
+                } else {
+                    parent.add(Restrictions.in("id", itemIds));
+                }
             }             
         } else {
             criteria = DetachedCriteria.forClass(Item.class);
@@ -499,6 +510,14 @@ public class ItemSearch implements Serializable {
 
     public void setItemIds(Collection<Long> itemIds) {
         this.itemIds = itemIds;
+    }
+
+    public Collection<Long> getHistoryIds() {
+        return historyIds;
+    }
+
+    public void setHistoryIds(Collection<Long> historyIds) {
+        this.historyIds = historyIds;
     }
 
     public List<ColumnHeading> getColumnHeadings() {

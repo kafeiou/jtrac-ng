@@ -132,6 +132,7 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - **Sub-token Analyzer (`SubTokenFilter`)**: Splits emails (e.g. `user@gmail.com`) and compound filenames (e.g. `thunderbird_gmail.pdf`) into sub-tokens (`user`, `gmail`, `com`, `thunderbird`, `pdf`), enabling single-word searches like `gmail` to seamlessly match email addresses and attachment filenames.
    - **Smart Query Expansion & Leading Wildcard**: Automatically expands terms to `(term OR term*)`, activates `allowLeadingWildcard = true` for `*keyword*` queries, and enables Chinese phrase slop (`phraseSlop = 2`) so separated phrases like `申請帳號` match `申請開放帳號`.
    - **Global Show History Default (`showHistory = true`)**: Defaults `showHistory` to `true` across space browsing and quick searches, expanding item revisions and displaying comments directly in the results list.
+   - **Smart History Filtering on Keyword Search**: When history view is enabled and a text search is performed, the system intelligently filters results to return only the primary ticket snapshot or specific revision comments that actually match the keyword, automatically hiding irrelevant revisions (e.g. status changes without matching text).
    - **Automated Startup Index Rebuild**: Detects analyzer version upgrade (`lucene.analyzer.version = 3.0.0-subtoken-v1`) and triggers asynchronous background reindexing upon container startup.
    - **Docker Hub Migration**: Updated Docker Hub image documentation across 8 languages to `kafeiou/jtrac-ng:latest`.
 

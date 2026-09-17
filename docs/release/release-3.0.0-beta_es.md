@@ -110,6 +110,7 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
    - **Filtro de subtokens (`SubTokenFilter`)**: Divide direcciones de correo (ej. `user@gmail.com`) y nombres de archivo compuestos (ej. `thunderbird_gmail.pdf`) en subtokens (`user`, `gmail`, `com`, `thunderbird`, `pdf`), permitiendo que búsquedas de `gmail` encuentren correos y adjuntos.
    - **Expansión inteligente y comodines iniciales**: Expande términos a `(term OR term*)`, activa `allowLeadingWildcard = true` para `*palabra*` y soporta tolerancia de frases (`phraseSlop = 2`).
    - **Historial activado por defecto (`showHistory = true`)**: Muestra todas las revisiones y comentarios directamente en las listas de tickets.
+   - **Filtrado inteligente de historial en búsqueda por palabras clave (Smart History Filtering)**: Cuando el historial está activado y se realiza una búsqueda, el sistema filtra inteligentemente los resultados para mostrar únicamente el registro principal o los comentarios de revisión que realmente coinciden con la palabra clave, ocultando cambios de estado irrelevantes.
    - **Reindexación automática en segundo plano al iniciar**: Detecta la actualización del analizador (`lucene.analyzer.version = 3.0.0-subtoken-v1`) y reindexa de forma asíncrona.
    - **Migración a Docker Hub**: Documentación en 8 idiomas actualizada a `kafeiou/jtrac-ng:latest`.
 

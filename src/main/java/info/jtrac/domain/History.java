@@ -72,7 +72,9 @@ public class History extends AbstractItem {
         Document d = new Document();
         d.add(new org.apache.lucene.document.Field("docId", "history:" + getId(), Store.YES, Index.NOT_ANALYZED));
         d.add(new org.apache.lucene.document.Field("id", getId() + "", Store.YES, Index.NO));
-        d.add(new org.apache.lucene.document.Field("itemId", getParent().getId() + "", Store.YES, Index.NO));
+        if (getParent() != null) {
+            d.add(new org.apache.lucene.document.Field("itemId", getParent().getId() + "", Store.YES, Index.NO));
+        }
         d.add(new org.apache.lucene.document.Field("type", "history", Store.YES, Index.NO));
         StringBuffer sb = new StringBuffer();
         if (getParent() != null && getParent().getSpace() != null && getParent().getSpace().getPrefixCode() != null && getParent().getSequenceNum() > 0) {

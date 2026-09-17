@@ -832,6 +832,32 @@ public class HibernateJtracDao implements JtracDao {
     }
 
     @Override
+    public List<Long> findFirstHistoryIdsForItems(Collection<Long> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Session session;
+        boolean isNew = false;
+        try {
+            session = sessionFactory.getCurrentSession();
+        } catch (org.hibernate.HibernateException e) {
+            session = sessionFactory.openSession();
+            isNew = true;
+        }
+        try {
+            return session.createQuery(
+                    "select min(h.id) from History h where h.parent.id in (:itemIds) group by h.parent.id",
+                    Long.class)
+                    .setParameterList("itemIds", itemIds)
+                    .getResultList();
+        } finally {
+            if (isNew && session != null) {
+                session.close();
+            }
+        }
+    }
+
+    @Override
     public void clearSession() {
         try {
             getCurrentSession().clear();

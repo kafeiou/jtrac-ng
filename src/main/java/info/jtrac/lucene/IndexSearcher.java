@@ -71,8 +71,13 @@ public class IndexSearcher {
     }
 
     public List<Long> findItemIdsContainingText(String text) {
+        return findHitsContainingText(text).getItemIds();
+    }
+
+    public SearchResultHits findHitsContainingText(String text) {
+        SearchResultHits emptyHits = new SearchResultHits();
         if (text == null || text.trim().length() == 0) {
-            return Collections.emptyList();
+            return emptyHits;
         }
 
         QueryParser parser = new QueryParser(Version.LUCENE_29, "text", analyzer);
@@ -101,11 +106,11 @@ public class IndexSearcher {
 
         try {
             if (!IndexReader.indexExists(indexDirectory)) {
-                return Collections.emptyList();
+                return emptyHits;
             }
         } catch (Exception e) {
             logger.error("Error checking index existence", e);
-            return Collections.emptyList();
+            return emptyHits;
         }
 
         IndexReader reader = null;
@@ -141,15 +146,31 @@ public class IndexSearcher {
                 }
             }
 
-            List<Long> hitIds = new ArrayList<Long>(topDocs.scoreDocs.length);
+            SearchResultHits hits = new SearchResultHits();
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
-                Long id = ItemIdHitExtractor.extractItemId(doc);
-                if (id != null && !hitIds.contains(id)) {
-                    hitIds.add(id);
+                String type = doc.get("type");
+                Long itemId = ItemIdHitExtractor.extractItemId(doc);
+                if (itemId != null && !hits.getItemIds().contains(itemId)) {
+                    hits.getItemIds().add(itemId);
+                }
+                if ("history".equals(type)) {
+                    String hIdStr = doc.get("id");
+                    if (hIdStr != null) {
+                        try {
+                            Long hId = Long.valueOf(hIdStr);
+                            if (!hits.getHistoryIds().contains(hId)) {
+                                hits.getHistoryIds().add(hId);
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                } else if ("item".equals(type)) {
+                    if (itemId != null && !hits.getItemLevelHitItemIds().contains(itemId)) {
+                        hits.getItemLevelHitItemIds().add(itemId);
+                    }
                 }
             }
-            return hitIds;
+            return hits;
         } catch (Exception e) {
             logger.error("Error searching index for query: " + text, e);
             throw new RuntimeException("Error searching index for query: " + text, e);

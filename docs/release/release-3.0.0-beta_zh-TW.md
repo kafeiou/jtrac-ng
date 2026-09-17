@@ -130,6 +130,7 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
    - **子詞分詞器 (`SubTokenFilter`)**：自動將 Email 信箱（如 `user@gmail.com`）與複合檔名（如 `thunderbird_gmail.pdf`）拆解出子詞 Token（`user`、`gmail`、`com`、`thunderbird`、`pdf`），使搜尋單詞 `gmail` 時能自然精準命中信箱與附件。
    - **智慧查詢萬用字元擴展與前置星號支援**：單詞自動展開為 `(term OR term*)`，啟用 `allowLeadingWildcard = true` 支援 `*關鍵字*` 任意位置比對，並配置中文片語容錯 `phraseSlop = 2`，使「申請帳號」能順利比對「申請開放帳號」。
    - **全面預設展開歷史記錄 (`showHistory = true`)**：不論專案空間瀏覽或快速搜尋，清單一律預設展開每筆歷史修訂，直接呈現留言討論脈絡。
+   - **關鍵字搜尋之智慧歷程過濾 (Smart History Filtering)**：當開啟歷史記錄並執行文字搜尋時，自動實施智慧過濾，僅回傳並展示真正包含該搜尋關鍵字之首筆工單或留言修訂列，自動隱藏未含關鍵字之無關狀態修改歷程。
    - **系統啟動自動非同步重建索引**：自動偵測分詞器升級版本（`lucene.analyzer.version = 3.0.0-subtoken-v1`），於容器啟動後在背景非同步重建歷史工單 Lucene 索引。
    - **Docker Hub 映像檔遷移**：同步將 8 國語系建置手冊中的 Docker Hub 映像檔指向 `kafeiou/jtrac-ng:latest`。
 
