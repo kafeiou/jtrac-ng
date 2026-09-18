@@ -136,6 +136,11 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - **Smart History Filtering on Keyword Search**: When history view is enabled and a text search is performed, the system intelligently filters results to return only the primary ticket snapshot or specific revision comments that actually match the keyword, automatically hiding irrelevant revisions (e.g. status changes without matching text).
    - **Automated Startup Index Rebuild**: Detects analyzer version upgrade (`lucene.analyzer.version = 3.0.0-subtoken-v1`) and triggers asynchronous background reindexing upon container startup.
    - **Docker Hub Migration**: Updated Docker Hub image documentation across 8 languages to `kafeiou/jtrac-ng:latest`.
+9. **Ollama Bidirectional Traditional/Simplified Chinese & Cross-Strait Synonym Search Expansion**:
+   - **Complete Coverage of Literal Variants and Cross-Strait Terminology**: When searching with Chinese queries, the system automatically invokes Ollama for bidirectional expansion covering both literal character variants (Traditional "專案" <-> Simplified "专案") and cross-strait IT/business technical synonyms ("專案" <-> Mainland "项目"; "程式碼" <-> "代码"; "記憶體" <-> "内存"; "網路" <-> "网络"; "軟體" <-> "软件"; "伺服器" <-> "服务器"; "預設" <-> "默认"; "使用者" <-> "用户"; "登入" <-> "登录"), combining into composite Lucene queries (e.g. `((專案 OR 專案*) OR (专案 OR 专案*) OR (项目 OR 项目*))`) to achieve seamless bilingual retrieval.
+   - **Zero Overhead for Alphanumeric Queries**: Queries without Chinese characters (e.g., `EFC-109`, `login`) bypass Ollama completely (0ms latency).
+   - **Ultra-Fast LRU Memory Cache**: A thread-safe LRU cache (capacity: 1,000 items) ensures repeat queries resolve instantly (< 1ms).
+   - **Timeout Control (Default: 6s) & Fail-Safe Circuit Breaker**: Introduced `llm.search.expansion.enabled` (default: true) and `llm.search.expansion.timeout` (default: 6 seconds); if Ollama is offline or times out, the search gracefully falls back without interruption, and a 30s circuit breaker prevents subsequent queries from waiting.
 
 ---
 

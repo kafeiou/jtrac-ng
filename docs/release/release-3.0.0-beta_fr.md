@@ -114,6 +114,11 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
    - **Filtrage intelligent de l'historique lors de la recherche par mot-clé (Smart History Filtering)** : Lorsque l'historique est activé et qu'une recherche par mot-clé est effectuée, le système filtre intelligemment pour n'afficher que le ticket initial ou les commentaires de révision contenant le terme, masquant automatiquement les modifications d'état non pertinentes.
    - **Réindexation automatique en arrière-plan au démarrage** : Détecte la mise à jour de l'analyseur (`lucene.analyzer.version = 3.0.0-subtoken-v1`) et réindexe de manière asynchrone.
    - **Migration Docker Hub** : Documentation mise à jour dans les 8 langues vers `kafeiou/jtrac-ng:latest`.
+9. **Conversion bidirectionnelle chinois traditionnel/simplifié et expansion des synonymes avec Ollama**:
+   - **Couverture complète des variantes de caractères et de la terminologie métier**: Lors d'une recherche en chinois, Ollama étend automatiquement la requête aux variantes littérales traditionnelles et simplifiées ("專案" <-> "专案") ainsi qu'aux synonymes informatiques et métiers régionaux ("專案" <-> "项目", "程式碼" <-> "代码", "記憶體" <-> "内存", "網路" <-> "网络"), combinés dans une requête Lucene composite assurant une correspondance exhaustive.
+   - **Zéro latence pour les requêtes alphanumériques**: Les requêtes standard (`EFC-109`, `login`) contournent directement Ollama (0 ms d'impact).
+   - **Cache mémoire LRU ultra-rapide**: Un cache thread-safe (1 000 entrées) résout les recherches récurrentes en moins de 1 ms.
+   - **Délai d'attente (6s par défaut) et coupe-circuit automatique**: Introduction de `llm.search.expansion.enabled` (par défaut true) et `llm.search.expansion.timeout` (par défaut 6s). En cas d'indisponibilité d'Ollama, le système bascule silencieusement sur la recherche d'origine et active un coupe-circuit de 30 secondes.
 
 ---
 

@@ -171,4 +171,89 @@ public class IndexSearcherTest {
         Assert.assertTrue(searcher.validateQuery(null));
     }
 
+	@Test
+    public void testTraditionalChineseSearchMatchesSimplifiedAndCrossStraitViaOllama() {
+        Item item1 = new Item();
+        item1.setId(101);
+        item1.setSummary("這是繁體專案管理");
+        item1.setDetail("記錄了各項研發細節");
+
+        Item item2 = new Item();
+        item2.setId(102);
+        item2.setSummary("这是简体字面的专案");
+        item2.setDetail("包含所有专案计划");
+
+        Item item3 = new Item();
+        item3.setId(103);
+        item3.setSummary("这是大陆用语的项目跟踪");
+        item3.setDetail("负责项目推进与上线");
+
+        Indexer indexer = (Indexer) context.getBean("indexer");
+        indexer.index(item1);
+        indexer.index(item2);
+        indexer.index(item3);
+
+        IndexSearcher searcher = (IndexSearcher) context.getBean("indexSearcher");
+
+        // Mock OllamaSearchExpander translating 專案 -> 专案, 项目
+        OllamaSearchExpander expander = new OllamaSearchExpander();
+        info.jtrac.mail.OllamaClient mockClient = new info.jtrac.mail.OllamaClient(null, null, null, 6) {
+            @Override
+            public String chat(String systemPrompt, String userPrompt) {
+                if ("專案".equals(userPrompt)) {
+                    return "专案 项目 項目";
+                }
+                return "";
+            }
+        };
+        expander.setOllamaClient(mockClient);
+        searcher.setSearchExpander(expander);
+
+        // Searching Traditional '專案' matches all 3 items (Traditional 專案, Simplified 专案, and synonym 项目)!
+        List hits = searcher.findItemIdsContainingText("專案");
+        Assert.assertEquals(3, hits.size());
+        Assert.assertTrue(hits.contains(101L));
+        Assert.assertTrue(hits.contains(102L));
+        Assert.assertTrue(hits.contains(103L));
+    }
+
+	@Test
+    public void testSimplifiedChineseSearchMatchesTraditionalAndSynonymsViaOllama() {
+        Item item1 = new Item();
+        item1.setId(201);
+        item1.setSummary("這是繁體專案管理");
+        item1.setDetail("繁體紀錄");
+
+        Item item2 = new Item();
+        item2.setId(202);
+        item2.setSummary("这是简体项目");
+        item2.setDetail("简体记录");
+
+        Indexer indexer = (Indexer) context.getBean("indexer");
+        indexer.index(item1);
+        indexer.index(item2);
+
+        IndexSearcher searcher = (IndexSearcher) context.getBean("indexSearcher");
+
+        // Mock OllamaSearchExpander translating 项目 -> 項目, 專案, 专案
+        OllamaSearchExpander expander = new OllamaSearchExpander();
+        info.jtrac.mail.OllamaClient mockClient = new info.jtrac.mail.OllamaClient(null, null, null, 6) {
+            @Override
+            public String chat(String systemPrompt, String userPrompt) {
+                if ("项目".equals(userPrompt)) {
+                    return "項目 專案 专案";
+                }
+                return "";
+            }
+        };
+        expander.setOllamaClient(mockClient);
+        searcher.setSearchExpander(expander);
+
+        // Searching Simplified '项目' matches both items
+        List hits = searcher.findItemIdsContainingText("项目");
+        Assert.assertEquals(2, hits.size());
+        Assert.assertTrue(hits.contains(201L));
+        Assert.assertTrue(hits.contains(202L));
+    }
+
 }

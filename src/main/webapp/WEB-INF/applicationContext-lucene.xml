@@ -16,9 +16,12 @@
         <property name="analyzer" ref="analyzer"/>
     </bean>
     
+    <bean id="searchExpander" class="info.jtrac.lucene.OllamaSearchExpander"/>
+
     <bean id="indexSearcher" class="info.jtrac.lucene.IndexSearcher">
         <property name="indexDirectory" ref="indexDirectory"/>
         <property name="analyzer" ref="analyzer"/>
+        <property name="searchExpander" ref="searchExpander"/>
     </bean>
            
 </beans>

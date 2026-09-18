@@ -22,6 +22,8 @@ public class InboundConfigTest {
         assertTrue(Config.getParams().contains("llm.ollama.api.key"));
         assertTrue(Config.getParams().contains("llm.ollama.timeout"));
         assertTrue(Config.getParams().contains("llm.retrieval.max_tickets"));
+        assertTrue(Config.getParams().contains("llm.search.expansion.enabled"));
+        assertTrue(Config.getParams().contains("llm.search.expansion.timeout"));
     }
 
     @Test
@@ -30,11 +32,13 @@ public class InboundConfigTest {
         assertTrue(Config.isBoolean("mail.inbound.ssl.enable"));
         assertTrue(Config.isBoolean("mail.inbound.starttls.enable"));
         assertTrue(Config.isBoolean("mail.inbound.ssl.trust.all"));
+        assertTrue(Config.isBoolean("llm.search.expansion.enabled"));
         assertFalse(Config.isBoolean("mail.inbound.server.host"));
 
         assertTrue(Config.isNumber("mail.inbound.server.port"));
         assertTrue(Config.isNumber("llm.ollama.timeout"));
         assertTrue(Config.isNumber("llm.retrieval.max_tickets"));
+        assertTrue(Config.isNumber("llm.search.expansion.timeout"));
         assertFalse(Config.isNumber("llm.ollama.model"));
     }
 
@@ -80,6 +84,8 @@ public class InboundConfigTest {
             "config.llm.ollama.api.key",
             "config.llm.ollama.timeout",
             "config.llm.retrieval.max_tickets",
+            "config.llm.search.expansion.enabled",
+            "config.llm.search.expansion.timeout",
             "config.security.privacy.headers.enabled",
             "config.attachment.index.maxSizeMb",
             "config.attachment.index.maxChars",

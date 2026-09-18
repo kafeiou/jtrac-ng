@@ -172,6 +172,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
 
     public void setIndexSearcher(IndexSearcher indexSearcher) {
         this.indexSearcher = indexSearcher;
+        if (indexSearcher != null && indexSearcher.getSearchExpander() != null) {
+            indexSearcher.getSearchExpander().setConfigSupplier(this::loadAllConfig);
+        }
     }
 
     public void setIndexer(Indexer indexer) {
@@ -336,6 +339,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         initAttachmentMaxSize(config.get("attachment.maxsize"));
         initSessionTimeout(config.get("session.timeout"));
         initBackupServices();
+        if (indexSearcher != null && indexSearcher.getSearchExpander() != null) {
+            indexSearcher.getSearchExpander().setConfigSupplier(this::loadAllConfig);
+        }
 
         // Proactively rebuild Lucene indexes in background if legacy data was migrated or analyzer upgraded
         boolean dbMigrated = HsqldbDatabaseMigrator.isDatabaseMigrated();

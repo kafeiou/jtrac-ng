@@ -115,6 +115,11 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
    - **Lọc lịch sử thông minh khi tìm kiếm từ khóa (Smart History Filtering)**: Khi bật chế độ xem lịch sử và thực hiện tìm kiếm, hệ thống lọc thông minh chỉ hiển thị bản ghi mở đầu hoặc các nhận xét sửa đổi thực sự chứa từ khóa, tự động ẩn các lịch sử thay đổi trạng thái không liên quan.
    - **Tự động xây dựng lại chỉ mục bất đồng bộ khi khởi động**: Phát hiện nâng cấp phiên bản bộ phân tích (`lucene.analyzer.version = 3.0.0-subtoken-v1`) và tự động chạy lại chỉ mục trong nền sau khi khởi động.
    - **Di chuyển Docker Hub**: Cập nhật tài liệu 8 ngôn ngữ sang `kafeiou/jtrac-ng:latest`.
+9. **Chuyển đổi hai chiều chữ Hán phồn thể/giản thể và mở rộng từ đồng nghĩa tìm kiếm với Ollama**:
+   - **Bao phủ toàn diện biến thể chữ và từ đồng nghĩa chuyên ngành**: Khi tìm kiếm bằng chữ Hán, hệ thống tự động gọi Ollama để chuyển đổi hai chiều chữ phồn thể và giản thể (ví dụ: "專案" <-> "专案"), đồng thời mở rộng từ đồng nghĩa kỹ thuật/kinh doanh (ví dụ: "專案" <-> "项目", "程式碼" <-> "代码", "記憶體" <-> "内存", "網路" <-> "网络"), tạo thành truy vấn kết hợp Lucene giúp truy xuất liền mạch giữa các tài liệu phồn thể và giản thể.
+   - **Không làm chậm truy vấn chữ cái/số thông thường**: Các từ khóa tiếng Anh hoặc mã số (như `EFC-109`, `login`) bỏ qua Ollama hoàn toàn (độ trễ 0ms).
+   - **Bộ nhớ đệm LRU tốc độ cao**: Bộ nhớ đệm LRU an toàn đa luồng (dung lượng 1.000 mục) đảm bảo các truy vấn lặp lại phản hồi ngay lập tức (< 1ms).
+   - **Kiểm soát thời gian chờ (mặc định 6 giây) và ngắt mạch an toàn**: Thêm cấu hình `llm.search.expansion.enabled` (mặc định true) và `llm.search.expansion.timeout` (mặc định 6 giây); nếu Ollama ngoại tuyến hoặc hết giờ, hệ thống tự động quay lại tìm kiếm từ khóa gốc mà không làm gián đoạn người dùng, ngắt mạch 30 giây để tránh chờ đợi lặp lại.
 
 ---
 

@@ -42,6 +42,7 @@ public class IndexSearcher {
 
     private Directory indexDirectory;
     private Analyzer analyzer;
+    private OllamaSearchExpander searchExpander;
 
     public void setIndexDirectory(Directory indexDirectory) {
         this.indexDirectory = indexDirectory;
@@ -49,6 +50,14 @@ public class IndexSearcher {
 
     public void setAnalyzer(Analyzer analyzer) {
         this.analyzer = analyzer;
+    }
+
+    public void setSearchExpander(OllamaSearchExpander searchExpander) {
+        this.searchExpander = searchExpander;
+    }
+
+    public OllamaSearchExpander getSearchExpander() {
+        return searchExpander;
     }
 
     public boolean validateQuery(String text) {
@@ -232,14 +241,61 @@ public class IndexSearcher {
         if (trimmed.isEmpty()) {
             return trimmed;
         }
-        // If quoted or already contains wildcard or lucene field syntax, preserve as-is
-        if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+
+        // If quoted phrase
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"") && trimmed.length() > 2) {
+            String inner = trimmed.substring(1, trimmed.length() - 1).trim();
+            if (searchExpander != null && OllamaSearchExpander.containsChinese(inner)) {
+                List<String> variants = searchExpander.expandChineseVariants(inner);
+                if (variants != null && !variants.isEmpty()) {
+                    StringBuilder sb = new StringBuilder("(");
+                    sb.append(trimmed);
+                    for (String variant : variants) {
+                        sb.append(" OR \"").append(variant).append("\"");
+                    }
+                    sb.append(")");
+                    return sb.toString();
+                }
+            }
             return trimmed;
         }
+
+        // If already contains wildcard or lucene field syntax, preserve as-is
         if (trimmed.indexOf('*') != -1 || trimmed.indexOf('?') != -1 || trimmed.indexOf(':') != -1) {
             return trimmed;
         }
 
+        // Chinese variant and synonym expansion via Ollama
+        if (searchExpander != null && OllamaSearchExpander.containsChinese(trimmed)) {
+            List<String> variants = searchExpander.expandChineseVariants(trimmed);
+            if (variants != null && !variants.isEmpty()) {
+                String originalExpanded = expandSingleText(trimmed);
+                StringBuilder sb = new StringBuilder();
+                sb.append("(").append(originalExpanded).append(")");
+                for (String variant : variants) {
+                    String vExpanded = expandSingleText(variant);
+                    if (!vExpanded.isEmpty()) {
+                        sb.append(" OR (").append(vExpanded).append(")");
+                    }
+                }
+                return sb.toString();
+            }
+        }
+
+        return expandSingleText(trimmed);
+    }
+
+    private String expandSingleText(String text) {
+        if (text == null) {
+            return "";
+        }
+        String trimmed = text.trim();
+        if (trimmed.isEmpty()) {
+            return "";
+        }
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            return trimmed;
+        }
         String[] tokens = trimmed.split("\\s+");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tokens.length; i++) {

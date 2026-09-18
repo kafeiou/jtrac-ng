@@ -82,6 +82,8 @@ public class Config implements Serializable {
         PARAMS.add("llm.ollama.api.key");
         PARAMS.add("llm.ollama.timeout");
         PARAMS.add("llm.retrieval.max_tickets");
+        PARAMS.add("llm.search.expansion.enabled");
+        PARAMS.add("llm.search.expansion.timeout");
         PARAMS.add("lucene.analyzer.version");
 
         BOOLEAN_PARAMS = new LinkedHashSet<String>();
@@ -91,6 +93,7 @@ public class Config implements Serializable {
         BOOLEAN_PARAMS.add("mail.inbound.ssl.enable");
         BOOLEAN_PARAMS.add("mail.inbound.starttls.enable");
         BOOLEAN_PARAMS.add("mail.inbound.ssl.trust.all");
+        BOOLEAN_PARAMS.add("llm.search.expansion.enabled");
         BOOLEAN_PARAMS.add("jtrac.edit.item");
         BOOLEAN_PARAMS.add("markdown.enabled");
         BOOLEAN_PARAMS.add("attachments.openNewWindow");
@@ -102,6 +105,7 @@ public class Config implements Serializable {
         NUMBER_PARAMS.add("mail.inbound.server.port");
         NUMBER_PARAMS.add("llm.ollama.timeout");
         NUMBER_PARAMS.add("llm.retrieval.max_tickets");
+        NUMBER_PARAMS.add("llm.search.expansion.timeout");
         NUMBER_PARAMS.add("attachment.maxsize");
         NUMBER_PARAMS.add("pwd.minLength");
         NUMBER_PARAMS.add("items.search.num");

@@ -114,6 +114,11 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
    - **Filtrado inteligente de historial en búsqueda por palabras clave (Smart History Filtering)**: Cuando el historial está activado y se realiza una búsqueda, el sistema filtra inteligentemente los resultados para mostrar únicamente el registro principal o los comentarios de revisión que realmente coinciden con la palabra clave, ocultando cambios de estado irrelevantes.
    - **Reindexación automática en segundo plano al iniciar**: Detecta la actualización del analizador (`lucene.analyzer.version = 3.0.0-subtoken-v1`) y reindexa de forma asíncrona.
    - **Migración a Docker Hub**: Documentación en 8 idiomas actualizada a `kafeiou/jtrac-ng:latest`.
+9. **Conversión bidireccional chino tradicional/simplificado y expansión de sinónimos de búsqueda con Ollama**:
+   - **Cobertura integral de variantes literales y sinónimos técnicos regionales**: Al buscar términos en chino, el sistema invoca Ollama para expandirlos bidireccionalmente incluyendo caracteres literales tradicionales y simplificados ("專案" <-> "专案") y equivalentes técnicos comunes ("專案" <-> "项目", "程式碼" <-> "代码", "記憶體" <-> "内存", "網路" <-> "网络"), construyendo consultas Lucene compuestas que permiten encontrar tickets en ambas variantes.
+   - **Cero sobrecarga para consultas alfanuméricas**: Búsquedas en inglés o códigos (ej. `EFC-109`, `login`) omiten Ollama de inmediato (0 ms de latencia).
+   - **Caché en memoria LRU ultra rápida**: Una caché LRU segura para subprocesos (capacidad: 1.000 términos) responde a búsquedas repetidas en < 1 ms.
+   - **Control de tiempo de espera (por defecto: 6s) y disyuntor automático**: Parámetros `llm.search.expansion.enabled` (predeterminado true) y `llm.search.expansion.timeout` (predeterminado 6s). Si Ollama no responde, se aplica un retroceso silencioso a la búsqueda original y se activa un disyuntor de 30 segundos.
 
 ---
 

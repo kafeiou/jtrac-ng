@@ -114,6 +114,11 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
     - **Intelligente Verlaufsfilterung bei der Stichwortsuche (Smart History Filtering)**: Wenn der Verlauf aktiviert ist und eine Volltextsuche durchgeführt wird, filtert das System die Ergebnisse intelligent, um nur die Ticket-Erstanlage oder Revisionen mit Treffern anzuzeigen und irrelevante Statusänderungen automatisch auszublenden.
    - **Automatischer Hintergrund-Reindex beim Start**: Erkennt Aktualisierungen der Analyzer-Version (`lucene.analyzer.version = 3.0.0-subtoken-v1`) und stößt eine asynchrone Neuindizierung an.
    - **Docker-Hub-Migration**: Dokumentation in allen 8 Sprachen auf `kafeiou/jtrac-ng:latest` aktualisiert.
+9. **Ollama-gestützte bidirektionale Konvertierung (Traditionell/Vereinfacht) und Synonym-Sucherweiterung**:
+   - **Vollständige Abdeckung von Schriftzeichenvarianten und Fachbegriffen**: Bei Suchanfragen mit chinesischen Schriftzeichen erweitert das System diese über Ollama bidirektional um zeichengetreue Varianten ("專案" <-> "专案") sowie regionale IT- und Geschäftssynonyme ("專案" <-> "项目", "程式碼" <-> "代码", "記憶體" <-> "内存", "網路" <-> "网络") zu einer kombinierten Lucene-Abfrage, wodurch sprachübergreifende Tickets nahtlos gefunden werden.
+   - **Keine Verzögerung bei alphanumerischen Begriffen**: Reine Text-/Zahlenbegriffe (`EFC-109`, `login`) umgehen Ollama vollständig (0 ms Mehraufwand).
+   - **Extrem schneller LRU-Speicher-Cache**: Ein threadsicherer LRU-Cache (1.000 Einträge) beantwortet wiederholte Anfragen in < 1 ms.
+   - **Zeitlimit (Standard: 6s) und fehlertoleranter Circuit-Breaker**: Parameter `llm.search.expansion.enabled` (Standard true) und `llm.search.expansion.timeout` (Standard 6s). Bei Nichterreichbarkeit erfolgt ein lautloser Fallback auf den Originalbegriff mit einer 30-sekündigen Schutzpause.
 
 ---
 
