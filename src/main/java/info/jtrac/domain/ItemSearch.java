@@ -48,7 +48,7 @@ public class ItemSearch implements Serializable {
     private long resultCount;
     private String sortFieldName = "id";
     private boolean sortDescending = true;
-    private boolean showHistory = true;    
+    private boolean showHistory;    
     private boolean batchMode;
 
     private long selectedItemId;
@@ -74,7 +74,12 @@ public class ItemSearch implements Serializable {
     }      
 
     public void initFromPageParameters(PageParameters params, User user, Jtrac jtrac) {       
-        showHistory = params.get("showHistory").toBoolean(true);
+        if (!params.get("showHistory").isNull()) {
+            showHistory = params.get("showHistory").toBoolean(false);
+        } else {
+            String searchTextParam = params.get("searchText").toString(null);
+            showHistory = (searchTextParam != null && !searchTextParam.trim().isEmpty());
+        }
 		try {
 			pageSize = params.get("pageSize").toInt(Integer.parseInt(jtrac.loadConfig("items.search.num")));
 		} catch (RuntimeException rtex) { /* ignore, the default is fine */ }
@@ -180,14 +185,14 @@ public class ItemSearch implements Serializable {
         }
         if(sortFieldName.equals("id") || sortFieldName.equals("space")) {
             if(showHistory) {
-                // if showHistory: sort by item.id and then history.id
+                // if showHistory: sort by item.id and then history.id in ascending order
                 if(sortDescending) {
                     if(space == null) {
                         DetachedCriteria parentSpace = parent.createCriteria("space");
                         parentSpace.addOrder(Order.desc("name"));                        
                     }                    
                     criteria.addOrder(Order.desc("parent.id"));
-                    criteria.addOrder(Order.desc("id"));
+                    criteria.addOrder(Order.asc("id"));
                 } else {
                     if(space == null) {
                         DetachedCriteria parentSpace = parent.createCriteria("space");
@@ -217,6 +222,10 @@ public class ItemSearch implements Serializable {
             } else {
                 criteria.addOrder(Order.asc(sortFieldName));
             } 
+            if (showHistory) {
+                criteria.addOrder(Order.desc("parent.id"));
+                criteria.addOrder(Order.asc("id"));
+            }
         }
         return criteria;
     }    

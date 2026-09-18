@@ -121,7 +121,8 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
 8. **Lucene 全文检索与历史历程全面现代化 (Subtokens, Wildcard Expansion & Show History Default)**：
    - **子词分词器 (`SubTokenFilter`)**：自动将 Email 邮箱（如 `user@gmail.com`）与复合文件名（如 `thunderbird_gmail.pdf`）拆解出子词 Token（`user`、`gmail`、`com`、`thunderbird`、`pdf`），使搜索单词 `gmail` 时能自然精准命中邮箱与附件。
    - **智能查询通配符扩展与前置星号支持**：单词自动展开为 `(term OR term*)`，启用 `allowLeadingWildcard = true` 支持 `*关键字*` 任意位置比对，并配置中文短语容错 `phraseSlop = 2`，使“申请账号”能顺利比对“申请开放账号”。
-   - **全面默认展开历史记录 (`showHistory = true`)**：不论空间浏览或快速搜索，清单一律默认展开每笔历史修订，直接呈现留言讨论脉络。
+   - **项目空间浏览纯工单呈现与搜索动态展开 (Clean Space Browsing & Search-Driven History Expansion)**：项目空间浏览默认 `showHistory = false`，每张工单仅显示一笔干净记录（`EFC-109`），彻底消除未搜索即展开大量历史修订留言之混乱现象；仅在使用者输入关键字检索或进入进阶搜索表单时，系统自动启用 `showHistory = true` 展开命中之历程与留言，点选清除搜索时自动收合还原。
+   - **工单与修订历程时序排序优化 (Chronological Order: Parent Ticket Before Revisions)**：修正历史记录展开时之排序规则，依工单单号降序、历程流水号升序（`parent.id DESC, id ASC`），确保主工单（如 `xxx-109`）永远排在修订历程（如 `xxx-109(1)`）之前，若依其他字段排序亦维持工单分组时序相邻呈现。
    - **关键字搜索之智能历程过滤 (Smart History Filtering)**：当开启历史记录并执行文字搜索时，自动实施智能过滤，仅返回并展示真正包含该搜索关键字之首笔工单或留言修订列，自动隐藏未含关键字之无关状态修改历程。
    - **系统启动自动异步重建索引**：自动检测分词器升级版本（`lucene.analyzer.version = 3.0.0-subtoken-v1`），于容器启动后在后台异步重建历史工单 Lucene 索引。
    - **Docker Hub 镜像迁移**：同步将 8 语系构建手册中的 Docker Hub 镜像指向 `kafeiou/jtrac-ng:latest`。

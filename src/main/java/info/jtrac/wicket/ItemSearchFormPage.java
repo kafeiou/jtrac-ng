@@ -32,6 +32,7 @@ public class ItemSearchFormPage extends BasePage {
         } else {
             itemSearch = new ItemSearch(s);
         }
+        itemSearch.setShowHistory(true);
         addComponents(itemSearch);
     }
     

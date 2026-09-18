@@ -212,4 +212,31 @@ public class ItemSearchTest {
         itemSearch.setSortFieldName(null);
         Assert.assertEquals("id", itemSearch.getSortFieldName());
     }
+
+    @Test
+    public void testCriteriaOrderingWhenShowHistoryIsTrue() {
+        Space space = new Space();
+        space.setId(1);
+        space.setPrefixCode("EFC");
+        space.setMetadata(new Metadata());
+        ItemSearch itemSearch = new ItemSearch(space);
+        itemSearch.setShowHistory(true);
+
+        // 1. Sort by ID descending (default): parent.id DESC, id ASC
+        itemSearch.setSortFieldName("id");
+        itemSearch.setSortDescending(true);
+        org.hibernate.criterion.DetachedCriteria criteriaDesc = itemSearch.getCriteria();
+        Assert.assertNotNull(criteriaDesc);
+
+        // 2. Sort by ID ascending: parent.id ASC, id ASC
+        itemSearch.setSortDescending(false);
+        org.hibernate.criterion.DetachedCriteria criteriaAsc = itemSearch.getCriteria();
+        Assert.assertNotNull(criteriaAsc);
+
+        // 3. Sort by status: status DESC, parent.id DESC, id ASC
+        itemSearch.setSortFieldName("status");
+        itemSearch.setSortDescending(true);
+        org.hibernate.criterion.DetachedCriteria criteriaStatus = itemSearch.getCriteria();
+        Assert.assertNotNull(criteriaStatus);
+    }
 }

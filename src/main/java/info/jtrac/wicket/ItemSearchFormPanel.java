@@ -57,6 +57,7 @@ public class ItemSearchFormPanel extends BasePanel {
     public ItemSearchFormPanel(String id, User user) {
         super(id);
         this.itemSearch = new ItemSearch(user);
+        this.itemSearch.setShowHistory(true);
         addComponents();
     }
 
@@ -68,6 +69,7 @@ public class ItemSearchFormPanel extends BasePanel {
         } else {
             this.itemSearch = new ItemSearch(getPrincipal());
         }
+        this.itemSearch.setShowHistory(true);
         addComponents();
     }
 

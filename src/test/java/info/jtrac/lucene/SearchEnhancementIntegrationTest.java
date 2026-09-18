@@ -98,21 +98,32 @@ public class SearchEnhancementIntegrationTest {
     }
 
     @Test
-    public void testShowHistoryDefaultsToTrue() {
+    public void testShowHistoryDefaultRules() {
         ItemSearch search = new ItemSearch((info.jtrac.domain.User) null);
-        Assert.assertTrue("ItemSearch.showHistory must default to true", search.isShowHistory());
+        Assert.assertFalse("ItemSearch.showHistory must default to false for clean browsing", search.isShowHistory());
 
         PageParameters params = new PageParameters();
         search.initFromPageParameters(params, null, null);
-        Assert.assertTrue("initFromPageParameters without showHistory param must remain true", search.isShowHistory());
+        Assert.assertFalse("initFromPageParameters without showHistory and without searchText must remain false", search.isShowHistory());
+
+        PageParameters searchParams = new PageParameters();
+        searchParams.set("searchText", "crash");
+        search.initFromPageParameters(searchParams, null, null);
+        Assert.assertTrue("initFromPageParameters with searchText must default showHistory to true", search.isShowHistory());
 
         PageParameters falseParams = new PageParameters();
         falseParams.set("showHistory", "false");
+        falseParams.set("searchText", "crash");
         search.initFromPageParameters(falseParams, null, null);
-        Assert.assertFalse("initFromPageParameters with showHistory=false must be false", search.isShowHistory());
+        Assert.assertFalse("initFromPageParameters with explicit showHistory=false must be false even with searchText", search.isShowHistory());
+
+        PageParameters trueParams = new PageParameters();
+        trueParams.set("showHistory", "true");
+        search.initFromPageParameters(trueParams, null, null);
+        Assert.assertTrue("initFromPageParameters with explicit showHistory=true must be true", search.isShowHistory());
 
         PageParameters queryString = search.getAsQueryString();
-        Assert.assertEquals("false", queryString.get("showHistory").toString());
+        Assert.assertEquals("true", queryString.get("showHistory").toString());
     }
 
     @Test

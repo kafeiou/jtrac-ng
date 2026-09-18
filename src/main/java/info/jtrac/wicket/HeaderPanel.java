@@ -94,6 +94,7 @@ public class HeaderPanel extends BasePanel {
                     if (pendingSearch != null && !pendingSearch.trim().isEmpty()) {
                         ItemSearch itemSearch = (getCurrentSpace() != null) ? new ItemSearch(getCurrentSpace()) : new ItemSearch(user);
                         itemSearch.setSearchText(pendingSearch.trim());
+                        itemSearch.setShowHistory(true);
                         setResponsePage(new ItemSearchFormPage(itemSearch));
                     } else {
                         setResponsePage(ItemSearchFormPage.class);
@@ -123,6 +124,7 @@ public class HeaderPanel extends BasePanel {
                     if (pendingSearch != null && !pendingSearch.trim().isEmpty()) {
                         ItemSearch itemSearch = new ItemSearch(space);
                         itemSearch.setSearchText(pendingSearch.trim());
+                        itemSearch.setShowHistory(true);
                         setResponsePage(new ItemSearchFormPage(itemSearch));
                     } else {
                         setResponsePage(ItemSearchFormPage.class);
@@ -227,6 +229,7 @@ public class HeaderPanel extends BasePanel {
             itemSearch = new ItemSearch(user);
         }
         itemSearch.setSearchText(trimmed);
+        itemSearch.setShowHistory(true);
         JtracSession.get().setItemSearch(itemSearch);
         setResponsePage(ItemListPage.class, itemSearch.getAsQueryString());
     }

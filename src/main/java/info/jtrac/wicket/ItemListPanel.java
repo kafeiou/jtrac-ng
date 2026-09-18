@@ -230,6 +230,11 @@ public class ItemListPanel extends BasePanel {
                 String val = filterModel.getObject();
                 itemSearch.setCurrentPage(0);
                 itemSearch.setSearchText(val);
+                if (val != null && !val.trim().isEmpty()) {
+                    itemSearch.setShowHistory(true);
+                } else {
+                    itemSearch.setShowHistory(false);
+                }
                 JtracSession.get().setItemSearch(itemSearch);
                 setResponsePage(new ItemListPage(itemSearch));
             }
@@ -246,6 +251,7 @@ public class ItemListPanel extends BasePanel {
                 public void onClick() {
                     itemSearch.setCurrentPage(0);
                     itemSearch.setSearchText(null);
+                    itemSearch.setShowHistory(false);
                     JtracSession.get().setItemSearch(itemSearch);
                     setResponsePage(new ItemListPage(itemSearch));
                 }
