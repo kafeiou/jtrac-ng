@@ -131,6 +131,10 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
    - **纯英数字零负担放行**：检索英数字词（如 `EFC-109`、`login`）时中文侦测为 false，完全略过 Ollama 调用（0ms 额外耗时）。
    - **内存 LRU 缓存极速命中**：针对常用词汇建立线程安全 LRU 缓存（默认容量 1,000 笔），重复查询时从缓存直接取回（< 1ms）。
    - **超时控制 (默认 6 秒) 与断路器静默降级**：新增系统参数 `llm.search.expansion.enabled`（默认 true）与 `llm.search.expansion.timeout`（默认 6 秒）；若 Ollama 离线或超时，自动静默降级至原始关键字检索绝不中断搜索，并启动 30 秒断路器退避，避免后续检索持续等待。
+10. **Markdown 渲染 Windows UNC 路径与反斜杠完整保护 (Markdown Windows UNC Path & Backslash Preservation)**：
+    - **问题根因修复**：修复在工单细节或留言输入 Windows UNC 网络共享路径（例如 `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` 或 `"\\hlmt.com.tw\..."`）时，因 CommonMark 原生标点符号转义机制导致开头双反斜杠 `\\` 被吞噬缩减为单反斜杠 `\`、大括号前反斜杠 `\{` 遗失之问题。
+    - **文字外观 100% 保持自然排版**：维持一般纯文本呈现，不强制包裹为代码芯片样式，字体外观与前后正文自然融合。
+    - **全方位路径覆盖与代码块保护**：全面支持 UNC 共享路径（`\\server\share`）、磁盘路径（`C:\...`）、相对路径及单独的双反斜杠（`\\`）；同时具备代码块感知，对行内代码（`` `...` ``）与围栏代码块（```` ```...``` ````）主动绕过保护，绝不产生双重转义，原生 Markdown 标点转义亦正常运作。
 
 ---
 

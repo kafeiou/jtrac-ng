@@ -139,6 +139,10 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - **Zero Overhead for Alphanumeric Queries**: Queries without Chinese characters (e.g., `EFC-109`, `login`) bypass Ollama completely (0ms latency).
    - **Ultra-Fast LRU Memory Cache**: A thread-safe LRU cache (capacity: 1,000 items) ensures repeat queries resolve instantly (< 1ms).
    - **Timeout Control (Default: 6s) & Fail-Safe Circuit Breaker**: Introduced `llm.search.expansion.enabled` (default: true) and `llm.search.expansion.timeout` (default: 6 seconds); if Ollama is offline or times out, the search gracefully falls back without interruption, and a 30s circuit breaker prevents subsequent queries from waiting.
+10. **Markdown Windows UNC Path & Backslash Preservation**:
+    - **Root Cause Fix**: Resolved an issue where entering Windows UNC network share paths (e.g. `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` or `"\\hlmt.com.tw\..."`) in item details or comments caused leading double backslashes `\\` to be collapsed into a single backslash `\` and backslashes before braces `\{` to be stripped due to CommonMark ASCII punctuation escaping rules.
+    - **100% Natural Text Rendering**: Rendered as normal body text without forcing inline code chip styles or font variations, ensuring seamless visual harmony with surrounding content.
+    - **Comprehensive Coverage & Code Block Immunity**: Full coverage for UNC network shares (`\\server\share`), local drive paths (`C:\...`), relative paths, and standalone double backslashes (`\\`); automatically bypasses code spans (`` `...` ``) and fenced code blocks (```` ```...``` ````) to avoid double-escaping, while preserving standard Markdown punctuation escaping.
 
 ---
 

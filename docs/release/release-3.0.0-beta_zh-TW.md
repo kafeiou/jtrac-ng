@@ -139,6 +139,10 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
    - **純英數字零負擔放行**：檢索英數字詞（如 `EFC-109`、`login`）時中文偵測為 false，完全略過 Ollama 呼叫（0ms 額外耗時）。
    - **記憶體 LRU 快取極速命中**：針對常用詞彙建立執行緒安全 LRU 快取（預設容量 1,000 筆），重複查詢時從快取直接取回（< 1ms）。
    - **逾時控制 (預設 6 秒) 與斷路器靜默降級**：新增系統參數 `llm.search.expansion.enabled`（預設 true）與 `llm.search.expansion.timeout`（預設 6 秒）；若 Ollama 離線或逾時，自動靜默降級至原始關鍵字檢索絕不中斷搜尋，並啟動 30 秒斷路器退避，避免後續檢索持續等待。
+10. **Markdown 渲染 Windows UNC 路徑與反斜線完整保護 (Markdown Windows UNC Path & Backslash Preservation)**：
+    - **問題根因修復**：修復在工單細節或留言輸入 Windows UNC 網路共享路徑（例如 `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` 或 `"\\hlmt.com.tw\..."`）時，因 CommonMark 原生標點符號跳脫機制導致開頭雙反斜線 `\\` 被吞噬縮減為單反斜線 `\`、大括號前反斜線 `\{` 遺失之問題。
+    - **文字外觀 100% 保持自然排版**：維持一般純文字呈現，不強制包覆為程式碼晶片樣式，字體外觀與前後內文自然融合。
+    - **全方位路徑覆蓋與程式碼防護**：全面支援 UNC 共享路徑（`\\server\share`）、磁碟路徑（`C:\...`）、相對路徑及單獨之雙反斜線（`\\`）；同時具備代碼區塊感知，對行內代碼（`` `...` ``）與圍欄程式碼區塊（```` ```...``` ````）主動繞過保護，絕不產生雙重跳脫，原生 Markdown 標點跳脫亦正常運作。
 
 ---
 

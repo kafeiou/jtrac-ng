@@ -119,6 +119,10 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
    - **Cero sobrecarga para consultas alfanuméricas**: Búsquedas en inglés o códigos (ej. `EFC-109`, `login`) omiten Ollama de inmediato (0 ms de latencia).
    - **Caché en memoria LRU ultra rápida**: Una caché LRU segura para subprocesos (capacidad: 1.000 términos) responde a búsquedas repetidas en < 1 ms.
    - **Control de tiempo de espera (por defecto: 6s) y disyuntor automático**: Parámetros `llm.search.expansion.enabled` (predeterminado true) y `llm.search.expansion.timeout` (predeterminado 6s). Si Ollama no responde, se aplica un retroceso silencioso a la búsqueda original y se activa un disyuntor de 30 segundos.
+10. **Preservación de Rutas Windows UNC y Barras Invertidas en Renderizado Markdown (Markdown Windows UNC Path & Backslash Preservation)**:
+   - **Corrección de Causa Raíz**: Se solucionó un problema por el cual ingresar rutas de recursos compartidos de red Windows UNC (por ejemplo, `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` o `"\\hlmt.com.tw\..."`) en detalles o comentarios provocaba que las dobles barras invertidas iniciales `\\` se redujeran a una sola barra `\` y que las barras antes de llaves `\{` se eliminaran debido a las reglas de escape de puntuación de CommonMark.
+   - **Renderizado de Texto 100% Natural**: Se muestra como texto normal sin forzar estilos de etiquetas de código en línea, garantizando armonía visual con el texto circundante.
+   - **Cobertura Integral e Inmunidad en Bloques de Código**: Cobertura completa para rutas UNC (`\\server\share`), rutas de unidades locales (`C:\...`), rutas relativas y dobles barras independientes (`\\`); omite automáticamente fragmentos de código en línea (`` `...` ``) y bloques de código delimitados (```` ```...``` ````) para evitar el doble escape, manteniendo intacto el escape de puntuación estándar de Markdown.
 
 ---
 

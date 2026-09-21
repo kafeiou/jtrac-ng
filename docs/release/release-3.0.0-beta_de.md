@@ -119,6 +119,10 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
    - **Keine Verzögerung bei alphanumerischen Begriffen**: Reine Text-/Zahlenbegriffe (`EFC-109`, `login`) umgehen Ollama vollständig (0 ms Mehraufwand).
    - **Extrem schneller LRU-Speicher-Cache**: Ein threadsicherer LRU-Cache (1.000 Einträge) beantwortet wiederholte Anfragen in < 1 ms.
    - **Zeitlimit (Standard: 6s) und fehlertoleranter Circuit-Breaker**: Parameter `llm.search.expansion.enabled` (Standard true) und `llm.search.expansion.timeout` (Standard 6s). Bei Nichterreichbarkeit erfolgt ein lautloser Fallback auf den Originalbegriff mit einer 30-sekündigen Schutzpause.
+10. **Markdown-Rendering von Windows-UNC-Pfaden und Backslash-Erhaltung (Markdown Windows UNC Path & Backslash Preservation)**:
+    - **Behebung der Ursache**: Behebt ein Problem, bei dem die Eingabe von Windows-UNC-Netzwerkfreigabepfaden (z. B. `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` oder `"\\hlmt.com.tw\..."`) in Ticketdetails oder Kommentaren dazu führte, dass führende doppelte Backslashes `\\` zu einem einzelnen Backslash `\` reduziert und Backslashes vor geschweiften Klammern `\{` durch die CommonMark-Satzzeichen-Escape-Regeln entfernt wurden.
+    - **100% natürliches Textbild**: Wird als regulärer Fließtext ohne erzwungene Inline-Code-Chips gerendert und fügt sich nahtlos in den umgebenden Inhalt ein.
+    - **Umfassende Pfadabdeckung & Schutz von Code-Blöcken**: Vollständige Unterstützung für UNC-Pfade (`\\server\share`), lokale Laufwerkspfade (`C:\...`), relative Pfade und eigenständige doppelte Backslashes (`\\`); Inline-Code (`` `...` ``) und Code-Blöcke (```` ```...``` ````) werden automatisch erkannt und übersprungen, um doppeltes Escaping zu verhindern, während normales Markdown-Escaping unberührt bleibt.
 
 ---
 

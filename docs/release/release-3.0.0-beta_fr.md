@@ -119,6 +119,10 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
    - **Zéro latence pour les requêtes alphanumériques**: Les requêtes standard (`EFC-109`, `login`) contournent directement Ollama (0 ms d'impact).
    - **Cache mémoire LRU ultra-rapide**: Un cache thread-safe (1 000 entrées) résout les recherches récurrentes en moins de 1 ms.
    - **Délai d'attente (6s par défaut) et coupe-circuit automatique**: Introduction de `llm.search.expansion.enabled` (par défaut true) et `llm.search.expansion.timeout` (par défaut 6s). En cas d'indisponibilité d'Ollama, le système bascule silencieusement sur la recherche d'origine et active un coupe-circuit de 30 secondes.
+10. **Préservation des Chemins Windows UNC et des Barres Obliques Inverses dans le Rendu Markdown (Markdown Windows UNC Path & Backslash Preservation)**:
+    - **Correction de la cause racine**: Résolution d'un problème où la saisie de chemins de partage réseau Windows UNC (par exemple `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` ou `"\\hlmt.com.tw\..."`) dans les détails ou les commentaires provoquait la réduction des doubles barres obliques inverses initiales `\\` en une seule barre `\` et la suppression des barres devant les accolades `\{` en raison des règles d'échappement de ponctuation de CommonMark.
+    - **Rendu en Texte Naturel à 100%**: Affiché sous forme de texte normal sans imposer de style de pastille de code en ligne, garantissant une intégration visuelle parfaite avec le texte environnant.
+    - **Couverture Complète et Immunité des Blocs de Code**: Prise en charge intégrale des chemins UNC (`\\server\share`), des lecteurs locaux (`C:\...`), des chemins relatifs et des doubles barres isolées (`\\`); contourne automatiquement le code en ligne (`` `...` ``) et les blocs de code clôturés (```` ```...``` ````) pour éviter tout double échappement, tout en conservant le fonctionnement normal de l'échappement Markdown standard.
 
 ---
 

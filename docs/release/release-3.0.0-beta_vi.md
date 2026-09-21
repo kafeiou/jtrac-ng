@@ -120,6 +120,10 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
    - **Không làm chậm truy vấn chữ cái/số thông thường**: Các từ khóa tiếng Anh hoặc mã số (như `EFC-109`, `login`) bỏ qua Ollama hoàn toàn (độ trễ 0ms).
    - **Bộ nhớ đệm LRU tốc độ cao**: Bộ nhớ đệm LRU an toàn đa luồng (dung lượng 1.000 mục) đảm bảo các truy vấn lặp lại phản hồi ngay lập tức (< 1ms).
    - **Kiểm soát thời gian chờ (mặc định 6 giây) và ngắt mạch an toàn**: Thêm cấu hình `llm.search.expansion.enabled` (mặc định true) và `llm.search.expansion.timeout` (mặc định 6 giây); nếu Ollama ngoại tuyến hoặc hết giờ, hệ thống tự động quay lại tìm kiếm từ khóa gốc mà không làm gián đoạn người dùng, ngắt mạch 30 giây để tránh chờ đợi lặp lại.
+10. **Bảo toàn Đường dẫn Windows UNC và Dấu gạch chéo ngược trong Hiển thị Markdown (Markdown Windows UNC Path & Backslash Preservation)**:
+    - **Khắc phục Nguyên nhân Gốc rễ**: Sửa lỗi khi nhập đường dẫn chia sẻ mạng Windows UNC (ví dụ: `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` hoặc `"\\hlmt.com.tw\..."`) trong chi tiết yêu cầu hoặc bình luận, cơ chế thoát dấu câu mặc định của CommonMark khiến hai dấu gạch chéo ngược ở đầu `\\` bị thu gọn thành một dấu `\`, và dấu gạch chéo ngược trước dấu ngoặc nhọn `\{` bị mất.
+    - **Giữ nguyên 100% Kiểu chữ Tự nhiên**: Hiển thị dưới dạng văn bản thường, không ép buộc bọc thành thẻ code khối hộp, đảm bảo hài hòa thị giác với văn bản xung quanh.
+    - **Hỗ trợ Toàn diện và Miễn nhiễm Khối Mã nguồn**: Hỗ trợ đầy đủ đường dẫn chia sẻ UNC (`\\server\share`), đường dẫn ổ đĩa cục bộ (`C:\...`), đường dẫn tương đối và dấu gạch chéo kép đơn lẻ (`\\`); tự động bỏ qua khối mã dòng (`` `...` ``) và khối mã có hàng rào (```` ```...``` ````) để tránh thoát kép, đồng thời bảo đảm cơ chế thoát dấu câu thông thường của Markdown vẫn hoạt động chính xác.
 
 ---
 

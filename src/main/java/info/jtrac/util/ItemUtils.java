@@ -140,10 +140,86 @@ public final class ItemUtils {
         return sb.toString().replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
     }
 
+	private static final java.util.regex.Pattern CODE_BLOCK_OR_SPAN_PATTERN =
+			java.util.regex.Pattern.compile("(?s)(```[^\n]*\n.*?```|~~~[^\n]*\n.*?~~~|`[^`\n]+`)");
+
+	private static final java.util.regex.Pattern WINDOWS_PATH_UNIFIED_PATTERN =
+			java.util.regex.Pattern.compile("([\"'“「])((?:\\\\\\\\[^\"'”」\r\n]+|[a-zA-Z]:\\\\[^\"'”」\r\n]+))([\"'”」])"
+					+ "|(\\\\\\\\[^\\s<>\"'“”「」\r\n]+)"
+					+ "|(\\b[a-zA-Z]:\\\\[^\\s<>\"'“”「」\r\n]*)"
+					+ "|((?:^|(?<=\\s))[a-zA-Z0-9_.\\-]+\\\\[a-zA-Z0-9_.\\-]+(?:\\\\[^\\s<>\"'“”「」\r\n]+)*)"
+					+ "|((?<!\\\\)\\\\\\\\(?!\\\\))");
+
+	private static final java.util.regex.Pattern TRAILING_PUNCTUATION_PATTERN =
+			java.util.regex.Pattern.compile("(?<![})\\]])[.,;:!?。，、！？]+$");
+
+	/**
+	 * Pre-processes markdown text to protect Windows UNC paths (e.g. \\server\share),
+	 * Windows local drive paths (e.g. C:\path), and double backslashes (\\) from
+	 * having their backslashes stripped by CommonMark escape rules.
+	 *
+	 * Content inside code blocks (```...```) and inline code spans (`...`) is left untouched.
+	 */
+	public static String protectWindowsPaths(String text) {
+		if (text == null || text.indexOf('\\') == -1) {
+			return text;
+		}
+
+		java.util.regex.Matcher codeMatcher = CODE_BLOCK_OR_SPAN_PATTERN.matcher(text);
+		StringBuilder sb = new StringBuilder();
+		int lastEnd = 0;
+
+		while (codeMatcher.find()) {
+			String nonCode = text.substring(lastEnd, codeMatcher.start());
+			sb.append(protectWindowsPathsInNonCode(nonCode));
+			sb.append(codeMatcher.group());
+			lastEnd = codeMatcher.end();
+		}
+		if (lastEnd < text.length()) {
+			String nonCode = text.substring(lastEnd);
+			sb.append(protectWindowsPathsInNonCode(nonCode));
+		}
+		return sb.toString();
+	}
+
+	private static String protectWindowsPathsInNonCode(String text) {
+		if (text == null || text.indexOf('\\') == -1) {
+			return text;
+		}
+
+		java.util.regex.Matcher m = WINDOWS_PATH_UNIFIED_PATTERN.matcher(text);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			if (m.group(1) != null) {
+				// Quoted path: group(1) left quote, group(2) path, group(3) right quote
+				String leftQuote = m.group(1);
+				String path = m.group(2);
+				String rightQuote = m.group(3);
+				String escaped = path.replace("\\", "\\\\");
+				m.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(leftQuote + escaped + rightQuote));
+			} else {
+				// Unquoted match: group(4) UNC, group(5) Drive, group(6) Relative, or group(7) standalone \\
+				String match = m.group();
+				java.util.regex.Matcher punctMatcher = TRAILING_PUNCTUATION_PATTERN.matcher(match);
+				String pathPart = match;
+				String punctPart = "";
+				if (punctMatcher.find()) {
+					punctPart = punctMatcher.group();
+					pathPart = match.substring(0, match.length() - punctPart.length());
+				}
+				String escaped = pathPart.replace("\\", "\\\\") + punctPart;
+				m.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(escaped));
+			}
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
 	public static String renderMarkdown (String text) {
 		if (text == null) {
 			return null;
 		} else {
+			text = protectWindowsPaths(text);
 			Node document = parser.parse(text);
 			String html = renderer.render(document).trim();
 			return html;
