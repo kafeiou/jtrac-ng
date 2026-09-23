@@ -32,10 +32,10 @@
 	<my:cssOverride/>
 </head>
 <body>
-<table width="100%" class="jtrac header" padding="4">
+<table width="100%" class="jtrac header jtrac-brand-header">
 	<tr>
-		<td width="20%" align="left"><a href="${pageContext.request.contextPath}/app"><img height="55px" src="${pageContext.request.contextPath}/resources/jtrac-logo.svg"/></a></td>
-		<td align="left"><b>Lightweight Knowledge Query System</b></td>
+		<td class="jtrac-brand-logo-col" align="left"><a href="${pageContext.request.contextPath}/app"><img class="jtrac-brand-logo" src="${pageContext.request.contextPath}/resources/jtrac-logo.svg" alt="JTrac NG"/></a></td>
+		<td class="jtrac-brand-text-col" align="left"><b><span class="jtrac-brand-message">Lightweight Knowledge Query System</span></b></td>
 	</tr>
 </table>
 <DIV id="mainarea">

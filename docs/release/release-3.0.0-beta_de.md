@@ -126,6 +126,7 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
 11. **JTrac NG Kapsel-Vektor-Logo & "Lightweight Knowledge Query System" Header-Modernisierung**:
     - **Vollvektorielles "JTrac [NG]" Markenlogo**: Das 15 Jahre alte Raster-GIF wurde durch ein gestochen scharfes Vektor-SVG ersetzt (tiefblaues `JTrac` kombiniert mit einer azurblauen Verlaufs-Kapsel mit weißem `NG`). Gestochen scharf auf Retina-Displays, theme-fähig für Hell-/Dunkelmodus und mit transparenter PNG- sowie GIF-Abwärtskompatibilität.
     - **Präziser Header-Text**: Der Standardtext wurde von "JTrac - Open Source Issue Tracking System" zu "`Lightweight Knowledge Query System`" modernisiert, wodurch Escape-Probleme mit `&` entfallen und das System als schlanke Wissensabfrage-Plattform positioniert wird.
+    - **Kompaktes Logo & linksbündiges Header-Layout für Mobilgeräte (Mobile Compact Logo & Tight Left-Aligned Header)**: Für Smartphones und Mobilgeräte (`<= 768px` und `<= 480px`) skaliert das Logo automatisch auf eine Höhe von 26px (22px auf kleinen Bildschirmen, max. 90-110px Breite). Veraltete Tabellenbeschränkungen (`width="20%"` und feste `height="55px"`) wurden entfernt, sodass der Header-Text direkt linksbündig neben dem Logo anschließt, was horizontalen Freiraum maximiert und unschöne vertikale Zeilenumbrüche verhindert.
 
 ---
 

@@ -146,6 +146,7 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
 11. **JTrac NG 全新膠囊標籤向量 Logo 與「輕量級知識查詢系統」頁首升級 (JTrac NG Capsule Logo & Lightweight Knowledge Query System)**：
     - **全向量「JTrac [NG]」品牌 Logo**：正式退役 15 年前老舊之點陣 GIF，換上全新向量 SVG 品牌識別（深藍色 `JTrac` 搭配電光青藍漸層膠囊底色之白色 `NG` 標章），零鋸齒、支援 Retina 高解析螢幕與暗亮色主題自適應，並同步產出高解析透明 PNG 與相容 GIF 確保舊版歷史路徑 100% 向後相容。
     - **頁首說明文字精準定位**：將原預設之「JTrac - Open Source Issue Tracking System」全面升級為「`Lightweight Knowledge Query System`」（輕量級知識查詢系統），徹底消除繁瑣之 `&` 實體跳脫問題，左側 Logo 醒目標記品牌、右側文字專注系統價值，零冗餘且大氣俐落。
+    - **行動端緊湊響應式排版與左靠間距優化 (Mobile Compact Logo & Tight Left-Aligned Header)**：針對智慧型手機與行動裝置（`<= 768px` 與 `<= 480px`），將 Logo 尺寸自適應縮減為高度 26px（小型手機 22px，最大寬度 90-110px），徹底清除舊式 `width="20%"` 與硬編碼 `height="55px"` 限制，標頭文字緊臨 Logo 左靠排列，大幅釋放手機螢幕橫向可用寬度，徹底根除標題文字被過度擠壓或縱向折行之問題。
 
 ---
 

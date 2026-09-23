@@ -148,6 +148,7 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 11. **JTrac NG Capsule Vector Logo & "Lightweight Knowledge Query System" Header Modernization**:
     - **Full-Vector "JTrac [NG]" Brand Logo**: Retired the 15-year-old legacy raster GIF and introduced a crisp vector SVG brand identity featuring deep royal blue `JTrac` paired with an electric cyan-to-azure pill capsule badge encasing bold white `NG`. Crisp on Retina displays, theme-aware for light and dark modes, with transparent PNG and legacy GIF fallbacks for 100% backward compatibility.
     - **Header Purpose Clarification**: Upgraded the default header text from the legacy "JTrac - Open Source Issue Tracking System" to "`Lightweight Knowledge Query System`", eliminating cumbersome `&` entity escaping while establishing JTrac NG's identity as an AI-powered knowledge discovery and query engine.
+    - **Mobile Compact Logo & Tight Left-Aligned Header**: For mobile devices (`<= 768px` and `<= 480px`), the logo scales responsively to a compact height of 26px (22px on small phones, max-width 90-110px). Obsolete table constraints (`width="20%"` and fixed `height="55px"`) are removed, placing the header subtitle snugly against the logo to maximize horizontal screen real estate and prevent unnatural vertical text wrapping.
 
 ---
 

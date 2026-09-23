@@ -126,6 +126,7 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
 11. **Logo Vectoriel Capsule JTrac NG et Modernisation de l'En-tête "Lightweight Knowledge Query System"**:
     - **Logo Vectoriel Intégral "JTrac [NG]"**: Remplacement de l'ancien GIF matriciel vieux de 15 ans par une nouvelle identité vectorielle SVG (texte `JTrac` bleu royal profond associé à une capsule en dégradé cyan électrique contenant `NG` en blanc), net sur écrans Retina et adapté aux modes clair/sombre, avec formats PNG transparent et GIF pour une rétrocompatibilité à 100%.
     - **Alignement du Texte d'En-tête**: Remplacement de l'ancien texte "JTrac - Open Source Issue Tracking System" par "`Lightweight Knowledge Query System`", éliminant tout conflit d'échappement lié au symbole `&` et valorisant le positionnement de JTrac NG comme moteur de recherche et de connaissances agile.
+    - **Logo Compact et Espacement Gauche Optimisé pour Mobiles (Mobile Compact Logo & Tight Left-Aligned Header)**: Pour les smartphones et terminaux mobiles (`<= 768px` et `<= 480px`), la hauteur du logo s'adapte automatiquement à 26px (22px sur petits écrans, largeur max. 90-110px). Les contraintes de tableau obsolètes (`width="20%"` et `height="55px"` fixes) ont été supprimées, positionnant le texte d'en-tête immédiatement à gauche contre le logo pour maximiser l'espace horizontal et éviter tout retour à la ligne vertical disgracieux.
 
 ---
 

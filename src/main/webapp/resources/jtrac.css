@@ -169,6 +169,51 @@ div.error-input select { border: none; }
 .heading { color: var(--darkblue); font-weight: bold; margin-bottom: 1em; }
 .alt { background: var(--lightblue); }
 .header { background: var(--header); }
+
+/* --- Brand Header & Responsive Logo --- */
+table.jtrac-brand-header {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--header);
+	border-spacing: 0;
+	margin-bottom: 4px;
+}
+
+td.jtrac-brand-logo-col {
+	width: 1%;
+	white-space: nowrap;
+	padding: 6px 10px 6px 8px;
+	vertical-align: middle;
+	text-align: left;
+}
+
+td.jtrac-brand-logo-col a {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+}
+
+.jtrac-brand-logo {
+	height: 36px;
+	width: auto;
+	max-width: 150px;
+	display: block;
+	object-fit: contain;
+}
+
+td.jtrac-brand-text-col {
+	vertical-align: middle;
+	text-align: left;
+	padding: 6px 8px 6px 4px;
+}
+
+.jtrac-brand-message {
+	font-size: 1.15em;
+	font-weight: bold;
+	color: var(--text-color);
+	letter-spacing: 0.2px;
+	display: inline-block;
+}
 .selected, table.jtrac .selected { background: var(--mediumblue); }
 .bdr-bottom, tr.bdr-bottom td { border-bottom: 1px solid var(--gray); }
 .nav-header { background: var(--gray); padding: 3px 4px; box-sizing: border-box; }
@@ -752,6 +797,29 @@ code {
 		min-height: 44px !important;
 		min-width: 44px !important;
 		box-sizing: border-box;
+	}
+
+	/* --- Brand Header Responsive Rules --- */
+	table.jtrac-brand-header {
+		margin-bottom: 4px;
+	}
+
+	td.jtrac-brand-logo-col {
+		padding: 4px 6px 4px 4px;
+	}
+
+	.jtrac-brand-logo {
+		height: 26px;
+		max-width: 110px;
+	}
+
+	td.jtrac-brand-text-col {
+		padding: 4px 4px 4px 2px;
+	}
+
+	.jtrac-brand-message {
+		font-size: 0.95em;
+		line-height: 1.25;
 	}
 
 	/* --- Pure CSS Hamburger Navigation --- */
@@ -1730,6 +1798,28 @@ code {
 		line-height: 1.5 !important;
 		color: var(--text-color) !important;
 		word-break: break-word !important;
+	}
+}
+
+/* --- Small Mobile Device Brand Header Optimization --- */
+@media (max-width: 480px) {
+	.jtrac-brand-logo {
+		height: 22px;
+		max-width: 90px;
+	}
+
+	td.jtrac-brand-logo-col {
+		padding: 3px 4px 3px 2px;
+	}
+
+	td.jtrac-brand-text-col {
+		padding: 3px 4px 3px 2px;
+	}
+
+	.jtrac-brand-message {
+		font-size: 0.88em;
+		line-height: 1.2;
+		word-break: break-word;
 	}
 }
 

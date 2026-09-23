@@ -127,6 +127,7 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 11. **Logo Vector Viên nang JTrac NG và Nâng cấp Tiêu đề "Lightweight Knowledge Query System"**:
     - **Logo Thương hiệu Vector Toàn diện "JTrac [NG]"**: Thay thế tệp GIF cũ kỹ từ 15 năm trước bằng định dạng vector SVG sắc nét (chữ `JTrac` màu xanh đậm kết hợp huy hiệu viên nang chuyển sắc xanh lam-ngọc chứa chữ `NG` trắng nổi bật), hiển thị hoàn hảo trên màn hình Retina và tự thích ứng giao diện Sáng/Tối, đồng thời cung cấp PNG trong suốt và GIF kế thừa để đảm bảo tương thích ngược 100%.
     - **Định vị Tiêu đề Rõ ràng**: Nâng cấp toàn diện dòng chữ mặc định từ "JTrac - Open Source Issue Tracking System" thành "`Lightweight Knowledge Query System`" (Hệ thống Truy vấn Tri thức Tinh gọn), loại bỏ hoàn toàn các rắc rối thoát ký tự `&` và nêu bật giá trị cốt lõi hiện đại.
+    - **Bố cục Logo Tinh gọn và Căn lề Trái Tối ưu cho Thiết bị Di động (Mobile Compact Logo & Tight Left-Aligned Header)**: Dành cho điện thoại thông minh và thiết bị di động (`<= 768px` và `<= 480px`), kích thước logo tự động thu nhỏ về chiều cao 26px (22px trên máy nhỏ, chiều rộng tối đa 90-110px). Xóa bỏ hoàn toàn ràng buộc bảng cũ `width="20%"` và `height="55px"`, đặt dòng tiêu đề sát ngay bên phải logo để giải phóng tối đa không gian màn hình ngang và tránh hiện tượng văn bản bị ngắt dòng dọc bất hợp lý.
 
 ---
 
