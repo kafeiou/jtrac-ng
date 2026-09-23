@@ -143,6 +143,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
     - **Root Cause Fix**: Resolved an issue where entering Windows UNC network share paths (e.g. `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` or `"\\hlmt.com.tw\..."`) in item details or comments caused leading double backslashes `\\` to be collapsed into a single backslash `\` and backslashes before braces `\{` to be stripped due to CommonMark ASCII punctuation escaping rules.
     - **100% Natural Text Rendering**: Rendered as normal body text without forcing inline code chip styles or font variations, ensuring seamless visual harmony with surrounding content.
     - **Comprehensive Coverage & Code Block Immunity**: Full coverage for UNC network shares (`\\server\share`), local drive paths (`C:\...`), relative paths, and standalone double backslashes (`\\`); automatically bypasses code spans (`` `...` ``) and fenced code blocks (```` ```...``` ````) to avoid double-escaping, while preserving standard Markdown punctuation escaping.
+11. **JTrac NG Capsule Vector Logo & "Lightweight Knowledge Query System" Header Modernization**:
+    - **Full-Vector "JTrac [NG]" Brand Logo**: Retired the 15-year-old legacy raster GIF and introduced a crisp vector SVG brand identity featuring deep royal blue `JTrac` paired with an electric cyan-to-azure pill capsule badge encasing bold white `NG`. Crisp on Retina displays, theme-aware for light and dark modes, with transparent PNG and legacy GIF fallbacks for 100% backward compatibility.
+    - **Header Purpose Clarification**: Upgraded the default header text from the legacy "JTrac - Open Source Issue Tracking System" to "`Lightweight Knowledge Query System`", eliminating cumbersome `&` entity escaping while establishing JTrac NG's identity as an AI-powered knowledge discovery and query engine.
 
 ---
 

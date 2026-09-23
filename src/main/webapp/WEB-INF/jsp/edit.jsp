@@ -34,8 +34,8 @@
 <body>
 <table width="100%" class="jtrac header" padding="4">
 	<tr>
-		<td width="20%" align="left"><a href="${pageContext.request.contextPath}/app"><img height="55px" src="${pageContext.request.contextPath}/resources/jtrac-logo.gif"/></a></td>
-		<td align="left"><b>JTrac - Open Source Issue Tracking System</b></td>
+		<td width="20%" align="left"><a href="${pageContext.request.contextPath}/app"><img height="55px" src="${pageContext.request.contextPath}/resources/jtrac-logo.svg"/></a></td>
+		<td align="left"><b>Lightweight Knowledge Query System</b></td>
 	</tr>
 </table>
 <DIV id="mainarea">

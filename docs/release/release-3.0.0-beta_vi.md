@@ -124,6 +124,9 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
     - **Khắc phục Nguyên nhân Gốc rễ**: Sửa lỗi khi nhập đường dẫn chia sẻ mạng Windows UNC (ví dụ: `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` hoặc `"\\hlmt.com.tw\..."`) trong chi tiết yêu cầu hoặc bình luận, cơ chế thoát dấu câu mặc định của CommonMark khiến hai dấu gạch chéo ngược ở đầu `\\` bị thu gọn thành một dấu `\`, và dấu gạch chéo ngược trước dấu ngoặc nhọn `\{` bị mất.
     - **Giữ nguyên 100% Kiểu chữ Tự nhiên**: Hiển thị dưới dạng văn bản thường, không ép buộc bọc thành thẻ code khối hộp, đảm bảo hài hòa thị giác với văn bản xung quanh.
     - **Hỗ trợ Toàn diện và Miễn nhiễm Khối Mã nguồn**: Hỗ trợ đầy đủ đường dẫn chia sẻ UNC (`\\server\share`), đường dẫn ổ đĩa cục bộ (`C:\...`), đường dẫn tương đối và dấu gạch chéo kép đơn lẻ (`\\`); tự động bỏ qua khối mã dòng (`` `...` ``) và khối mã có hàng rào (```` ```...``` ````) để tránh thoát kép, đồng thời bảo đảm cơ chế thoát dấu câu thông thường của Markdown vẫn hoạt động chính xác.
+11. **Logo Vector Viên nang JTrac NG và Nâng cấp Tiêu đề "Lightweight Knowledge Query System"**:
+    - **Logo Thương hiệu Vector Toàn diện "JTrac [NG]"**: Thay thế tệp GIF cũ kỹ từ 15 năm trước bằng định dạng vector SVG sắc nét (chữ `JTrac` màu xanh đậm kết hợp huy hiệu viên nang chuyển sắc xanh lam-ngọc chứa chữ `NG` trắng nổi bật), hiển thị hoàn hảo trên màn hình Retina và tự thích ứng giao diện Sáng/Tối, đồng thời cung cấp PNG trong suốt và GIF kế thừa để đảm bảo tương thích ngược 100%.
+    - **Định vị Tiêu đề Rõ ràng**: Nâng cấp toàn diện dòng chữ mặc định từ "JTrac - Open Source Issue Tracking System" thành "`Lightweight Knowledge Query System`" (Hệ thống Truy vấn Tri thức Tinh gọn), loại bỏ hoàn toàn các rắc rối thoát ký tự `&` và nêu bật giá trị cốt lõi hiện đại.
 
 ---
 

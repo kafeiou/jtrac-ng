@@ -56,14 +56,14 @@ public class IndividualHeadPanel extends BasePanel {
 				}
 				return base + (url.startsWith("/") ? url : "/" + url);
 			} else {
-				return base + "/resources/jtrac-logo.gif";
+				return base + "/resources/jtrac-logo.svg";
 			}
 		}));
 		add(img);
 
 		String message = configMap.get("jtrac.header.text");
 		if (! StringUtils.hasText(message))
-   		    add(new Label("message", "JTrac - Open Source Issue Tracking System"));
+   		    add(new Label("message", "Lightweight Knowledge Query System"));
 		else if ((message != null) && ("no".equals(message)))
    		    add(new Label("message", ""));
 		else

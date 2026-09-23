@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215 55" width="215" height="55" fill="none">
+  <defs>
+    <linearGradient id="ngGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c6ff"/>
+      <stop offset="100%" stop-color="#0066ff"/>
+    </linearGradient>
+    <filter id="capsuleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0072ff" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <style>
+    .brand-jtrac {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      fill: #0849c4;
+      letter-spacing: -0.5px;
+    }
+    .brand-ng {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 21px;
+      font-weight: 900;
+      fill: #ffffff;
+      letter-spacing: 1px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .brand-jtrac {
+        fill: #60a5fa;
+      }
+    }
+  </style>
+
+  <!-- JTrac Wordmark -->
+  <text x="6" y="38" class="brand-jtrac">JTrac</text>
+
+  <!-- Next Generation (NG) Capsule Pill Badge -->
+  <g filter="url(#capsuleGlow)">
+    <rect x="124" y="11" width="76" height="33" rx="16.5" fill="url(#ngGrad)"/>
+  </g>
+  <text x="162" y="35" text-anchor="middle" class="brand-ng">NG</text>
+</svg>

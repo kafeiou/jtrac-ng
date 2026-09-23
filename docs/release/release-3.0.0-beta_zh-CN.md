@@ -135,6 +135,9 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
     - **问题根因修复**：修复在工单细节或留言输入 Windows UNC 网络共享路径（例如 `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` 或 `"\\hlmt.com.tw\..."`）时，因 CommonMark 原生标点符号转义机制导致开头双反斜杠 `\\` 被吞噬缩减为单反斜杠 `\`、大括号前反斜杠 `\{` 遗失之问题。
     - **文字外观 100% 保持自然排版**：维持一般纯文本呈现，不强制包裹为代码芯片样式，字体外观与前后正文自然融合。
     - **全方位路径覆盖与代码块保护**：全面支持 UNC 共享路径（`\\server\share`）、磁盘路径（`C:\...`）、相对路径及单独的双反斜杠（`\\`）；同时具备代码块感知，对行内代码（`` `...` ``）与围栏代码块（```` ```...``` ````）主动绕过保护，绝不产生双重转义，原生 Markdown 标点转义亦正常运作。
+11. **JTrac NG 全新胶囊标签矢量 Logo 与“轻量级知识查询系统”页头升级 (JTrac NG Capsule Logo & Lightweight Knowledge Query System)**：
+    - **全矢量“JTrac [NG]”品牌 Logo**：正式退役 15 年前老旧之点阵 GIF，换上全新矢量 SVG 品牌标识（深蓝色 `JTrac` 搭配电光青蓝渐变胶囊底色之白色 `NG` 徽章），零锯齿、支持 Retina 高清屏幕与明暗主题自适应，并同步输出高解析透明 PNG 与兼容 GIF 确保历史路径 100% 向后兼容。
+    - **页头说明文本精准定位**：将原默认之“JTrac - Open Source Issue Tracking System”全面升级为“`Lightweight Knowledge Query System`”（轻量级知识查询系统），彻底消除繁琐之 `&` 符号实体转义问题，左侧 Logo 醒目标记品牌、右侧文本专注核心价值，简洁大方且无冗余。
 
 ---
 

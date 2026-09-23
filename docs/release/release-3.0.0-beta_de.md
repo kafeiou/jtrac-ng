@@ -123,6 +123,9 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
     - **Behebung der Ursache**: Behebt ein Problem, bei dem die Eingabe von Windows-UNC-Netzwerkfreigabepfaden (z. B. `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` oder `"\\hlmt.com.tw\..."`) in Ticketdetails oder Kommentaren dazu führte, dass führende doppelte Backslashes `\\` zu einem einzelnen Backslash `\` reduziert und Backslashes vor geschweiften Klammern `\{` durch die CommonMark-Satzzeichen-Escape-Regeln entfernt wurden.
     - **100% natürliches Textbild**: Wird als regulärer Fließtext ohne erzwungene Inline-Code-Chips gerendert und fügt sich nahtlos in den umgebenden Inhalt ein.
     - **Umfassende Pfadabdeckung & Schutz von Code-Blöcken**: Vollständige Unterstützung für UNC-Pfade (`\\server\share`), lokale Laufwerkspfade (`C:\...`), relative Pfade und eigenständige doppelte Backslashes (`\\`); Inline-Code (`` `...` ``) und Code-Blöcke (```` ```...``` ````) werden automatisch erkannt und übersprungen, um doppeltes Escaping zu verhindern, während normales Markdown-Escaping unberührt bleibt.
+11. **JTrac NG Kapsel-Vektor-Logo & "Lightweight Knowledge Query System" Header-Modernisierung**:
+    - **Vollvektorielles "JTrac [NG]" Markenlogo**: Das 15 Jahre alte Raster-GIF wurde durch ein gestochen scharfes Vektor-SVG ersetzt (tiefblaues `JTrac` kombiniert mit einer azurblauen Verlaufs-Kapsel mit weißem `NG`). Gestochen scharf auf Retina-Displays, theme-fähig für Hell-/Dunkelmodus und mit transparenter PNG- sowie GIF-Abwärtskompatibilität.
+    - **Präziser Header-Text**: Der Standardtext wurde von "JTrac - Open Source Issue Tracking System" zu "`Lightweight Knowledge Query System`" modernisiert, wodurch Escape-Probleme mit `&` entfallen und das System als schlanke Wissensabfrage-Plattform positioniert wird.
 
 ---
 
