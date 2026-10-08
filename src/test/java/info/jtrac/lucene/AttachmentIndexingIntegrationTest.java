@@ -18,6 +18,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -183,5 +184,46 @@ public class AttachmentIndexingIntegrationTest {
 
         String extracted = AttachmentTextExtractor.extractText(dummyDoc, 10, 50000);
         Assert.assertEquals("", extracted);
+    }
+
+    @Test
+    public void testZipAttachmentIndexingAndSearchHits() throws Exception {
+        long spaceId = 1L;
+        Space space = new Space();
+        space.setId(spaceId);
+        space.setPrefixCode("PROJ");
+
+        Item item4 = new Item();
+        item4.setId(400L);
+        item4.setSpace(space);
+        item4.setSummary("Issue for ZIP archive attachment");
+        item4.setDetail("Please see attached archive bundle");
+
+        Attachment attZip = new Attachment();
+        attZip.setId(4L);
+        attZip.setFilePrefix(4L);
+        attZip.setFileName("archive_bundle.zip");
+
+        File zipFile = AttachmentUtils.getAttachmentFileForWrite(attZip, spaceId, tempHome.getAbsolutePath());
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+            zos.putNextEntry(new ZipEntry("invoice_report.txt"));
+            zos.write("SpecialInvoiceIdentifier2026 Amount USD 8888".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+
+        History history4 = new History(item4);
+        history4.setId(40L);
+        history4.setParent(item4);
+        history4.setAttachment(attZip);
+
+        String text4 = AttachmentTextExtractor.extractText(zipFile, 10, 50000);
+        history4.setAttachmentText(text4);
+
+        indexer.index(item4);
+        indexer.index(history4);
+
+        List<Long> hits = searcher.findItemIdsContainingText("SpecialInvoiceIdentifier2026");
+        Assert.assertEquals(1, hits.size());
+        Assert.assertEquals(Long.valueOf(400L), hits.get(0));
     }
 }

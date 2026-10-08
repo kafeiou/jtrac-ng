@@ -24,6 +24,9 @@ public class InboundConfigTest {
         assertTrue(Config.getParams().contains("llm.retrieval.max_tickets"));
         assertTrue(Config.getParams().contains("llm.search.expansion.enabled"));
         assertTrue(Config.getParams().contains("llm.search.expansion.timeout"));
+        assertTrue(Config.getParams().contains("attachment.ocr.enabled"));
+        assertTrue(Config.getParams().contains("attachment.ocr.model"));
+        assertTrue(Config.getParams().contains("attachment.ocr.max_image_size_mb"));
     }
 
     @Test
@@ -33,12 +36,14 @@ public class InboundConfigTest {
         assertTrue(Config.isBoolean("mail.inbound.starttls.enable"));
         assertTrue(Config.isBoolean("mail.inbound.ssl.trust.all"));
         assertTrue(Config.isBoolean("llm.search.expansion.enabled"));
+        assertTrue(Config.isBoolean("attachment.ocr.enabled"));
         assertFalse(Config.isBoolean("mail.inbound.server.host"));
 
         assertTrue(Config.isNumber("mail.inbound.server.port"));
         assertTrue(Config.isNumber("llm.ollama.timeout"));
         assertTrue(Config.isNumber("llm.retrieval.max_tickets"));
         assertTrue(Config.isNumber("llm.search.expansion.timeout"));
+        assertTrue(Config.isNumber("attachment.ocr.max_image_size_mb"));
         assertFalse(Config.isNumber("llm.ollama.model"));
     }
 
@@ -89,6 +94,9 @@ public class InboundConfigTest {
             "config.security.privacy.headers.enabled",
             "config.attachment.index.maxSizeMb",
             "config.attachment.index.maxChars",
+            "config.attachment.ocr.enabled",
+            "config.attachment.ocr.model",
+            "config.attachment.ocr.max_image_size_mb",
             "mail.ai_query.subject_prefix",
             "mail.ai_query.offline_notice_subject",
             "mail.ai_query.offline_notice_body"

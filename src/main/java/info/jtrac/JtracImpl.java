@@ -41,6 +41,7 @@ import info.jtrac.lucene.Indexer;
 import info.jtrac.lucene.SearchResultHits;
 import info.jtrac.mail.InboundMailReceiver;
 import info.jtrac.mail.MailSender;
+import info.jtrac.mail.OllamaClient;
 import info.jtrac.tools.HsqldbDatabaseMigrator;
 import info.jtrac.util.AttachmentStorageMigrator;
 import info.jtrac.util.AttachmentTextExtractor;
@@ -241,6 +242,44 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         return 50000;
     }
 
+    @Override
+    public boolean isAttachmentOcrEnabled() {
+        return "true".equalsIgnoreCase(loadConfig("attachment.ocr.enabled", "true"));
+    }
+
+    @Override
+    public String getAttachmentOcrModel() {
+        return loadConfig("attachment.ocr.model", "");
+    }
+
+    @Override
+    public int getAttachmentOcrMaxImageSizeMb() {
+        String val = loadConfig("attachment.ocr.max_image_size_mb");
+        if (val != null) {
+            try {
+                return Integer.parseInt(val.trim());
+            } catch (NumberFormatException ignored) {}
+        }
+        return 5;
+    }
+
+    private OllamaClient getOllamaClientIfOcrEnabled() {
+        if (!isAttachmentOcrEnabled()) {
+            return null;
+        }
+        String url = loadConfig("llm.ollama.url", "http://localhost:11434");
+        String model = loadConfig("llm.ollama.model", "llama3.2");
+        String apiKey = loadConfig("llm.ollama.api.key", null);
+        int timeout = 60;
+        try {
+            String t = loadConfig("llm.ollama.timeout");
+            if (t != null) {
+                timeout = Integer.parseInt(t.trim());
+            }
+        } catch (Exception ignore) {}
+        return new OllamaClient(url, model, apiKey, timeout);
+    }
+
     public void setAttachmentIndexExecutor(ExecutorService attachmentIndexExecutor) {
         this.attachmentIndexExecutor = attachmentIndexExecutor;
     }
@@ -279,7 +318,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
             if (file != null && file.exists()) {
                 int maxSizeMb = getAttachmentIndexMaxSizeInMb();
                 int maxChars = getAttachmentIndexMaxChars();
-                String text = AttachmentTextExtractor.extractText(file, maxSizeMb, maxChars);
+                OllamaClient ollamaClient = getOllamaClientIfOcrEnabled();
+                String ocrModel = getAttachmentOcrModel();
+                String text = AttachmentTextExtractor.extractText(file, maxSizeMb, maxChars, ollamaClient, ocrModel);
                 history.setAttachmentText(text);
             }
             indexer.index(history);
@@ -1203,7 +1244,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
                     try {
                         File attFile = AttachmentUtils.getFile(history.getAttachment(), item.getSpace().getId(), jtracHome);
                         if (attFile != null && attFile.exists()) {
-                            String text = AttachmentTextExtractor.extractText(attFile, maxSizeMb, maxChars);
+                            OllamaClient ollamaClient = getOllamaClientIfOcrEnabled();
+                            String ocrModel = getAttachmentOcrModel();
+                            String text = AttachmentTextExtractor.extractText(attFile, maxSizeMb, maxChars, ollamaClient, ocrModel);
                             history.setAttachmentText(text);
                         }
                     } catch (Exception e) {

@@ -66,6 +66,30 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
    - **零命中安全通知 (Zero-Hit Safe Notice)**：當使用者查詢在獲授權之 Space 內查無任何匹配工單或附件時，系統立即攔截並寄送結構化零命中通知信件，列出當前授權 Space 清單與接地原則說明，絕不轉交模型進行空想臆測，並將原始信件自動清空。
    - **機敏憑證安全遮罩 (Confidential Secrets Masking)**：實作 `SensitiveDataMasker`，於 HTML 診斷報告組裝時自動過濾密碼（password）、Bearer Token、API Key、私鑰區塊及 URL 連線密碼，全面替換為 `***` 遮罩保護，同時完整保留使用者帳號與工單 ID。
    - **推薦部署硬體與長上下文配置 (Recommended Hardware & 200K Context)**：於 Prompt 實戰指南中明確規範硬體選型，推薦旗艦 GPU NVIDIA RTX 5090 (32GB VRAM) 與 `qwen2.5:32b`，並強制要求透過 Ollama Modelfile 配置 200K 長上下文視窗（`num_ctx 200000`）；嚴厲示警勿採用短上下文或小參數模型，杜絕資料截斷導致分析失效。
+8. **檢索時間窗口過濾與顯式單號豁免機制 (Time-Window Retrieval Filter & Exact RefId Exemption)**：
+   - **動態時間窗口過濾**：於 `config` 表註冊全域參數 `llm.retrieval.max_age_days`（預設 365 天），以工單最後活動時間 $\max(\text{item.timeStamp}, \text{latestHistory.timeStamp})$ 作為判定基準，自動過濾超過 1 年未更新之老舊工單，避免過時歷史資料污染 AI 分析脈絡；若設定為 0 或負數則停用過濾並檢索全歷史。
+   - **顯式工單號（Exact RefId）全面豁免**：當使用者於郵件主旨或內文中明確指定工單編號（如 `PROJ-108`）時，系統視為精確調閱意圖，完全豁免時間窗口限制並優先納入候選分析。
+9. **檢索停用詞過濾、兩岸專業詞彙互轉與關鍵字膠囊報告呈現 (Stopwords Filtering, Cross-Strait Terminology Mapping & Keyword Dossier Badges)**：
+   - **檢索停用詞過濾 (Retrieval Stopwords Filtering)**：於 `config` 表註冊全域參數 `llm.retrieval.stopwords`（預設值為「`通知,工單`」），在 Prompt 萃取指引與 Java 前後端管線中硬性排除泛用干擾詞（並自動關聯排除同義詞 `notice`、`notification`、`ticket` 與 `issue`）；大幅杜絕如查詢「發票通知」或「發票工單」時因「通知」或「工單」一詞導致 Lucene 檢索被無關系統通知或普通工單淹沒的問題。
+   - **兩岸專業習慣詞彙雙向展開 (Cross-Strait Vocabulary & Terminology Mapping)**：建立常駐雙向 IT 與業務術語對照表（涵蓋「專案 ⇄ 项目」、「發票 ⇄ 发票/开票」、「程式碼 ⇄ 代码」、「記憶體 ⇄ 内存」、「欄位 ⇄ 字段」、「排程 ⇄ 定时任务/计划任务」、「檔案 ⇄ 文件」、「資料庫 ⇄ 数据库」、「使用者 ⇄ 用户」等），結合 Prompt 指令強化，實現深度術語互補而非單字替換，確保跨兩岸用語皆能精準召回。
+   - **全透明關鍵字膠囊標籤呈現 (Transparent Keyword Badges in Dossier & Email)**：於 AI HTML 深度診斷報告 Header 與回覆郵件內文中顯式展示所有實際採納與擴展之關鍵字膠囊標籤（包含繁體、簡體、兩岸用語與英文對應詞），並同步記錄於中繼 Staging Markdown 摘要，搜尋條件與擴展歷程 100% 透明可稽核。
+   - **CJK 短語雙引號檢索與相關度門檻防呆**：Lucene 檢索時自動為多字中文字詞包裹雙引號以防單字 Unigram 拆解產生雜訊，且嚴格過濾相關度分數 $\le 0$ 之無關候選票券，徹底杜絕無關工單干擾。
+10. **嚴格零幻覺 RAG 問答機制與 Email「回答問題」卡片 (Strict Zero-Hallucination RAG & Direct Question-Answering Email Card)**：
+   - **嚴格零幻覺封閉域限制 (Strict Closed-Domain RAG Grounding)**：全面移除模型補充外部常識之條款，硬性規定所有回答必須 100% 嚴格基於檢索出的工單歷史記錄與附件文檔，並強制標註引用工單編號 `[REF-ID]`。若工單中查無解答資訊，模型嚴禁憑空猜測，必須明確聲明「（現有工單資料中查無此項資訊 / Not documented in retrieved tickets）」。
+   - **智慧提問意圖偵測 (Question Inquiry Detection)**：自動分析郵件主旨與內文之問號標點（`?`、`？`）及多語系疑問詞（`請問`、`如何`、`怎麼`、`為什麼`、`在哪`、`是否`、`能不能`、`how`、`what`、`why`、`where` 等），自動切換至專屬提問增強模式。
+   - **Email 內文直覺卡片呈現 (Direct Answer Card in Email Body)**：郵件正文直接渲染醒目的「💬 回答問題 / Answer to Inquiry」卡片（非提問則為「💡 核心解答摘要」；查無工單則呈現橘紅警示防呆卡片），支援機密自動遮蔽、工單超連結生成及 Mermaid 流程圖自動過濾保護。
+11. **壓縮檔案 (.zip, .rar) 全文文字索引與 Ollama 多模態 Vision OCR 圖檔辨識 (Archive Full-Text Indexing & Ollama Multimodal Vision OCR)**：
+    - **壓縮檔案內部文檔深度文字索引 (`.zip`, `.rar`)**：新增壓縮檔案附件之內部文檔全文檢索抽取能力，支援 `.zip`（純 Java 串流解壓）與 `.rar`（Junrar 純 Java 核心），自動解析解壓後之文檔（`.pdf`, `.docx`, `.xlsx`, `.txt`, `.csv`, `.md`, `.log`）並依來源路徑結構化標註 `[Archive: folder/document.ext]`，供 Lucene 建立索引及 AI RAG 檢索。
+    - **嚴格解壓縮安全圍籬 (Zip Slip & Zip Bomb Defense)**：
+      - 阻絕路徑穿越（Zip Slip）：自動偵測並跳過包含 `..` 或開頭絕對路徑之惡意項目。
+      - 阻絕解壓炸彈（Zip Bomb）：單一壓縮檔最多處理 100 個檔案項目，累計解壓大小上限 30MB，單檔上限 10MB。
+      - 阻絕遞迴解壓攻擊：巢狀壓縮檔（壓縮檔內含壓縮檔）自動跳過，絕不遞迴解開。
+    - **Ollama 多模態視覺 OCR 圖檔文字辨識 (Ollama Multimodal Vision OCR)**：
+      - 在配置 Ollama 環境下，全面支援獨立上傳圖檔（`.png`, `.jpg`, `.jpeg`, `.bmp`, `.webp`, `.gif`）以及壓縮檔解開之圖檔進行自動 OCR 文字辨識與 Lucene 索引。
+      - 透過 Ollama `/api/chat` 的 `images` Base64 協定進行純文字轉錄（Transcribe），自動將辨識文字納入工單附件全文搜尋與 AI 檢索脈絡。
+      - **高解析度自動等比縮圖與 GIF 畫面正規化 (Auto-Downscaling & GIF Normalization Defense)**：針對長寬超過 1280px 之高解析度圖檔自動於傳送給 Ollama 前等比例縮放至安全尺寸（最大 1280px），並針對透明度與 GIF 動態圖自動進行白色背景平坦化處理；大幅降低 70% 以上之 GPU 顯存與 Token 消耗，徹底防範 Ollama `CUDA error: out of memory` 顯存耗盡問題。
+      - 系統參數支援 `attachment.ocr.enabled`（預設 true）、`attachment.ocr.model`（可自訂如 `llama3.2-vision`、`minicpm-v` 或 `moondream`，預設為空時自動沿用預設 LLM 模型）及 `attachment.ocr.max_image_size_mb`（預設 5MB）。
+      - 具備優雅降級機制：若 Ollama 離線、逾時或模型不支援圖片，自動跳過 OCR 絕不中斷工單建立或檢索作業。
 
 ---
 

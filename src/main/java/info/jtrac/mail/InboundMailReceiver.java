@@ -32,8 +32,10 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -60,6 +62,119 @@ public class InboundMailReceiver {
             "untrusted_user_query", "untrusted_ticket_context", "roleplay", "assistant",
             "password", "secret", "override", "bypass", "drop", "delete", "insert", "update"
     ));
+
+    private static final Map<String, List<String>> CROSS_STRAIT_TERM_MAP = new HashMap<>();
+
+    static {
+        // High-frequency cross-strait IT and business terminology bidirectional dictionary
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "發票", "发票", "开票", "invoice");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "專案", "项目", "专案", "project");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "程式碼", "程式", "代码", "程序", "code");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "記憶體", "内存", "memory", "ram");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "伺服器", "服务器", "server");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "網路", "网络", "network");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "欄位", "字段", "field");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "檔案", "文件", "file");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "資料夾", "文件夹", "folder", "directory");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "排程", "定时任务", "计划任务", "schedule", "cron");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "使用者", "用户", "user");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "登入", "登录", "login", "signin");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "預設", "默认", "default");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "資訊", "信息", "info", "information");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "軟體", "软件", "software");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "硬體", "硬件", "hardware");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "訊息", "消息", "message");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "權限", "权限", "permission", "privilege");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "資料庫", "数据库", "database");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "開立", "开具", "issue");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "報表", "报表", "report");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "測試", "测试", "test");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "異常", "异常", "exception");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "錯誤", "错误", "error", "bug");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "查詢", "查询", "query");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "搜尋", "搜索", "search");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "匯入", "导入", "import");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "匯出", "导出", "export");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "更新", "更新", "update");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "刪除", "删除", "delete");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "新增", "添加", "create", "add");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "備份", "备份", "backup");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "還原", "还原", "restore");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "快取", "缓存", "cache");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "連結", "链接", "link");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "設定", "设置", "config", "setting");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "憑證", "证书", "certificate");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "金鑰", "密钥", "key");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "工單", "工单", "ticket", "issue");
+        addCrossStraitTermPair(CROSS_STRAIT_TERM_MAP, "電子發票", "电子发票", "einvoice");
+    }
+
+    private static void addCrossStraitTermPair(Map<String, List<String>> map, String... terms) {
+        for (String t1 : terms) {
+            String k = t1.trim().toLowerCase();
+            List<String> list = map.computeIfAbsent(k, key -> new ArrayList<>());
+            for (String t2 : terms) {
+                if (!t1.equalsIgnoreCase(t2) && !list.contains(t2)) {
+                    list.add(t2);
+                }
+            }
+        }
+    }
+
+    public static Set<String> parseStopwords(String stopwordsStr) {
+        Set<String> set = new HashSet<>();
+        if (StringUtils.hasText(stopwordsStr)) {
+            String[] tokens = stopwordsStr.split("[,;\\s]+");
+            for (String t : tokens) {
+                if (StringUtils.hasText(t)) {
+                    String trimmed = t.trim().toLowerCase();
+                    set.add(trimmed);
+                    if ("通知".equals(trimmed)) {
+                        set.add("notice");
+                        set.add("notification");
+                    }
+                    if ("工單".equals(trimmed) || "工单".equals(trimmed)) {
+                        set.add("工單");
+                        set.add("工单");
+                        set.add("ticket");
+                        set.add("issue");
+                    }
+                }
+            }
+        }
+        return set;
+    }
+
+    public static List<String> expandCrossStraitTerms(Collection<String> inputKeywords, Set<String> stopwords) {
+        List<String> result = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        if (inputKeywords == null) {
+            return result;
+        }
+        for (String kw : inputKeywords) {
+            if (!StringUtils.hasText(kw)) {
+                continue;
+            }
+            String trimmed = kw.trim();
+            String lower = trimmed.toLowerCase();
+            if (stopwords != null && stopwords.contains(lower)) {
+                continue;
+            }
+            if (seen.add(lower)) {
+                result.add(trimmed);
+            }
+            List<String> synonyms = CROSS_STRAIT_TERM_MAP.get(lower);
+            if (synonyms != null) {
+                for (String syn : synonyms) {
+                    String synLower = syn.trim().toLowerCase();
+                    if ((stopwords == null || !stopwords.contains(synLower)) && seen.add(synLower)) {
+                        result.add(syn);
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
     private final Jtrac jtrac;
     private final MailSender mailSender;
@@ -244,12 +359,28 @@ public class InboundMailReceiver {
             }
         }
 
+        int maxAgeDays = 365;
+        String maxAgeDaysStr = config.get("llm.retrieval.max_age_days");
+        if (StringUtils.hasText(maxAgeDaysStr)) {
+            try {
+                maxAgeDays = Integer.parseInt(maxAgeDaysStr.trim());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        // Read stopwords from config (default "通知,工單")
+        String stopwordsStr = config.get("llm.retrieval.stopwords");
+        if (stopwordsStr == null) {
+            stopwordsStr = "通知,工單";
+        }
+        Set<String> stopwords = parseStopwords(stopwordsStr);
+
         // 2. Phase 1: LLM-driven query expansion (with graceful heuristic fallback)
-        List<String> keywords = extractKeywordsWithLlm(ollamaClient, subject, body);
-        logger.info("Extracted query expansion keywords: {}", keywords);
+        List<String> keywords = extractKeywordsWithLlm(ollamaClient, subject, body, stopwords);
+        logger.info("Extracted query expansion keywords (excluding stopwords {}): {}", stopwords, keywords);
 
         // 3. Phase 2: Programmatic hybrid weighted retrieval & ranking (select top 10~15 candidates)
-        List<Item> contextItems = retrieveAuthorizedTickets(user, subject, body, keywords, maxTickets);
+        List<Item> contextItems = retrieveAuthorizedTickets(user, subject, body, keywords, maxTickets, maxAgeDays);
         contextItems = MailSender.sortItemsBySpaceAndIdDesc(contextItems);
 
         // Guardrail: If no matching tickets found in authorized spaces, send zero-hit notice and do NOT hallucinate
@@ -272,7 +403,7 @@ public class InboundMailReceiver {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
             stagingFile = new File(stagingDir, "jtrac_staging_" + user.getLoginName() + "_" + timestamp + ".md");
 
-            stagedDigest = processTicketsToStaging(ollamaClient, contextItems, subject, body, stagingFile, perTicketSummaries);
+            stagedDigest = processTicketsToStaging(ollamaClient, contextItems, subject, body, stagingFile, perTicketSummaries, keywords);
         } catch (Exception e) {
             logger.warn("Failed during ticket staging creation: " + e.getMessage() + ", proceeding with raw context");
         }
@@ -299,7 +430,7 @@ public class InboundMailReceiver {
         }
 
         // 6. Send formatted HTML response and mark original message for deletion
-        mailSender.sendAiQueryResponse(senderEmail, subject, aiResponse, contextItems, perTicketSummaries, userLocale, user.getSpaces());
+        mailSender.sendAiQueryResponse(senderEmail, subject, aiResponse, contextItems, perTicketSummaries, userLocale, user.getSpaces(), keywords);
         msg.setFlag(Flags.Flag.DELETED, true);
         logger.info("Successfully answered query from {} and marked original message for deletion", senderEmail);
     }
@@ -310,13 +441,20 @@ public class InboundMailReceiver {
      * and returns the complete staged digest content.
      */
     protected String processTicketsToStaging(OllamaClient ollamaClient, List<Item> items, String querySubject, String queryBody, File stagingFile) {
-        return processTicketsToStaging(ollamaClient, items, querySubject, queryBody, stagingFile, null);
+        return processTicketsToStaging(ollamaClient, items, querySubject, queryBody, stagingFile, null, null);
     }
 
     protected String processTicketsToStaging(OllamaClient ollamaClient, List<Item> items, String querySubject, String queryBody, File stagingFile, Map<String, String> perTicketSummaries) {
+        return processTicketsToStaging(ollamaClient, items, querySubject, queryBody, stagingFile, perTicketSummaries, null);
+    }
+
+    protected String processTicketsToStaging(OllamaClient ollamaClient, List<Item> items, String querySubject, String queryBody, File stagingFile, Map<String, String> perTicketSummaries, List<String> keywords) {
         StringBuilder stagingBuffer = new StringBuilder();
         stagingBuffer.append("# JTrac AI Query Staging Digest\n\n");
         stagingBuffer.append("- Inquiry Subject: ").append(querySubject != null ? querySubject : "").append("\n");
+        if (keywords != null && !keywords.isEmpty()) {
+            stagingBuffer.append("- Extracted & Expanded Keywords: ").append(keywords).append("\n");
+        }
         stagingBuffer.append("- Total Analyzed Tickets: ").append(items != null ? items.size() : 0).append("\n\n");
 
         if (items != null && !items.isEmpty()) {
@@ -406,27 +544,40 @@ public class InboundMailReceiver {
 
     /**
      * Phase 1: Invokes LLM to extract keywords in the query's original language and English translation/synonyms.
-     * Defensively parses JSON and falls back to heuristic tokenization if LLM is unavailable or fails.
+     * Defensively parses JSON, applies stopword filtering, expands cross-strait vocabulary,
+     * and falls back to heuristic tokenization if LLM is unavailable or fails.
      */
     protected List<String> extractKeywordsWithLlm(OllamaClient ollamaClient, String subject, String body) {
+        return extractKeywordsWithLlm(ollamaClient, subject, body, parseStopwords("通知,工單"));
+    }
+
+    protected List<String> extractKeywordsWithLlm(OllamaClient ollamaClient, String subject, String body, Set<String> stopwords) {
         try {
-            String systemPrompt = OllamaPromptBuilder.buildKeywordExtractionSystemPrompt();
+            String systemPrompt = OllamaPromptBuilder.buildKeywordExtractionSystemPrompt(stopwords);
             String userPrompt = OllamaPromptBuilder.buildKeywordExtractionUserPrompt(subject, body);
             String response = ollamaClient.chat(systemPrompt, userPrompt);
-            List<String> keywords = parseKeywordsFromJson(response);
-            if (keywords != null && !keywords.isEmpty()) {
-                return keywords;
+            List<String> rawKeywords = parseKeywordsFromJson(response, stopwords);
+            if (rawKeywords != null && !rawKeywords.isEmpty()) {
+                List<String> expanded = expandCrossStraitTerms(rawKeywords, stopwords);
+                if (!expanded.isEmpty()) {
+                    return expanded;
+                }
             }
         } catch (Exception e) {
             logger.warn("LLM keyword extraction failed or timed out, falling back to heuristic extraction: {}", e.getMessage());
         }
-        return extractHeuristicKeywords(subject, body);
+        List<String> heuristicRaw = extractHeuristicKeywords(subject, body, stopwords);
+        return expandCrossStraitTerms(heuristicRaw, stopwords);
     }
 
     /**
      * Parses the LLM JSON response {"keywords": ["kw1", "kw2", ...]} safely with Jackson.
      */
     protected List<String> parseKeywordsFromJson(String response) {
+        return parseKeywordsFromJson(response, null);
+    }
+
+    protected List<String> parseKeywordsFromJson(String response, Set<String> stopwords) {
         if (!StringUtils.hasText(response)) {
             return Collections.emptyList();
         }
@@ -461,7 +612,7 @@ public class InboundMailReceiver {
                     if (item != null && item.isTextual()) {
                         String kw = item.asText().trim();
                         kw = kw.replaceAll("^[\\\"'\\s.,;]+|[\\\"'\\s.,;]+$", "").trim();
-                        if (isValidKeyword(kw) && seen.add(kw.toLowerCase())) {
+                        if (isValidKeyword(kw, stopwords) && seen.add(kw.toLowerCase())) {
                             result.add(kw);
                         }
                     }
@@ -478,6 +629,10 @@ public class InboundMailReceiver {
      * Validates and sanitizes individual keyword candidate.
      */
     protected static boolean isValidKeyword(String kw) {
+        return isValidKeyword(kw, null);
+    }
+
+    protected static boolean isValidKeyword(String kw, Set<String> stopwords) {
         if (!StringUtils.hasText(kw)) {
             return false;
         }
@@ -488,7 +643,11 @@ public class InboundMailReceiver {
         if (trimmed.contains("\n") || trimmed.contains("\r") || trimmed.contains("<") || trimmed.contains(">") || trimmed.contains("{") || trimmed.contains("}")) {
             return false;
         }
-        if (INJECTION_STOPWORDS.contains(trimmed.toLowerCase())) {
+        String lower = trimmed.toLowerCase();
+        if (INJECTION_STOPWORDS.contains(lower)) {
+            return false;
+        }
+        if (stopwords != null && stopwords.contains(lower)) {
             return false;
         }
         return true;
@@ -498,6 +657,10 @@ public class InboundMailReceiver {
      * Heuristic tokenization fallback extracting keywords from subject and body.
      */
     protected List<String> extractHeuristicKeywords(String subject, String body) {
+        return extractHeuristicKeywords(subject, body, parseStopwords("通知,工單"));
+    }
+
+    protected List<String> extractHeuristicKeywords(String subject, String body, Set<String> stopwords) {
         List<String> keywords = new ArrayList<>();
         Set<String> seen = new HashSet<>();
 
@@ -509,8 +672,18 @@ public class InboundMailReceiver {
         if (StringUtils.hasText(cleanSubject)) {
             for (String token : cleanSubject.split("[\\s,;:.!?，。！？\\[\\]()（）/\\\\]+")) {
                 String t = token.replaceAll("^[\\\"'\\s.,;]+|[\\\"'\\s.,;]+$", "").trim();
-                if (isValidKeyword(t) && seen.add(t.toLowerCase())) {
+                if (isValidKeyword(t, stopwords) && seen.add(t.toLowerCase())) {
                     keywords.add(t);
+                }
+                if (stopwords != null) {
+                    for (String sw : stopwords) {
+                        if (t.length() > sw.length() && t.contains(sw)) {
+                            String stripped = t.replace(sw, "").trim();
+                            if (isValidKeyword(stripped, stopwords) && seen.add(stripped.toLowerCase())) {
+                                keywords.add(stripped);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -522,10 +695,20 @@ public class InboundMailReceiver {
                 if (trimmed.length() > 2 && !trimmed.startsWith(">") && !trimmed.startsWith("--")) {
                     for (String token : trimmed.split("[\\s,;:.!?，。！？\\[\\]()（）/\\\\]+")) {
                         String t = token.replaceAll("^[\\\"'\\s.,;]+|[\\\"'\\s.,;]+$", "").trim();
-                        if (isValidKeyword(t) && seen.add(t.toLowerCase())) {
+                        if (isValidKeyword(t, stopwords) && seen.add(t.toLowerCase())) {
                             keywords.add(t);
                             if (keywords.size() >= 10) {
                                 break;
+                            }
+                        }
+                        if (stopwords != null) {
+                            for (String sw : stopwords) {
+                                if (t.length() > sw.length() && t.contains(sw)) {
+                                    String stripped = t.replace(sw, "").trim();
+                                    if (isValidKeyword(stripped, stopwords) && seen.add(stripped.toLowerCase())) {
+                                        keywords.add(stripped);
+                                    }
+                                }
                             }
                         }
                     }
@@ -547,19 +730,39 @@ public class InboundMailReceiver {
     }
 
     /**
-     * Phase 2: Programmatic hybrid weighted retrieval & ranking.
-     * Searches up to maxTickets via Lucene, scores candidates based on keyword hits,
-     * rewards bilingual matches, and returns the top 20 tickets enriched with attachment content.
+     * Backward-compatible ticket retrieval delegating to retrieval with configured maxAgeDays.
      */
     public List<Item> retrieveAuthorizedTickets(User user, String subject, String body, List<String> keywords, int maxTickets) {
+        int maxAgeDays = 365;
+        if (jtrac != null) {
+            try {
+                String maxAgeStr = jtrac.loadConfig("llm.retrieval.max_age_days");
+                if (StringUtils.hasText(maxAgeStr)) {
+                    maxAgeDays = Integer.parseInt(maxAgeStr.trim());
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return retrieveAuthorizedTickets(user, subject, body, keywords, maxTickets, maxAgeDays);
+    }
+
+    /**
+     * Phase 2: Programmatic hybrid weighted retrieval & ranking.
+     * Searches up to maxTickets via Lucene, filters candidates older than maxAgeDays (exempting exact RefIds),
+     * scores candidates based on keyword hits, rewards bilingual matches, and returns the top 15 tickets enriched with attachment content.
+     * When maxAgeDays <= 0, time-window filtering is disabled.
+     */
+    public List<Item> retrieveAuthorizedTickets(User user, String subject, String body, List<String> keywords, int maxTickets, int maxAgeDays) {
         if (maxTickets <= 0) {
             maxTickets = 50;
         }
 
         Set<Long> matchedIds = new HashSet<>();
+        Set<Long> exactRefIds = new HashSet<>();
         List<ItemCandidate> candidates = new ArrayList<>();
 
         // 1. Match explicit ticket reference IDs in subject or body (e.g. PROJ-123)
+        // Explicit RefId matches bypass time-window filtering
         String combinedText = subject + " " + (body != null ? body : "");
         Matcher matcher = REF_ID_PATTERN.matcher(combinedText);
         while (matcher.find()) {
@@ -568,6 +771,7 @@ public class InboundMailReceiver {
                 Item item = jtrac.loadItemByRefId(refId);
                 if (item != null && (user.isSuperUser() || user.isAllocatedToSpace(item.getSpace().getId()))) {
                     if (matchedIds.add(item.getId())) {
+                        exactRefIds.add(item.getId());
                         candidates.add(new ItemCandidate(item, 100)); // Base 100 for exact RefId match
                     }
                 }
@@ -576,7 +780,24 @@ public class InboundMailReceiver {
         }
 
         // 2. Lucene full-text search across authorized spaces using expanded keywords
-        String searchQuery = (keywords != null && !keywords.isEmpty()) ? String.join(" ", keywords) : extractSearchKeywords(subject, body);
+        String searchQuery;
+        if (keywords != null && !keywords.isEmpty()) {
+            List<String> queryTerms = new ArrayList<>();
+            for (String kw : keywords) {
+                if (!StringUtils.hasText(kw)) {
+                    continue;
+                }
+                String t = kw.trim();
+                if (info.jtrac.lucene.OllamaSearchExpander.containsChinese(t) && t.length() >= 2 && !t.startsWith("\"")) {
+                    queryTerms.add("\"" + t + "\"");
+                } else {
+                    queryTerms.add(t);
+                }
+            }
+            searchQuery = String.join(" ", queryTerms);
+        } else {
+            searchQuery = extractSearchKeywords(subject, body);
+        }
         if (StringUtils.hasText(searchQuery)) {
             ItemSearch itemSearch = new ItemSearch(user);
             itemSearch.setPageSize(maxTickets);
@@ -584,7 +805,15 @@ public class InboundMailReceiver {
 
             List<Item> searchItems = jtrac.findItems(itemSearch);
             if (searchItems != null) {
+                long cutoffMillis = (maxAgeDays > 0) ? (System.currentTimeMillis() - ((long) maxAgeDays * 86400000L)) : 0L;
                 for (Item item : searchItems) {
+                    if (maxAgeDays > 0 && !exactRefIds.contains(item.getId())) {
+                        Date lastActivity = getLastActivityTimestamp(item);
+                        if (lastActivity == null || lastActivity.getTime() < cutoffMillis) {
+                            logger.debug("Filtered out ticket [{}] due to maxAgeDays constraint ({} days)", item.getRefId(), maxAgeDays);
+                            continue;
+                        }
+                    }
                     if (matchedIds.add(item.getId())) {
                         candidates.add(new ItemCandidate(item, 0));
                     }
@@ -604,16 +833,45 @@ public class InboundMailReceiver {
         // Sort descending by score
         candidates.sort((a, b) -> Integer.compare(b.score, a.score));
 
+        // Filter out candidates with score <= 0 (unless exact RefId match)
+        List<ItemCandidate> scoredCandidates = new ArrayList<>();
+        for (ItemCandidate candidate : candidates) {
+            if (candidate.score > 0 || exactRefIds.contains(candidate.item.getId())) {
+                scoredCandidates.add(candidate);
+            }
+        }
+
         // 4. Select top candidates (up to 15) for LLM context, and enrich with attachment text
-        int topLimit = Math.min(15, candidates.size());
+        int topLimit = Math.min(15, scoredCandidates.size());
         List<Item> resultItems = new ArrayList<>(topLimit);
         for (int i = 0; i < topLimit; i++) {
-            Item item = candidates.get(i).item;
+            Item item = scoredCandidates.get(i).item;
             enrichItemWithAttachmentText(item);
             resultItems.add(item);
         }
 
         return resultItems;
+    }
+
+    /**
+     * Calculates the latest activity timestamp of an item, taking the maximum of
+     * the item's creation timestamp and all history/comment timestamps.
+     */
+    public Date getLastActivityTimestamp(Item item) {
+        if (item == null) {
+            return null;
+        }
+        Date last = item.getTimeStamp();
+        if (item.getHistory() != null) {
+            for (History h : item.getHistory()) {
+                if (h != null && h.getTimeStamp() != null) {
+                    if (last == null || h.getTimeStamp().after(last)) {
+                        last = h.getTimeStamp();
+                    }
+                }
+            }
+        }
+        return last;
     }
 
     protected void calculateRelevanceScore(ItemCandidate candidate, List<String> keywords) {
@@ -712,14 +970,56 @@ public class InboundMailReceiver {
         if (jtrac == null || item.getHistory() == null || item.getHistory().isEmpty()) {
             return;
         }
+        boolean hasAttachmentNeedingText = false;
+        for (History h : item.getHistory()) {
+            if (h.getAttachment() != null && (!StringUtils.hasText(h.getAttachmentText()))) {
+                hasAttachmentNeedingText = true;
+                break;
+            }
+        }
+        if (!hasAttachmentNeedingText) {
+            return;
+        }
+
+        OllamaClient ocrClient = null;
+        boolean ocrEnabled = false;
+        try {
+            ocrEnabled = jtrac.isAttachmentOcrEnabled();
+        } catch (Throwable ignored) {}
+
+        if (ocrEnabled) {
+            String ollamaUrl = jtrac.loadConfig("llm.ollama.url", "http://localhost:11434");
+            String ollamaModel = jtrac.loadConfig("llm.ollama.model", "llama3.2");
+            String ollamaApiKey = jtrac.loadConfig("llm.ollama.api.key");
+            int timeout = 60;
+            String timeoutStr = jtrac.loadConfig("llm.ollama.timeout");
+            if (StringUtils.hasText(timeoutStr)) {
+                try {
+                    timeout = Integer.parseInt(timeoutStr.trim());
+                } catch (NumberFormatException ignored) {}
+            }
+            ocrClient = new OllamaClient(ollamaUrl, ollamaModel, ollamaApiKey, timeout);
+        }
         for (History h : item.getHistory()) {
             if (h.getAttachment() != null && (!StringUtils.hasText(h.getAttachmentText()))) {
                 try {
                     File file = AttachmentUtils.getFile(h.getAttachment(), item.getSpace().getId(), jtrac.getJtracHome());
                     if (file != null && file.exists()) {
+                        String ocrModel = null;
+                        try {
+                            ocrModel = jtrac.getAttachmentOcrModel();
+                        } catch (Throwable ignored) {}
+                        int maxSizeMb = 10;
+                        int maxChars = 50000;
+                        try {
+                            maxSizeMb = jtrac.getAttachmentIndexMaxSizeInMb();
+                            maxChars = jtrac.getAttachmentIndexMaxChars();
+                        } catch (Throwable ignored) {}
                         String text = AttachmentTextExtractor.extractText(file,
-                                jtrac.getAttachmentIndexMaxSizeInMb(),
-                                jtrac.getAttachmentIndexMaxChars());
+                                maxSizeMb,
+                                maxChars,
+                                ocrClient,
+                                ocrModel);
                         h.setAttachmentText(text);
                     }
                 } catch (Throwable t) {

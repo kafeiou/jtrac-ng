@@ -59,8 +59,13 @@ public class OllamaClient {
     }
 
     public String buildChatPayload(String systemPrompt, String userPrompt) {
+        return buildChatPayloadWithImage(systemPrompt, userPrompt, null, null);
+    }
+
+    public String buildChatPayloadWithImage(String systemPrompt, String userPrompt, byte[] imageBytes, String customModel) {
         ObjectNode root = objectMapper.createObjectNode();
-        root.put("model", model);
+        String selectedModel = (customModel != null && !customModel.trim().isEmpty()) ? customModel.trim() : model;
+        root.put("model", selectedModel);
         root.put("stream", false);
 
         ArrayNode messages = root.putArray("messages");
@@ -72,7 +77,11 @@ public class OllamaClient {
 
         ObjectNode userMsg = messages.addObject();
         userMsg.put("role", "user");
-        userMsg.put("content", userPrompt != null ? userPrompt : "");
+        userMsg.put("content", (userPrompt != null && !userPrompt.trim().isEmpty()) ? userPrompt : "Please transcribe all readable text from this image.");
+        if (imageBytes != null && imageBytes.length > 0) {
+            ArrayNode images = userMsg.putArray("images");
+            images.add(java.util.Base64.getEncoder().encodeToString(imageBytes));
+        }
 
         return root.toString();
     }
@@ -96,9 +105,18 @@ public class OllamaClient {
     }
 
     public String chat(String systemPrompt, String userPrompt) throws IOException {
-        String endpoint = baseUrl + "/api/chat";
         String payload = buildChatPayload(systemPrompt, userPrompt);
-        logger.debug("Connecting to Ollama at {} with model {}", endpoint, model);
+        return postPayload(payload);
+    }
+
+    public String chatWithImage(String systemPrompt, String userPrompt, byte[] imageBytes, String customModel) throws IOException {
+        String payload = buildChatPayloadWithImage(systemPrompt, userPrompt, imageBytes, customModel);
+        return postPayload(payload);
+    }
+
+    private String postPayload(String payload) throws IOException {
+        String endpoint = baseUrl + "/api/chat";
+        logger.debug("Connecting to Ollama at {}", endpoint);
 
         URL url = new URL(endpoint);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();

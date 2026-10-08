@@ -409,10 +409,14 @@ public class MailSender {
 	}
 
 	public void sendAiQueryResponse(String toEmail, String originalSubject, String aiContent, List<Item> referencedItems, Locale locale, Set<Space> spaces) {
-		sendAiQueryResponse(toEmail, originalSubject, aiContent, referencedItems, null, locale, spaces);
+		sendAiQueryResponse(toEmail, originalSubject, aiContent, referencedItems, null, locale, spaces, null);
 	}
 
 	public void sendAiQueryResponse(String toEmail, String originalSubject, String aiContent, List<Item> referencedItems, Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces) {
+		sendAiQueryResponse(toEmail, originalSubject, aiContent, referencedItems, perTicketSummaries, locale, spaces, null);
+	}
+
+	public void sendAiQueryResponse(String toEmail, String originalSubject, String aiContent, List<Item> referencedItems, Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, List<String> keywords) {
 		if (sender == null) {
 			logger.debug("mail sender is null, not sending AI query response");
 			return;
@@ -443,7 +447,7 @@ public class MailSender {
 			String token = UUID.randomUUID().toString();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmm");
 			String reportFilename = "JTrac-AI-Report-" + sdf.format(now) + ".html";
-			String standaloneHtml = buildStandaloneHtmlReport(cleanSub, aiContent, referencedItems, perTicketSummaries, locale, spaces, now, token);
+			String standaloneHtml = buildStandaloneHtmlReport(cleanSub, aiContent, referencedItems, perTicketSummaries, locale, spaces, now, token, keywords);
 			saveReportToDisk(token, standaloneHtml);
 			String reportUrl = url + "flow/report?token=" + token;
 
@@ -458,6 +462,56 @@ public class MailSender {
 			sb.append("<div style='font-size: 14px; color: #57606a; margin-bottom: 18px;'>");
 			sb.append("<strong>\u67e5\u8a62\u4e3b\u65e8 / Query:</strong> ").append(escapeHtml(cleanSub));
 			sb.append("</div>");
+
+			if (keywords != null && !keywords.isEmpty()) {
+				sb.append("<div style='font-size: 13px; color: #57606a; margin-bottom: 18px;'>");
+				sb.append("<strong>\u62c6\u89e3\u95dc\u9375\u5b57 / Keywords:</strong> ");
+				sb.append("<div style='margin-top: 6px;'>");
+				for (String kw : keywords) {
+					sb.append("<span style='display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; font-size: 12px; border-radius: 12px; background-color: #ddf4ff; color: #0969da; border: 1px solid #54aeff66; font-family: ui-monospace, Consolas, monospace;'>")
+					  .append(escapeHtml(kw))
+					  .append("</span>");
+				}
+				sb.append("</div></div>");
+			}
+
+			// RAG Direct Answer Card / Question Response
+			boolean isQuestion = OllamaPromptBuilder.isQuestionInquiry(cleanSub, null);
+			String directAnswer = extractAnswerSection(aiContent);
+			boolean hasTickets = (referencedItems != null && !referencedItems.isEmpty());
+
+			if (hasTickets && directAnswer != null && !directAnswer.isEmpty()) {
+				String renderedAnswer = ItemUtils.renderMarkdown(SensitiveDataMasker.maskSecrets(directAnswer));
+				if (spaces != null && !spaces.isEmpty() && renderedAnswer != null) {
+					renderedAnswer = ItemUtils.autolinkTickets(url, renderedAnswer, spaces);
+				}
+
+				String cardHeader = isQuestion
+						? "\uD83D\uDCAC \u56de\u7b54\u554f\u984c / Answer to Inquiry"
+						: "\uD83D\uDCA1 \u6838\u5fc3\u89e3\u7b54\u6458\u8981 / Executive Summary";
+				String borderLeftColor = isQuestion ? "#1a7f37" : "#0969da";
+				String headerColor = isQuestion ? "#1a7f37" : "#0969da";
+
+				sb.append("<div style='background-color: #f8fafc; border: 1px solid #d0d7de; border-left: 4px solid ")
+				  .append(borderLeftColor)
+				  .append("; border-radius: 8px; padding: 18px 22px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);'>");
+				sb.append("<div style='font-weight: 600; color: ").append(headerColor).append("; font-size: 15px; margin-bottom: 12px;'>");
+				sb.append(cardHeader);
+				sb.append("</div>");
+				sb.append("<div style='font-size: 14px; color: #24292e; line-height: 1.7;'>");
+				sb.append(renderedAnswer);
+				sb.append("</div>");
+				sb.append("</div>");
+			} else if (!hasTickets) {
+				sb.append("<div style='background-color: #fff8f2; border: 1px solid #ffebe9; border-left: 4px solid #cf222e; border-radius: 8px; padding: 16px 20px; margin-bottom: 22px;'>");
+				sb.append("<div style='font-weight: 600; color: #cf222e; font-size: 15px; margin-bottom: 8px;'>");
+				sb.append("\u26A0\uFE0F \u67e5\u7121\u76f8\u95dc\u5de5\u55ae / No Matching Tickets Found");
+				sb.append("</div>");
+				sb.append("<div style='font-size: 13px; color: #57606a; line-height: 1.6;'>");
+				sb.append("\u5728\u60a8\u5177\u6709\u5b58\u53d6\u6b0a\u9650\u7684\u5c08\u6848\u7a7a\u9593\u4e2d\uff0c\u76ee\u524d\u672a\u6aa2\u7d22\u5230\u7b26\u5408\u689d\u4ef6\u7684\u5de5\u55ae\u8a18\u9304\u3002\u7cfb\u7d71\u9075\u5faa\u56b4\u683c\u96f6\u5e7b\u89ba RAG \u539f\u5247\uff0c\u7121\u5de5\u55ae\u6578\u64da\u4f9d\u64da\u6642\u4e0d\u63d0\u4f9b\u81c6\u6e2c\u89e3\u7b54\u3002<br/>");
+				sb.append("(No matching tickets found within your authorized spaces. Following strict zero-hallucination RAG principles, no speculative answer is provided without ticket evidence.)");
+				sb.append("</div></div>");
+			}
 
 			// Web Link & 14-Day Retention Action Callout
 			sb.append("<div style='background-color: #f0f7ff; border: 1px solid #cce3ff; border-left: 4px solid #0969da; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; text-align: center;'>");
@@ -540,6 +594,51 @@ public class MailSender {
 		}
 	}
 
+	/**
+	 * Extracts the direct question-answering / executive summary section (Section 1) from the LLM synthesis response,
+	 * stripping any embedded raw Mermaid code blocks so that it renders cleanly in standard email clients.
+	 */
+	public static String extractAnswerSection(String aiContent) {
+		if (aiContent == null || aiContent.trim().isEmpty()) {
+			return null;
+		}
+		String content = aiContent.trim();
+		// Remove raw Mermaid blocks from email excerpt (email clients cannot run Mermaid JS)
+		content = content.replaceAll("(?s)```mermaid.*?```", "").trim();
+
+		// Check if there is a Section 1 header
+		// e.g. ### 回答問題, ### 針對提問回答, ### 核心解答摘要, ### 1., etc.
+		java.util.regex.Pattern s1Pattern = java.util.regex.Pattern.compile("(?im)^###?\\s*(?:1[\\.\\s]+)?(?:回答問題|針對提問回答|核心解答摘要|Executive Summary|Answer to Inquiry)[^\\r\\n]*\\r?\\n");
+		java.util.regex.Matcher s1Matcher = s1Pattern.matcher(content);
+
+		String answerBody;
+		if (s1Matcher.find()) {
+			int startIdx = s1Matcher.end();
+			// Look for Section 2 start: ### 各工單, ### 2., ### Key Findings, etc.
+			java.util.regex.Pattern s2Pattern = java.util.regex.Pattern.compile("(?im)^###?\\s*(?:2[\\.\\s]+)?(?:各工單關鍵發現與解法|各工單關鍵發現|Key Findings|Resolution|建議行動方案)[^\\r\\n]*");
+			java.util.regex.Matcher s2Matcher = s2Pattern.matcher(content);
+			if (s2Matcher.find(startIdx)) {
+				answerBody = content.substring(startIdx, s2Matcher.start()).trim();
+			} else {
+				answerBody = content.substring(startIdx).trim();
+			}
+		} else {
+			// If no explicit Section 1 header, check if Section 2 exists and take everything before it
+			java.util.regex.Pattern s2Pattern = java.util.regex.Pattern.compile("(?im)^###?\\s*(?:2[\\.\\s]+)?(?:各工單關鍵發現與解法|各工單關鍵發現|Key Findings|Resolution)[^\\r\\n]*");
+			java.util.regex.Matcher s2Matcher = s2Pattern.matcher(content);
+			if (s2Matcher.find()) {
+				answerBody = content.substring(0, s2Matcher.start()).trim();
+			} else {
+				// Fallback: take entire content
+				answerBody = content;
+			}
+		}
+
+		// Clean up markdown horizontal dividers at end if present
+		answerBody = answerBody.replaceAll("(?m)^\\s*[-*_]{3,}\\s*$", "").trim();
+		return answerBody.isEmpty() ? null : answerBody;
+	}
+
 	private void saveReportToDisk(String token, String htmlContent) {
 		try {
 			String home = (jtracHome != null && !jtracHome.trim().isEmpty()) ? jtracHome : (System.getProperty("user.home") + "/.jtrac");
@@ -557,11 +656,16 @@ public class MailSender {
 
 	public String buildStandaloneHtmlReport(String originalSubject, String aiContent, List<Item> referencedItems,
 										    Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, Date generatedDate) {
-		return buildStandaloneHtmlReport(originalSubject, aiContent, referencedItems, perTicketSummaries, locale, spaces, generatedDate, null);
+		return buildStandaloneHtmlReport(originalSubject, aiContent, referencedItems, perTicketSummaries, locale, spaces, generatedDate, null, null);
 	}
 
 	public String buildStandaloneHtmlReport(String originalSubject, String aiContent, List<Item> referencedItems,
 										    Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, Date generatedDate, String token) {
+		return buildStandaloneHtmlReport(originalSubject, aiContent, referencedItems, perTicketSummaries, locale, spaces, generatedDate, token, null);
+	}
+
+	public String buildStandaloneHtmlReport(String originalSubject, String aiContent, List<Item> referencedItems,
+										    Map<String, String> perTicketSummaries, Locale locale, Set<Space> spaces, Date generatedDate, String token, List<String> keywords) {
 		SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String genDateStr = sdfFull.format(generatedDate != null ? generatedDate : new Date());
 		int ticketCount = (referencedItems != null) ? referencedItems.size() : 0;
@@ -748,6 +852,14 @@ public class MailSender {
 		html.append("  cursor: pointer; transition: background-color 0.2s;\n");
 		html.append("}\n");
 		html.append(".download-btn:hover { background-color: var(--primary-hover); text-decoration: none !important; }\n");
+		html.append(".keyword-badge-container {\n");
+		html.append("  margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;\n");
+		html.append("}\n");
+		html.append(".keyword-badge {\n");
+		html.append("  display: inline-block; padding: 2px 8px; font-size: 12px; border-radius: 12px;\n");
+		html.append("  background-color: var(--badge-bg); color: var(--primary-color);\n");
+		html.append("  border: 1px solid var(--badge-border); font-family: ui-monospace, SFMono-Regular, Consolas, monospace;\n");
+		html.append("}\n");
 		html.append("</style>\n");
 		html.append("</head>\n");
 		html.append("<body>\n");
@@ -776,6 +888,14 @@ public class MailSender {
 		html.append("    <span><strong>生成時間 / Generated:</strong> ").append(genDateStr).append("</span>\n");
 		html.append("    <span><strong>分析工單數 / Tickets:</strong> ").append(ticketCount).append("</span>\n");
 		html.append("  </div>\n");
+		if (keywords != null && !keywords.isEmpty()) {
+			html.append("  <div class='keyword-badge-container'>\n");
+			html.append("    <span style='font-size: 12px; font-weight: 600; color: var(--text-muted);'>🔍 檢索關鍵字 / Keywords:</span>\n");
+			for (String kw : keywords) {
+				html.append("    <span class='keyword-badge'>").append(escapeHtml(kw)).append("</span>\n");
+			}
+			html.append("  </div>\n");
+		}
 		html.append("</header>\n");
 
 		// Section 1: Executive Synthesis

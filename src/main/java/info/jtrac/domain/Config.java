@@ -68,6 +68,9 @@ public class Config implements Serializable {
         PARAMS.add("spaces.list.pageSize");
         PARAMS.add("attachment.index.maxSizeMb");
         PARAMS.add("attachment.index.maxChars");
+        PARAMS.add("attachment.ocr.enabled");
+        PARAMS.add("attachment.ocr.model");
+        PARAMS.add("attachment.ocr.max_image_size_mb");
         PARAMS.add("security.privacy.headers.enabled");
         PARAMS.add("mail.inbound.enabled");
         PARAMS.add("mail.inbound.server.host");
@@ -82,6 +85,8 @@ public class Config implements Serializable {
         PARAMS.add("llm.ollama.api.key");
         PARAMS.add("llm.ollama.timeout");
         PARAMS.add("llm.retrieval.max_tickets");
+        PARAMS.add("llm.retrieval.max_age_days");
+        PARAMS.add("llm.retrieval.stopwords");
         PARAMS.add("llm.search.expansion.enabled");
         PARAMS.add("llm.search.expansion.timeout");
         PARAMS.add("lucene.analyzer.version");
@@ -94,6 +99,7 @@ public class Config implements Serializable {
         BOOLEAN_PARAMS.add("mail.inbound.starttls.enable");
         BOOLEAN_PARAMS.add("mail.inbound.ssl.trust.all");
         BOOLEAN_PARAMS.add("llm.search.expansion.enabled");
+        BOOLEAN_PARAMS.add("attachment.ocr.enabled");
         BOOLEAN_PARAMS.add("jtrac.edit.item");
         BOOLEAN_PARAMS.add("markdown.enabled");
         BOOLEAN_PARAMS.add("attachments.openNewWindow");
@@ -105,6 +111,7 @@ public class Config implements Serializable {
         NUMBER_PARAMS.add("mail.inbound.server.port");
         NUMBER_PARAMS.add("llm.ollama.timeout");
         NUMBER_PARAMS.add("llm.retrieval.max_tickets");
+        NUMBER_PARAMS.add("llm.retrieval.max_age_days");
         NUMBER_PARAMS.add("llm.search.expansion.timeout");
         NUMBER_PARAMS.add("attachment.maxsize");
         NUMBER_PARAMS.add("pwd.minLength");
@@ -113,6 +120,7 @@ public class Config implements Serializable {
         NUMBER_PARAMS.add("spaces.list.pageSize");
         NUMBER_PARAMS.add("attachment.index.maxSizeMb");
         NUMBER_PARAMS.add("attachment.index.maxChars");
+        NUMBER_PARAMS.add("attachment.ocr.max_image_size_mb");
 
         COLOR_PARAMS = new LinkedHashSet<String>();
     }

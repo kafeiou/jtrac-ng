@@ -63,6 +63,29 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
    - **ゼロヒット時の安全通知 (Zero-Hit Safe Notice)**：認可されたスペース内に対象チケットや添付ファイルが存在しない場合、モデルに架空の推測を行わせず即座に遮断し、認可スペース一覧と接地ポリシーを記載したゼロヒット案内メールを返信して元メールを自動消去。
    - **機密情報の自動マスキング (Confidential Credentials Masking)**：`SensitiveDataMasker` を実装し、HTML 診断レポート内のパスワード（password）、Bearer トークン、API キー、秘密鍵ブロック、URL 内認証情報を自動的に `***` に置換して保護（ユーザー名やチケット ID は維持）。
    - **推奨ハードウェア仕様と 200K 長文コンテキスト (Recommended Hardware & 200K Context)**：Prompt 実戦ガイドに推奨構成を明記。フラッグシップ GPU である NVIDIA RTX 5090 (32GB VRAM) および `qwen2.5:32b` の組み合わせを推奨し、Ollama Modelfile による 200K コンテキスト（`num_ctx 200000`）の設定を義務化。切り捨てによる分析破綻を防ぐため、短コンテキストや低パラメータモデルの使用を厳禁と警告。
+8. **検索時間枠フィルターと明示的チケット番号免除機構 (Time-Window Retrieval Filter & Exact RefId Exemption)**：
+   - **動的時間枠フィルタリング**：`config` テーブルにグローバル設定パラメータ `llm.retrieval.max_age_days`（デフォルト 365 日）を登録。チケットの最終アクティビティ日時 $\max(\text{item.timeStamp}, \text{latestHistory.timeStamp})$ を基準として判定し、1 年以上更新のない古いチケットを自動除外して AI コンテキストの汚染を防止します。0 または負数に設定すると時間制限が無効化され、全履歴が検索されます。
+   - **明示的チケット番号（Exact RefId）の完全免除**：メールの件名または本文で特定のチケット番号（例：`PROJ-108`）が明示されている場合、ユーザーの明確な調査意図として認識され、時間枠フィルターの制限を完全に免除して最優先で分析対象とします。
+9. **検索ストップワード除外・両岸専門用語相互展開・キーワードバッジ表示 (Stopwords Filtering, Cross-Strait Terminology Mapping & Keyword Dossier Badges)**：
+   - **検索ストップワード除外 (Retrieval Stopwords Filtering)**：`config` テーブルにグローバル設定 `llm.retrieval.stopwords`（デフォルト値：「`通知,工單`」）を登録。Prompt 指示および Java パイプラインで汎用的なノイズ単語を強制除外（同義語の `notice`, `notification`, `ticket`, `issue` も自動除外）し、「請求書通知」や「発票工単」などの問い合わせ時に「通知」「工單」によって無関係なシステム通知や一般チケットが大量ヒットする問題を根本解決。
+   - **両岸（繁体字・簡体字）専門用語の双方向展開 (Cross-Strait Vocabulary & Terminology Mapping)**：高頻度な IT・業務用語辞書（「專案 ⇄ 项目」「發票 ⇄ 发票/开票」「程式碼 ⇄ 代码」「記憶體 ⇄ 内存」「欄位 ⇄ 字段」「排程 ⇄ 定时任务/计划任务」「檔案 ⇄ 文件」「資料庫 ⇄ 数据库」など）を組み込み、単純な文字変換ではなく地域特有の専門用語の双方向相互補完を実現。
+   - **透明性の高いキーワードバッジ表示 (Transparent Keyword Badges in Dossier & Email)**：AI HTML 診断レポートのヘッダーおよび返信メール本文内に、実際に抽出・展開された全キーワード（繁体字、簡体字、両岸用語、英語訳）をカプセルバッジとして明示的に表示し、中間 Staging Markdown にも記録。検索条件の完全な可監査性を担保。
+   - **CJK フレーズ引用符検索と適合スコア閾値保護**：Lucene 検索時に2文字以上の漢字語句を二重引用符で囲み単語分割ノイズを防ぐとともに、適合スコア $\le 0$ の無関係なチケットを厳格に除外。
+10. **厳格なゼロ幻覚 RAG 質問回答機構とメール本文「回答」カード (Strict Zero-Hallucination RAG & Direct Question-Answering Email Card)**：
+   - **厳格な閉域ゼロ幻覚制約 (Strict Closed-Domain RAG Grounding)**：外部常識の補足を全面撤廃し、全回答を検索されたチケット履歴および添付文書に100%厳格に限定。チケットID `[REF-ID]` の引用を義務化し、情報が存在しない場合は「（現有工單資料中查無此項資訊 / チケット内に記載なし）」と明示して推測を排除。
+   - **インテリジェントな質問意図検知 (Question Inquiry Detection)**：件名および本文の疑問符（`?`、`？`）や多言語の疑問表現（`請問`、`如何`、`どうやって`、`なぜ`、`how`、`what`、`why` など）を自動解析し、質問回答モードへ動的に切り替え。
+   - **メール本文の直感的な回答カード表示 (Direct Answer Card in Email Body)**：メール本文内に「💬 回答問題 / Answer to Inquiry」カードを直接レンダリング（通常検索時は要約カード、0件時は警告カード）。機密情報の自動マスキング、チケットリンク自動生成、Mermaid 図の安全なフィルタリングを完備。
+11. **圧縮アーカイブ (.zip, .rar) 全文検索インデックスおよび Ollama マルチモーダル Vision OCR**:
+    - **圧縮ファイル内ドキュメントのディープ全文抽出 (`.zip`, `.rar`)**：圧縮添付ファイル内の文書に対する全文抽出をサポート。`.zip`（純粋 Java ストリーミング）および `.rar`（Junrar 純粋 Java コア）に対応し、展開されたファイル（`.pdf`, `.docx`, `.xlsx`, `.txt`, `.csv`, `.md`, `.log`）を元のパス情報 `[Archive: folder/document.ext]` 付きで Lucene および AI RAG 検索に供給。
+    - **厳格な解凍セキュリティ防御 (Zip Slip & Zip Bomb 対策)**：
+      - *Zip Slip / パストラバーサル防止*：`..` や絶対パスを含むエントリを検知して除外。
+      - *Zip Bomb / 解凍爆弾防御*：1アーカイブあたり最大100エントリ、累積解凍上限 30MB、単一ファイル上限 10MB の制限を適用。
+      - *再帰的解凍攻撃の抑止*：入れ子になったアーカイブ（zip 内の zip）は自動的にスキップ。
+    - **Ollama マルチモーダル Vision OCR による画像文字認識**：
+      - 単体画像ファイル（`.png`, `.jpg`, `.jpeg`, `.bmp`, `.webp`, `.gif`）およびアーカイブから展開された画像を、Ollama の Vision API（`/api/chat` の Base64 `images` ペイロード）を用いて検索可能なテキストに文字起こし（Transcribe）。
+      - **高解像度自動縮小＆GIF正規化防御 (Auto-Downscaling & GIF Normalization)**：長辺が 1280px を超える高解像度画像を Ollama へ送信する前に安全なサイズ（最大 1280px）へ等比縮小し、透過色やアニメーションGIFを白背景に正規化。GPU VRAM とトークン消費量を 70% 以上削減し、Ollama の `CUDA error: out of memory` メモリ枯渇を徹底防止。
+      - 設定パラメータ：`attachment.ocr.enabled`（デフォルト true）、`attachment.ocr.model`（`llama3.2-vision`、`minicpm-v`、`moondream` などの専用モデルを指定可能、空欄時はデフォルト LLM を継承）、`attachment.ocr.max_image_size_mb`（デフォルト 5MB）。
+      - *グレースフル・デグラデーション*：Ollama がオフライン、タイムアウト、または非対応モデルの場合でも、OCR を安全にスキップしてチケット作成や検索処理を継続。
 
 ---
 

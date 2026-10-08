@@ -117,6 +117,9 @@ public interface Jtrac extends UserDetailsService {
     int getAttachmentMaxSizeInMb();
     int getAttachmentIndexMaxSizeInMb();
     int getAttachmentIndexMaxChars();
+    boolean isAttachmentOcrEnabled();
+    String getAttachmentOcrModel();
+    int getAttachmentOcrMaxImageSizeMb();
     int getSessionTimeoutInMinutes();
     //========================================================
     Map<String, String> loadAllConfig();

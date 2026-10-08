@@ -290,4 +290,142 @@ public class MailSenderAiTest {
         mailSender.sendAiZeroHitNotice("no", "Subject", Locale.ENGLISH, spaces);
         mailSender.sendAiZeroHitNotice("user@example.com", null, null, null);
     }
+
+    @Test
+    public void testBuildStandaloneHtmlReportWithKeywordsBadges() {
+        Map<String, String> config = new HashMap<>();
+        config.put("mail.server.host", "localhost");
+        config.put("mail.from", "jtrac@example.com");
+        config.put("jtrac.url.base", "http://localhost/jtrac/");
+
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+
+        MailSender mailSender = new MailSender(config, messageSource, "en");
+
+        List<String> keywords = Arrays.asList("發票", "发票", "开票", "invoice");
+
+        String report = mailSender.buildStandaloneHtmlReport(
+                "發票查詢",
+                "分析結果說明",
+                Collections.emptyList(),
+                Collections.emptyMap(),
+                Locale.TAIWAN,
+                Collections.emptySet(),
+                new java.util.Date(),
+                "test-token",
+                keywords
+        );
+
+        assertNotNull(report);
+        assertTrue("Report must include keyword-badge-container", report.contains("keyword-badge-container"));
+        assertTrue("Report must contain badge for '發票'", report.contains("<span class='keyword-badge'>發票</span>"));
+        assertTrue("Report must contain badge for '发票'", report.contains("<span class='keyword-badge'>发票</span>"));
+        assertTrue("Report must contain badge for '开票'", report.contains("<span class='keyword-badge'>开票</span>"));
+        assertTrue("Report must contain badge for 'invoice'", report.contains("<span class='keyword-badge'>invoice</span>"));
+    }
+
+    @Test
+    public void testSendAiQueryResponseWithKeywordsDoesNotThrow() {
+        Map<String, String> config = new HashMap<>();
+        config.put("mail.server.host", "localhost");
+        config.put("mail.from", "jtrac@example.com");
+        config.put("jtrac.url.base", "http://localhost/jtrac/");
+
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+
+        MailSender mailSender = new MailSender(config, messageSource, "en");
+
+        List<String> keywords = Arrays.asList("發票", "开票", "invoice");
+        mailSender.sendAiQueryResponse("user@example.com", "發票問題", "分析完成",
+                Collections.emptyList(), Collections.emptyMap(), Locale.TAIWAN, Collections.emptySet(), keywords);
+    }
+
+    @Test
+    public void testExtractAnswerSection() {
+        // 1. Standard markdown with Section 1 (回答問題) and Section 2 (各工單) and Mermaid
+        String sampleAi = "### 回答問題 (Answer to Inquiry)\n"
+                + "根據工單 [PROJ-42] 的紀錄，發票開立需在 ASMI300 進行單據性質維護。\n\n"
+                + "```mermaid\n"
+                + "flowchart TD\n"
+                + "A[\"開票\"] --> B[\"確認\"]\n"
+                + "```\n\n"
+                + "具體步驟包含核對單別。\n\n"
+                + "### 各工單關鍵發現與解法 (Key Findings & Resolution)\n"
+                + "- [PROJ-42]: 單據性質資料維護\n\n"
+                + "### 建議行動方案 (Next Actions & Recommendations)\n"
+                + "1. 登入系統檢查權限";
+
+        String extracted = MailSender.extractAnswerSection(sampleAi);
+        assertNotNull(extracted);
+        assertTrue(extracted.contains("根據工單 [PROJ-42] 的紀錄"));
+        assertTrue(extracted.contains("具體步驟包含核對單別"));
+        assertFalse("Mermaid blocks must be stripped from email excerpt", extracted.contains("```mermaid"));
+        assertFalse("Mermaid blocks must be stripped from email excerpt", extracted.contains("flowchart TD"));
+        assertFalse("Section 2 content must not bleed into Section 1 answer", extracted.contains("各工單關鍵發現與解法"));
+        assertFalse(extracted.contains("建議行動方案"));
+
+        // 2. Executive summary heading variant
+        String execSummaryAi = "### 核心解答摘要 (Executive Summary)\n"
+                + "資料庫連線池調校完成，已恢復連線。\n\n"
+                + "### 各工單關鍵發現\n"
+                + "- [DB-10]: 連線數調整至 50";
+
+        String extractedExec = MailSender.extractAnswerSection(execSummaryAi);
+        assertNotNull(extractedExec);
+        assertTrue(extractedExec.contains("資料庫連線池調校完成"));
+        assertFalse(extractedExec.contains("各工單關鍵發現"));
+
+        // 3. Fallback when no section headings
+        String noHeaders = "直接回答：發票通知由每日排程批次發送。";
+        String extractedFallback = MailSender.extractAnswerSection(noHeaders);
+        assertEquals(noHeaders, extractedFallback);
+
+        // 4. Null & empty safety
+        assertNull(MailSender.extractAnswerSection(null));
+        assertNull(MailSender.extractAnswerSection("   "));
+    }
+
+    @Test
+    public void testSendAiQueryResponseWithQuestionAndAnswerCard() {
+        Map<String, String> config = new HashMap<>();
+        config.put("mail.server.host", "localhost");
+        config.put("mail.from", "jtrac@example.com");
+        config.put("jtrac.url.base", "http://localhost/jtrac/");
+
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+
+        MailSender mailSender = new MailSender(config, messageSource, "en");
+
+        Space space = new Space();
+        space.setId(10L);
+        space.setPrefixCode("TIPTOP");
+        space.setName("TIPTOP ERP");
+
+        Item item = new Item();
+        item.setSpace(space);
+        item.setSequenceNum(135);
+        item.setSummary("發票開立單別維護");
+        item.setStatus(1);
+
+        List<Item> items = Collections.singletonList(item);
+        Set<Space> spaces = Collections.singleton(space);
+
+        String aiContent = "### 回答問題 (Answer to Inquiry)\n"
+                + "依據 [TIPTOP-135]，發票開立請執行 aimi301 新增合泰 3308 單別。\n\n"
+                + "### 各工單關鍵發現與解法 (Key Findings & Resolution)\n"
+                + "- [TIPTOP-135]: 單據維護\n";
+
+        List<String> keywords = Arrays.asList("發票", "开票", "aimi301");
+
+        // Verify sending question inquiry does not throw and executes all RAG card rendering branches
+        mailSender.sendAiQueryResponse("user@example.com", "請問發票如何開立？", aiContent,
+                items, Collections.emptyMap(), Locale.TAIWAN, spaces, keywords);
+
+        // Verify zero tickets branch with question inquiry
+        mailSender.sendAiQueryResponse("user@example.com", "請問發票通知在哪？", aiContent,
+                Collections.emptyList(), Collections.emptyMap(), Locale.TAIWAN, spaces, keywords);
+    }
 }

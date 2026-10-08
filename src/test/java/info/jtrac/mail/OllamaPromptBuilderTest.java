@@ -8,6 +8,7 @@ import info.jtrac.domain.User;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +22,8 @@ public class OllamaPromptBuilderTest {
         assertNotNull(sysPrompt);
         assertTrue(sysPrompt.contains("JTrac AI Query Copilot"));
         assertTrue(sysPrompt.contains("[PROJ-123]"));
-        assertTrue(sysPrompt.contains("（參考外部資訊給予建議）"));
+        assertTrue(sysPrompt.contains("STRICT RETRIEVAL-AUGMENTED GENERATION (RAG) principles"));
+        assertTrue(sysPrompt.contains("現有工單資料中查無此項資訊"));
     }
 
     @Test
@@ -98,6 +100,16 @@ public class OllamaPromptBuilderTest {
     }
 
     @Test
+    public void testKeywordExtractionPromptsWithStopwords() {
+        String sysPrompt = OllamaPromptBuilder.buildKeywordExtractionSystemPrompt(Arrays.asList("通知", "notice"));
+        assertNotNull(sysPrompt);
+        assertTrue(sysPrompt.contains("MANDATORY STOPWORDS TO EXCLUDE"));
+        assertTrue(sysPrompt.contains("通知"));
+        assertTrue(sysPrompt.contains("notice"));
+        assertTrue(sysPrompt.contains("CROSS-STRAIT VOCABULARY"));
+    }
+
+    @Test
     public void testAntiPromptInjectionDirectives() {
         String sysPrompt = OllamaPromptBuilder.buildSystemPrompt();
         assertTrue(sysPrompt.contains("CRITICAL ANTI-INJECTION AND SECURITY DIRECTIVES"));
@@ -160,13 +172,12 @@ public class OllamaPromptBuilderTest {
         String sysPrompt = OllamaPromptBuilder.buildFinalSynthesisSystemPrompt();
         assertNotNull(sysPrompt);
         assertTrue(sysPrompt.contains("JTrac AI Query Copilot"));
-        assertTrue(sysPrompt.contains("核心解答摘要 (Executive Summary)"));
+        assertTrue(sysPrompt.contains("回答問題 (Answer to Inquiry)"));
         assertTrue(sysPrompt.contains("各工單關鍵發現與解法 (Key Findings & Resolution)"));
         assertTrue(sysPrompt.contains("建議行動方案 (Next Actions & Recommendations)"));
-        assertTrue(sysPrompt.contains("STRICT DATA GROUNDING AND EXTERNAL KNOWLEDGE MANDATORY LABELS"));
-        assertTrue(sysPrompt.contains("（參考外部資訊給予建議）"));
-        assertTrue(sysPrompt.contains("(Note: Recommended based on external reference knowledge)"));
-        assertTrue(sysPrompt.contains("（参考外部信息给予建议）"));
+        assertTrue(sysPrompt.contains("STRICT ZERO-HALLUCINATION & RAG GROUNDING RULES"));
+        assertTrue(sysPrompt.contains("ZERO HALLUCINATION"));
+        assertTrue(sysPrompt.contains("現有工單資料中查無此項資訊"));
         assertTrue(sysPrompt.contains("WORKFLOW AND MERMAID DIAGRAM RULES"));
         assertTrue(sysPrompt.contains("flowchart TD"));
         assertTrue(sysPrompt.contains("double quotes"));
@@ -175,9 +186,39 @@ public class OllamaPromptBuilderTest {
         String userPrompt = OllamaPromptBuilder.buildFinalSynthesisUserPrompt("Inquiry", "What caused the deadlock?", stagedText);
         assertTrue(userPrompt.contains("<untrusted_user_query>"));
         assertTrue(userPrompt.contains("Subject: Inquiry"));
+        assertTrue(userPrompt.contains("<inquiry_type>QUESTION</inquiry_type>"));
+        assertTrue(userPrompt.contains("Section 1 (### 回答問題 / Answer to Inquiry)"));
         assertTrue(userPrompt.contains("<staged_ticket_summaries>"));
         assertTrue(userPrompt.contains("[PROJ-555]"));
         assertTrue(userPrompt.contains("tuned isolation level"));
         assertTrue(userPrompt.contains("</staged_ticket_summaries>"));
+
+        String topicPrompt = OllamaPromptBuilder.buildFinalSynthesisUserPrompt("發票資料", "請檢索相關發票", stagedText);
+        assertTrue(topicPrompt.contains("<inquiry_type>SEARCH_TOPIC</inquiry_type>"));
+    }
+
+    @Test
+    public void testIsQuestionInquiry() {
+        // Question mark tests
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("發票開立", "請問如何開立發票？"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("How to configure SSL?", "Where is the config?"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("系統設定問題?", null));
+
+        // Chinese interrogative keywords without ?
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("請問發票通知設定", "想確認開票流程"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("如何排除死鎖", "資料庫連線超時"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("發票排程在哪裡", "請教自動化作法"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("備份是否正常", "能不能恢復"));
+
+        // English interrogative patterns without ?
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("how to fix memory leak", "server crashes"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("what is the database port", "checking config"));
+        assertTrue(OllamaPromptBuilder.isQuestionInquiry("why did the job fail", "nightly batch"));
+
+        // Non-question inquiries
+        assertFalse(OllamaPromptBuilder.isQuestionInquiry("發票通知", "發票清單"));
+        assertFalse(OllamaPromptBuilder.isQuestionInquiry("系統備份記錄", "查看昨天的日誌"));
+        assertFalse(OllamaPromptBuilder.isQuestionInquiry("", ""));
+        assertFalse(OllamaPromptBuilder.isQuestionInquiry(null, null));
     }
 }

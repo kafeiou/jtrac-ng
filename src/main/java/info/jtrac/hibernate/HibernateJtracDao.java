@@ -702,6 +702,9 @@ public class HibernateJtracDao implements JtracDao {
 
             ensureDefaultConfig(session, "attachment.index.maxSizeMb", "10");
             ensureDefaultConfig(session, "attachment.index.maxChars", "50000");
+            ensureDefaultConfig(session, "attachment.ocr.enabled", "true");
+            ensureDefaultConfig(session, "attachment.ocr.model", "");
+            ensureDefaultConfig(session, "attachment.ocr.max_image_size_mb", "5");
             ensureDefaultConfig(session, "security.privacy.headers.enabled", "true");
             ensureDefaultConfig(session, "mail.inbound.enabled", "false");
             ensureDefaultConfig(session, "mail.inbound.server.port", "993");
@@ -712,6 +715,8 @@ public class HibernateJtracDao implements JtracDao {
             ensureDefaultConfig(session, "llm.ollama.model", "llama3.2");
             ensureDefaultConfig(session, "llm.ollama.timeout", "60");
             ensureDefaultConfig(session, "llm.retrieval.max_tickets", "50");
+            ensureDefaultConfig(session, "llm.retrieval.max_age_days", "365");
+            ensureDefaultConfig(session, "llm.retrieval.stopwords", "通知,工單");
             ensureDefaultConfig(session, "llm.search.expansion.enabled", "true");
             ensureDefaultConfig(session, "llm.search.expansion.timeout", "6");
             ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-subtoken-v1");
