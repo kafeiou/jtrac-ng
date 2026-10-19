@@ -271,7 +271,103 @@
             if (searchDrawer && searchDrawer.classList.contains('open')) {
                 searchDrawer.classList.remove('open');
             }
+            if (window.jtracHideSearchLoading) {
+                window.jtracHideSearchLoading();
+            }
         }
+    });
+
+    // 6. Search & Item List Reload Loading Modal Controller (150ms anti-flicker delay + 15s safety timeout)
+    var searchLoadingDelayTimer = null;
+    var searchLoadingSafetyTimer = null;
+
+    window.jtracHideSearchLoading = function() {
+        if (searchLoadingDelayTimer) {
+            clearTimeout(searchLoadingDelayTimer);
+            searchLoadingDelayTimer = null;
+        }
+        if (searchLoadingSafetyTimer) {
+            clearTimeout(searchLoadingSafetyTimer);
+            searchLoadingSafetyTimer = null;
+        }
+        var overlay = document.getElementById('jtrac-search-loading-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+    };
+
+    window.jtracShowSearchLoading = function() {
+        window.jtracHideSearchLoading();
+        searchLoadingDelayTimer = setTimeout(function() {
+            var overlay = document.getElementById('jtrac-search-loading-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                overlay.setAttribute('aria-hidden', 'false');
+            }
+        }, 150);
+        searchLoadingSafetyTimer = setTimeout(function() {
+            window.jtracHideSearchLoading();
+        }, 15000);
+    };
+
+    function closestElement(el, selector) {
+        while (el && el.nodeType === 1) {
+            if (el.matches ? el.matches(selector) : (el.msMatchesSelector && el.msMatchesSelector(selector))) {
+                return el;
+            }
+            el = el.parentElement || el.parentNode;
+        }
+        return null;
+    }
+
+    document.addEventListener('submit', function(e) {
+        if (e.defaultPrevented) return;
+        var form = e.target;
+        if (!form || form.tagName !== 'FORM') return;
+
+        var isQuickSearch = form.classList.contains('desktop-search-form') || form.classList.contains('mobile-search-form');
+        if (isQuickSearch) {
+            var input = form.querySelector('input[type="text"]');
+            var val = input && input.value ? input.value.replace(/^\s+|\s+$/g, '') : '';
+            if (!val) {
+                if (e.preventDefault) e.preventDefault();
+                return;
+            }
+            window.jtracShowSearchLoading();
+            return;
+        }
+
+        var isFilterForm = form.classList.contains('item-list-filter-form');
+        var isAdvancedSearchForm = !!form.querySelector('.item-search-unified-bar');
+        if (isFilterForm || isAdvancedSearchForm) {
+            window.jtracShowSearchLoading();
+        }
+    }, false);
+
+    document.addEventListener('click', function(e) {
+        if (e.defaultPrevented) return;
+        if (typeof e.button === 'number' && e.button !== 0) return;
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+        var link = closestElement(e.target, 'a');
+        if (!link) return;
+        var href = link.getAttribute('href');
+        if (!href || href.indexOf('javascript:') === 0 || href === '#') return;
+        if (link.getAttribute('target') === '_blank') return;
+
+        var isPaginationLink = !!closestElement(link, '.page-links');
+        var isSortableHeaderLink = !!closestElement(link, 'table.jtrac-list tr.sortable th');
+        var isClearSearchLink = link.classList.contains('search-keyword-clear');
+        var isToolbarCountLink = !!closestElement(link, '.item-list-toolbar-left');
+
+        if (isPaginationLink || isSortableHeaderLink || isClearSearchLink || isToolbarCountLink) {
+            window.jtracShowSearchLoading();
+        }
+    }, false);
+
+    window.addEventListener('pageshow', function() {
+        window.jtracHideSearchLoading();
     });
 
     window.jtracToggleMobileSearch = function(e) {

@@ -285,13 +285,9 @@ td.jtrac-brand-text-col {
     background: transparent !important;
     color: var(--text-color);
     font-size: 1.05em;
-    width: 200px;
+    width: 240px;
     outline: none;
     padding: 2px 0;
-    transition: width 0.2s ease;
-}
-.desktop-search-input:focus {
-    width: 260px;
 }
 .desktop-search-submit-btn {
     background: var(--darkblue, #0000d9);
@@ -548,13 +544,9 @@ code {
 	background: transparent !important;
 	color: var(--text-color);
 	font-size: 1.05em;
-	width: 220px;
+	width: 260px;
 	outline: none;
 	padding: 2px 0;
-	transition: width 0.2s ease;
-}
-.item-list-search-input:focus {
-	width: 280px;
 }
 .search-keyword-banner {
 	display: flex;
@@ -2142,4 +2134,111 @@ code {
 	}
 }
 
+/* ==========================================================================
+   Search & List Reload Loading Modal Overlay (#jtrac-search-loading-overlay)
+   ========================================================================== */
 
+.search-loading-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(15, 23, 42, 0.45);
+	backdrop-filter: blur(2px);
+	-webkit-backdrop-filter: blur(2px);
+	z-index: 10050;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+}
+
+.search-loading-overlay.active {
+	display: flex !important;
+}
+
+.search-loading-card {
+	background: var(--card-bg, #FFFFFF);
+	color: var(--text-color, #1E293B);
+	border: 1px solid var(--card-border, #CBD5E1);
+	border-radius: 12px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+	padding: 24px 32px;
+	max-width: 420px;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 12px;
+	box-sizing: border-box;
+	animation: jtracModalFadeIn 0.16s ease-out;
+}
+
+.search-loading-spinner {
+	width: 38px;
+	height: 38px;
+	border: 3.5px solid var(--border-color, #CBD5E1);
+	border-top-color: var(--darkblue, #1D4ED8);
+	border-radius: 50%;
+	box-sizing: border-box;
+	animation: jtracSpin 0.8s linear infinite;
+	margin-bottom: 4px;
+}
+
+.search-loading-title {
+	font-size: 1.12em;
+	font-weight: bold;
+	color: var(--darkblue, #1E3A8A);
+	line-height: 1.35;
+}
+
+.search-loading-subtitle {
+	font-size: 0.92em;
+	color: var(--text-muted, #64748B);
+	line-height: 1.45;
+}
+
+@keyframes jtracSpin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+@keyframes jtracModalFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+[data-theme="dark"] .search-loading-overlay {
+	background: rgba(2, 6, 23, 0.65);
+}
+
+[data-theme="dark"] .search-loading-card {
+	background: #1E293B;
+	color: #E2E8F0;
+	border-color: #334155;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .search-loading-spinner {
+	border-color: #334155;
+	border-top-color: #60A5FA;
+}
+
+[data-theme="dark"] .search-loading-title {
+	color: #93C5FD;
+}
+
+[data-theme="dark"] .search-loading-subtitle {
+	color: #94A3B8;
+}

@@ -106,6 +106,9 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
    - Bouton de recherche intégré, accès direct par identifiant RefId (ex. `PROJ-123`) et recherche globale pour les administrateurs.
 4. **Optimisation mobile (RWD)** :
    - Menu tiroir latéral (Drawer), panneau Bottom-Sheet pour les historiques et pagination en capsule centrée.
+5. **Fenêtre modale de chargement « Recherche en cours, veuillez patienter... » avec délai anti-scintillement de 150ms** :
+   - Affiche une carte modale centrée avec spinner CSS pur lors des recherches sur les 4 formulaires (recherche rapide bureau, tiroir mobile, recherche avancée et filtre de liste) ainsi que lors du changement de page de pagination, du tri des colonnes et de l'effacement des filtres (`✕`).
+   - Intègre un micro-délai de **150ms** pour éviter tout scintillement lors des requêtes rapides tout en offrant un retour visuel clair pendant l'expansion des synonymes Ollama, avec blocage des requêtes vides, exclusion des clics `Ctrl`/`Cmd` (nouvel onglet), fermeture automatique `pageshow` et délai de sécurité de 15 secondes.
 
 ---
 

@@ -107,6 +107,9 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
    - Tích hợp nút tìm kiếm bên trong ô nhập, nhận diện nhanh mã ticket (nhập `PROJ-123` chuyển thẳng đến ticket), hỗ trợ tìm kiếm toàn cục cho quản trị viên.
 4. **Tối ưu hóa di động (Mobile RWD)**:
    - Menu trượt (Drawer) trên thiết bị di động, modal xem lịch sử dạng Bottom-Sheet, phân trang capsule căn giữa.
+5. **Cửa sổ Modal chờ "Đang tìm kiếm, vui lòng đợi..." kèm độ trễ chống nhấp nháy 150ms**:
+   - Hiển thị thẻ modal căn giữa với vòng xoay CSS thuần khiết trên cả 4 biểu mẫu tìm kiếm (tìm kiếm nhanh trên máy tính, ngăn kéo tìm kiếm di động, tìm kiếm nâng cao và bộ lọc danh sách) cũng như khi chuyển trang phân trang, sắp xếp cột và xóa tìm kiếm (`✕`).
+   - Tích hợp **độ trễ 150ms** giúp ngăn chặn nhấp nháy màn hình khi phản hồi nhanh nhưng vẫn hiển thị phản hồi trực quan rõ ràng khi Ollama mở rộng từ đồng nghĩa, đi kèm chặn truy vấn rỗng, bỏ qua khi giữ `Ctrl`/`Cmd` mở tab mới, tự động ẩn khi quay lại trang (`pageshow`) và tự động đóng an toàn sau 15 giây.
 
 ---
 

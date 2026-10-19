@@ -115,6 +115,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - Navigation drawer for mobile devices.
    - Explicit ticket IDs in summaries and Bottom-Sheet history detail modal.
    - Centered capsule pagination on mobile; desktop jump to first/last page and total page count.
+5. **Search & List Reload Loading Modal Overlay with 150ms Anti-Flicker Guard**:
+   - Displays a centered "Searching, please wait..." (`正在搜尋中，請稍候...`) modal overlay with a pure CSS animated spinner across all 4 search forms (desktop quick search, mobile search drawer, advanced search, and item list filter) as well as item list pagination, column sorting, and clear-search actions.
+   - Built-in **150ms micro-delay** prevents visual flicker during fast local searches while providing immediate feedback during multi-second Ollama synonym expansion, paired with blank-query interception, `Ctrl`/`Cmd` new-tab click bypass, `bfcache` (`pageshow`) auto-dismissal, and a 15-second safety timeout.
 
 ---
 

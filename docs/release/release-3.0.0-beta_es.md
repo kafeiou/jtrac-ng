@@ -106,6 +106,9 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
    - Botón de búsqueda integrado, salto directo por RefId (ej. `PROJ-123`) y búsqueda global para administradores.
 4. **Optimización móvil (RWD)**:
    - Menú lateral deslizable (Drawer), panel Bottom-Sheet para historial y paginación en cápsula centrada.
+5. **Ventana modal de carga "Buscando, por favor espere..." con retardo antiparpadeo de 150ms**:
+   - Muestra una tarjeta modal centrada con animación CSS pura durante búsquedas en los 4 formularios de búsqueda (búsqueda rápida de escritorio, cajón móvil, búsqueda avanzada y filtro de lista) así como al cambiar de página en la paginación, ordenar columnas o limpiar filtros (`✕`).
+   - Incluye un micro-retardo de **150ms** para evitar parpadeos en respuestas rápidas, interceptación de búsquedas vacías, exclusión de clics con `Ctrl`/`Cmd` (nueva pestaña), cierre automático con `pageshow` (caché atrás/adelante) y tiempo de seguridad de 15 segundos.
 
 ---
 

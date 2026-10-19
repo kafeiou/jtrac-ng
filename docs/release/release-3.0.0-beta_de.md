@@ -106,6 +106,9 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
    - Integrierter Suchbutton, RefId-Erkennung (z. B. `PROJ-123`) zur direkten Ticketnavigation und globale Suche für Administratoren.
 4. **Mobile Optimierung (RWD)**:
    - Seitliches Drawer-Menü, Bottom-Sheet für Verlaufsdetails und zentrierte Kapsel-Paginierung.
+5. **Lade-Modal „Suche läuft, bitte warten...“ mit 150ms Anti-Flacker-Verzögerung**:
+   - Zeigt bei allen 4 Suchformularen (Desktop-Schnellsuche, mobile Suchschublade, erweiterte Suche und Listenfilter) sowie beim Seitenwechsel in der Paginierung, bei der Spaltensortierung und beim Zurücksetzen der Suche (`✕`) ein zentriertes Modal-Overlay mit reinem CSS-Spinner an.
+   - Integrierte **150ms-Verzögerung** verhindert Flackern bei schnellen lokalen Antworten und bietet klares Feedback bei mehrsekündiger Ollama-Synonymerweiterung – inklusive Leerabfrage-Blockierung, `Ctrl`/`Cmd`-Neuer-Tab-Ausnahme, `pageshow`-Reset und 15-Sekunden-Sicherheits-Timeout.
 
 ---
 
