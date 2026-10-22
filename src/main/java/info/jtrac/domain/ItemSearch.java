@@ -180,10 +180,11 @@ public class ItemSearch implements Serializable {
     // so the DAO has to use getCriteriaForCount() separately
     public DetachedCriteria getCriteria() {
         DetachedCriteria criteria = getCriteriaForCount();
-        if (sortFieldName == null || "lastChanged".equals(sortFieldName)) { // lastChanged is a computed column
-            sortFieldName = "id"; // effectively is a sort on created date
+        if (sortFieldName == null) {
+            sortFieldName = "id";
         }
-        if(sortFieldName.equals("id") || sortFieldName.equals("space")) {
+        String effectiveSortField = "lastChanged".equals(sortFieldName) ? "id" : sortFieldName;
+        if(effectiveSortField.equals("id") || effectiveSortField.equals("space")) {
             if(showHistory) {
                 // if showHistory: sort by item.id and then history.id in ascending order
                 if(sortDescending) {
@@ -218,9 +219,9 @@ public class ItemSearch implements Serializable {
             }
         } else {        
             if (sortDescending) {
-                criteria.addOrder(Order.desc(sortFieldName));
+                criteria.addOrder(Order.desc(effectiveSortField));
             } else {
-                criteria.addOrder(Order.asc(sortFieldName));
+                criteria.addOrder(Order.asc(effectiveSortField));
             } 
             if (showHistory) {
                 criteria.addOrder(Order.desc("parent.id"));

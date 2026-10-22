@@ -98,6 +98,7 @@ public final class ItemUtils {
 				})
 				.escapeHtml(true)
 				.sanitizeUrls(true)
+				.softbreak("<br/>")
 				.build();
 	}
 

@@ -17,6 +17,7 @@
 package info.jtrac.hibernate;
 
 import info.jtrac.JtracDao;
+import info.jtrac.domain.AbstractItem;
 import info.jtrac.domain.Attachment;
 import info.jtrac.domain.Config;
 import info.jtrac.domain.Counts;
@@ -40,9 +41,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 import org.hibernate.CacheMode;
@@ -105,7 +109,8 @@ public class HibernateJtracDao implements JtracDao {
     public List<Item> findItems(ItemSearch itemSearch) {
         int pageSize = itemSearch.getPageSize();
         Field.Name sortFieldName = Field.isValidName(itemSearch.getSortFieldName()) ? Field.convertToName(itemSearch.getSortFieldName()) : null;
-        boolean doInMemorySort = sortFieldName != null && sortFieldName.isDropDownType() && itemSearch.getSpace() != null;
+        boolean doInMemorySort = "lastChanged".equals(itemSearch.getSortFieldName())
+                || (sortFieldName != null && sortFieldName.isDropDownType() && itemSearch.getSpace() != null);
         if (pageSize == -1 || doInMemorySort) {
             Criteria criteria = itemSearch.getCriteria().getExecutableCriteria(getCurrentSession());
             @SuppressWarnings("unchecked")
@@ -116,6 +121,9 @@ public class HibernateJtracDao implements JtracDao {
             itemSearch.setResultCount(list.size());
             if (pageSize != -1) {
                 int start = pageSize * itemSearch.getCurrentPage();
+                if (start >= list.size()) {
+                    return Collections.emptyList();
+                }
                 int end = Math.min(start + itemSearch.getPageSize(), list.size());
                 return list.subList(start, end);
             }
@@ -141,11 +149,41 @@ public class HibernateJtracDao implements JtracDao {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void doInMemorySort(List<Item> list, ItemSearch itemSearch) {
+        if ("lastChanged".equals(itemSearch.getSortFieldName())) {
+            Map<Long, Date> latestTimeMap = new HashMap<Long, Date>();
+            List<Long> parentIds = new ArrayList<Long>();
+            Set<Long> seenIds = new HashSet<Long>();
+            for (Object obj : list) {
+                AbstractItem ai = (AbstractItem) obj;
+                Item target = (ai instanceof Item) ? (Item) ai : ((History) ai).getParent();
+                if (target != null && target.getId() > 0 && seenIds.add(target.getId())) {
+                    parentIds.add(target.getId());
+                }
+            }
+            if (!parentIds.isEmpty() && sessionFactory != null) {
+                int batchSize = 500;
+                for (int i = 0; i < parentIds.size(); i += batchSize) {
+                    List<Long> chunk = parentIds.subList(i, Math.min(i + batchSize, parentIds.size()));
+                    List<Object[]> rows = getCurrentSession()
+                            .createQuery("select h.parent.id, max(h.timeStamp) from History h where h.parent.id in (:ids) group by h.parent.id having count(h.id) > 1", Object[].class)
+                            .setParameterList("ids", chunk)
+                            .getResultList();
+                    for (Object[] row : rows) {
+                        if (row[0] != null && row[1] != null) {
+                            latestTimeMap.put((Long) row[0], (Date) row[1]);
+                        }
+                    }
+                }
+            }
+            sortByLastChanged((List) list, itemSearch.isSortDescending(), latestTimeMap);
+            return;
+        }
         final Field field = itemSearch.getSpace().getMetadata().getField(itemSearch.getSortFieldName());
         final ArrayList<String> valueList = new ArrayList<String>(field.getOptions().keySet());
-        Comparator<Item> comp = new Comparator<Item>() {
-            public int compare(Item left, Item right) {
+        Comparator<AbstractItem> comp = new Comparator<AbstractItem>() {
+            public int compare(AbstractItem left, AbstractItem right) {
                 Object leftVal = left.getValue(field.getName());
                 String leftValString = leftVal == null ? null : leftVal.toString();
                 int leftInd = valueList.indexOf(leftValString);
@@ -155,7 +193,60 @@ public class HibernateJtracDao implements JtracDao {
                 return leftInd - rightInd;
             }
         };
-        Collections.sort(list, itemSearch.isSortDescending() ? comp.reversed() : comp);
+        Collections.sort((List) list, itemSearch.isSortDescending() ? comp.reversed() : comp);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sortByLastChanged(List list, final boolean sortDescending, final Map<Long, Date> latestTimeMap) {
+        Comparator<AbstractItem> comp = new Comparator<AbstractItem>() {
+            public int compare(AbstractItem left, AbstractItem right) {
+                Item leftItem = (left instanceof Item) ? (Item) left : ((History) left).getParent();
+                Item rightItem = (right instanceof Item) ? (Item) right : ((History) right).getParent();
+                long leftItemId = leftItem != null ? leftItem.getId() : left.getId();
+                long rightItemId = rightItem != null ? rightItem.getId() : right.getId();
+
+                if (!(left instanceof Item) && !(right instanceof Item) && leftItemId > 0 && leftItemId == rightItemId) {
+                    return Long.compare(left.getId(), right.getId());
+                }
+
+                Date leftTime = getEffectiveLastChangedTime(left, leftItem, latestTimeMap);
+                Date rightTime = getEffectiveLastChangedTime(right, rightItem, latestTimeMap);
+
+                int cmp = 0;
+                if (leftTime != null && rightTime != null) {
+                    cmp = leftTime.compareTo(rightTime);
+                } else if (leftTime != null) {
+                    cmp = 1;
+                } else if (rightTime != null) {
+                    cmp = -1;
+                }
+                if (cmp == 0) {
+                    cmp = Long.compare(leftItemId, rightItemId);
+                }
+                return sortDescending ? -cmp : cmp;
+            }
+        };
+        Collections.sort(list, comp);
+    }
+
+    private static Date getEffectiveLastChangedTime(AbstractItem row, Item targetItem, Map<Long, Date> latestTimeMap) {
+        if (targetItem == null) {
+            return row.getTimeStamp();
+        }
+        if (latestTimeMap != null && targetItem.getId() > 0) {
+            Date latest = latestTimeMap.get(targetItem.getId());
+            if (latest != null) {
+                return latest;
+            }
+            return targetItem.getTimeStamp() != null ? targetItem.getTimeStamp() : row.getTimeStamp();
+        }
+        if (targetItem.getHistory() != null && targetItem.getHistory().size() > 1) {
+            History latest = targetItem.getLatestHistory();
+            if (latest != null && latest.getTimeStamp() != null) {
+                return latest.getTimeStamp();
+            }
+        }
+        return targetItem.getTimeStamp() != null ? targetItem.getTimeStamp() : row.getTimeStamp();
     }
 
     public int loadCountOfAllItems() {

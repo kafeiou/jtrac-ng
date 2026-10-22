@@ -159,6 +159,7 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
    - **專案空間瀏覽純工單呈現與搜尋動態展開 (Clean Space Browsing & Search-Driven History Expansion)**：專案空間瀏覽預設 `showHistory = false`，每張工單僅顯示一筆乾淨記錄（`EFC-109`），徹底消除未搜尋即展開大量歷史修訂留言之混亂現象；僅在使用者輸入關鍵字檢索或進入進階搜尋表單時，系統自動啟用 `showHistory = true` 展開命中之歷程與留言，點選清除搜尋時自動收合還原。
    - **工單與修訂歷程時序排序優化 (Chronological Order: Parent Ticket Before Revisions)**：修正歷史記錄展開時之排序規則，依工單單號降序、歷程流水號升序（`parent.id DESC, id ASC`），確保主工單（如 `xxx-109`）永遠排在修訂歷程（如 `xxx-109(1)`）之前，若依其他欄位排序亦維持工單分組時序相鄰呈現。
    - **關鍵字搜尋之智慧歷程過濾 (Smart History Filtering)**：當開啟歷史記錄並執行文字搜尋時，自動實施智慧過濾，僅回傳並展示真正包含該搜尋關鍵字之首筆工單或留言修訂列，自動隱藏未含關鍵字之無關狀態修改歷程。
+   - **「最後變更 (`LAST_CHANGED`)」欄位語意精準化與點擊排序支援**：無論於一般空間列出資料（`showHistory = false`）或關鍵字搜尋展開歷史紀錄（`showHistory = true`），「最後變更」欄位皆統一取用該筆母工單之最後一筆歷史紀錄時間（`targetItem.getLatestHistory().getTimeStamp()`）；若工單僅建立而尚無任何後續修改或註解（`history.size() <= 1`），則明確顯示 `-`。同時支援點擊「最後變更」表頭進行升降序排序（有後續變更者以最後變更時間排序，顯示 `-` 之未變更工單則以建立時間參與排序）。
    - **系統啟動自動非同步重建索引**：自動偵測分詞器升級版本（`lucene.analyzer.version = 3.0.0-subtoken-v1`），於容器啟動後在背景非同步重建歷史工單 Lucene 索引。
    - **Docker Hub 映像檔遷移**：同步將 8 國語系建置手冊中的 Docker Hub 映像檔指向 `kafeiou/jtrac-ng:latest`。
 9. **Ollama 雙向繁簡轉換與兩岸同義詞檢索擴展 (Ollama Chinese Variant & Synonym Search Expansion)**：
@@ -170,6 +171,7 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
     - **問題根因修復**：修復在工單細節或留言輸入 Windows UNC 網路共享路徑（例如 `\\hlmt.com.tw\SysVol\hlmt.com.tw\Policies\{9CECF8CB-B752-4E7C-A1FB-90CB3B021A07}\User\Scripts\Logon` 或 `"\\hlmt.com.tw\..."`）時，因 CommonMark 原生標點符號跳脫機制導致開頭雙反斜線 `\\` 被吞噬縮減為單反斜線 `\`、大括號前反斜線 `\{` 遺失之問題。
     - **文字外觀 100% 保持自然排版**：維持一般純文字呈現，不強制包覆為程式碼晶片樣式，字體外觀與前後內文自然融合。
     - **全方位路徑覆蓋與程式碼防護**：全面支援 UNC 共享路徑（`\\server\share`）、磁碟路徑（`C:\...`）、相對路徑及單獨之雙反斜線（`\\`）；同時具備代碼區塊感知，對行內代碼（`` `...` ``）與圍欄程式碼區塊（```` ```...``` ````）主動繞過保護，絕不產生雙重跳脫，原生 Markdown 標點跳脫亦正常運作。
+    - **單次 Enter 換行完整保留（GFM Softbreak `<br/>`）**：於 CommonMark `HtmlRenderer` 啟用 `.softbreak("<br/>")`，確保新增工單細節（Detail）與追加註解（History Comment）中輸入之單一換行（`\n` / `\r\n`）於送出後直接轉為 `<br/>` 換行呈現，無須句尾補兩格空白。
 11. **JTrac NG 全新膠囊標籤向量 Logo 與「輕量級知識查詢系統」頁首升級 (JTrac NG Capsule Logo & Lightweight Knowledge Query System)**：
     - **全向量「JTrac [NG]」品牌 Logo**：正式退役 15 年前老舊之點陣 GIF，換上全新向量 SVG 品牌識別（深藍色 `JTrac` 搭配電光青藍漸層膠囊底色之白色 `NG` 標章），零鋸齒、支援 Retina 高解析螢幕與暗亮色主題自適應，並同步產出高解析透明 PNG 與相容 GIF 確保舊版歷史路徑 100% 向後相容。
     - **頁首說明文字精準定位**：將原預設之「JTrac - Open Source Issue Tracking System」全面升級為「`Lightweight Knowledge Query System`」（輕量級知識查詢系統），徹底消除繁瑣之 `&` 實體跳脫問題，左側 Logo 醒目標記品牌、右側文字專注系統價值，零冗餘且大氣俐落。

@@ -58,9 +58,6 @@ public class ItemListPanel extends BasePanel {
     private ItemSearch itemSearch;
     
     private void doSort(String sortFieldName) {
-        if ("lastChanged".equals(sortFieldName)) {
-            return;
-        }
         itemSearch.setCurrentPage(0);
         if (itemSearch.getSortFieldName().equals(sortFieldName)) {
             itemSearch.toggleSortDirection();
@@ -272,14 +269,9 @@ public class ItemListPanel extends BasePanel {
                 final ColumnHeading ch = (ColumnHeading) listItem.getModelObject();
                 Link headingLink = new Link("heading") {
                     public void onClick() {
-                        if (!"lastChanged".equals(ch.getNameText())) {
-                            doSort(ch.getNameText());
-                        }
+                        doSort(ch.getNameText());
                     }
                 };
-                if (ch.getNameText().equals("lastChanged")) {
-                    headingLink.setEnabled(false);
-                }
                 listItem.add(headingLink); 
                 String label = ch.isField() ? ch.getLabel() : localize("item_list." + ch.getName());
                 headingLink.add(new Label("heading", label));
@@ -380,15 +372,13 @@ public class ItemListPanel extends BasePanel {
                                     value = new Model(DateUtils.formatTimeStamp(item.getTimeStamp()));
                                     break;
                                 case LAST_CHANGED:
-									if (item instanceof Item) {
-										History history = ((Item) item).getLatestHistory();
-										if (history == null)
-											value = new Model(DateUtils.formatTimeStamp(item.getTimeStamp()));
-										else
-											value = new Model(DateUtils.formatTimeStamp(((Item) item).getLatestHistory().getTimeStamp()));
-									} else {
-										value = new Model(DateUtils.formatTimeStamp(item.getTimeStamp()));
-									}
+                                    Item targetItem = (item instanceof Item) ? (Item) item : ((History) item).getParent();
+                                    if (targetItem != null && targetItem.getHistory() != null && targetItem.getHistory().size() > 1) {
+                                        History latestHistory = targetItem.getLatestHistory();
+                                        value = new Model(latestHistory != null ? DateUtils.formatTimeStamp(latestHistory.getTimeStamp()) : "-");
+                                    } else {
+                                        value = new Model("-");
+                                    }
                                     break;
                                 case SPACE:
                                     if(showHistory) {
