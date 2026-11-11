@@ -14,7 +14,7 @@ RUN mvn clean package -DskipTests -B
 # ==============================================================================
 # Stage 2: Runtime Image (Eclipse Temurin 21 + Jetty 12.1 EE10)
 # ==============================================================================
-FROM jetty:12.1-jre21-eclipse-temurin
+FROM jetty:12-jdk21-eclipse-temurin
 
 USER root
 

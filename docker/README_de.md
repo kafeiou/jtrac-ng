@@ -1,4 +1,4 @@
-# JTrac NG Docker-Paketierung & Bereitstellung (Jetty 12.1 + Eclipse Temurin 21+)
+﻿# JTrac NG Docker-Paketierung & Bereitstellung (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,7 +8,7 @@ Dieses Verzeichnis enthält native Docker-Multi-Stage-Build-Konfigurationen und 
 
 ## Hauptmerkmale (Features)
 
-- **Modernisierte Laufzeitumgebung**: Basiert auf offiziellem `jetty:12.1-jre21-eclipse-temurin` mit `--add-modules=ee10-deploy,ee10-webapp` und nativer Jakarta-Servlet-6.0-Unterstützung (`jakarta.servlet`).
+- **Modernisierte Laufzeitumgebung**: Basiert auf offiziellem `jetty:12-jdk21-eclipse-temurin` mit `--add-modules=ee10-deploy,ee10-webapp` und nativer Jakarta-Servlet-6.0-Unterstützung (`jakarta.servlet`).
 - **Mehrstufiger Build (Multi-Stage Build)**: Automatische Kompilierung von `jtrac.war` aus dem Quellcode mittels `maven:3.9-eclipse-temurin-21`, ohne lokale Installation von JDK oder Maven.
 - **Vollständige Schriftartenunterstützung**: Enthält `fontconfig`, `fonts-noto-cjk`, `fonts-noto-core` und `fonts-dejavu-core` zur Vermeidung von Darstellungsfehlern bei PDF-Indizierung und Diagrammerstellung.
 - **Automatische Rechtekorrektur & sichere Ausführung**: Beim Start werden die Berechtigungen des Volumes `/jtrac-data` automatisch auf `jetty:jetty` (UID 999) angepasst und der Prozess mittels `gosu` sicher als Nicht-Root-Benutzer ausgeführt.

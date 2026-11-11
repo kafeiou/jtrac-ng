@@ -1,4 +1,4 @@
-# JTrac NG 編譯與建置指南 (繁體中文)
+﻿# JTrac NG 編譯與建置指南 (繁體中文)
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
@@ -113,7 +113,7 @@ JTrac NG 3.0.0-beta 核心採用 **Jakarta EE 10 / Servlet 6.0** 規範（`jakar
 |---|---|---|
 | **Jetty 12.x** | 12.1.x+（推薦首選） | **原生支援**：啟用內建 `ee10` 模組：<br/>`java -jar start.jar --add-modules=server,http,ee10-deploy,ee10-webapp`<br/>亦可直接使用內建之綠色可攜版（`jtrac-ng-3.0.0-beta-portable.zip`）雙擊執行。 |
 | **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **原生支援**：原生採用 Jakarta EE 10，直接將 `target/jtrac.war` 複製至 `webapps/ROOT.war` 即可開箱啟動。 |
-| **Docker 映像** | 3.0.0-beta | **官方推薦**：基於 `jetty:12.1-jre21-eclipse-temurin`，支援一鍵容器化部署。 |
+| **Docker 映像** | 3.0.0-beta | **官方推薦**：基於 `jetty:12-jdk21-eclipse-temurin`，支援一鍵容器化部署。 |
 
 ---
 

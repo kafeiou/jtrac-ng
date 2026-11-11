@@ -1,4 +1,4 @@
-# JTrac NG ビルド＆コンパイルガイド (日本語)
+﻿# JTrac NG ビルド＆コンパイルガイド (日本語)
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
@@ -113,7 +113,7 @@ JTrac NG 3.0.0-beta は **Jakarta EE 10 / Servlet 6.0** 仕様（`jakarta.servle
 |---|---|---|
 | **Jetty 12.x** | 12.1.x+（推奨首位） | **ネイティブ対応**：`ee10` モジュールを有効化：<br/>`java -jar start.jar --add-modules=server,http,ee10-deploy,ee10-webapp`<br/>または同梱のポータブル版（`jtrac-ng-3.0.0-beta-portable.zip`）で即座に実行可能。 |
 | **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **ネイティブ対応**：Jakarta EE 10 ネイティブ。`target/jtrac.war` を `webapps/ROOT.war` にコピーして起動するだけです。 |
-| **Docker コンテナ** | 3.0.0-beta | **公式推奨**：`jetty:12.1-jre21-eclipse-temurin` ベースのコンテナイメージでワンクリック運用。 |
+| **Docker コンテナ** | 3.0.0-beta | **公式推奨**：`jetty:12-jdk21-eclipse-temurin` ベースのコンテナイメージでワンクリック運用。 |
 
 ---
 

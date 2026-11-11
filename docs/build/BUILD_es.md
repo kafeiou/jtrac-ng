@@ -1,4 +1,4 @@
-# Guía de compilación y construcción de JTrac NG (Español)
+﻿# Guía de compilación y construcción de JTrac NG (Español)
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
@@ -102,7 +102,7 @@ JTrac NG 3.0.0-beta cumple con la especificación **Jakarta EE 10 / Servlet 6.0*
 |---|---|---|
 | **Jetty 12.x** | 12.1.x+ (Recomendado) | **Soporte nativo**: Active el módulo `ee10`:<br/>`java -jar start.jar --add-modules=server,http,ee10-deploy,ee10-webapp`<br/>O ejecute directamente la versión portable (`jtrac-ng-3.0.0-beta-portable.zip`). |
 | **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **Soporte nativo**: Nativo en Jakarta EE 10. Copie `target/jtrac.war` a `webapps/ROOT.war`. |
-| **Contenedor Docker** | 3.0.0-beta | **Imagen oficial**: Basada en `jetty:12.1-jre21-eclipse-temurin`. |
+| **Contenedor Docker** | 3.0.0-beta | **Imagen oficial**: Basada en `jetty:12-jdk21-eclipse-temurin`. |
 
 ---
 

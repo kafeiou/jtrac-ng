@@ -1,4 +1,4 @@
-# Hướng dẫn Biên dịch và Đóng gói JTrac NG (Tiếng Việt)
+﻿# Hướng dẫn Biên dịch và Đóng gói JTrac NG (Tiếng Việt)
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
@@ -102,7 +102,7 @@ JTrac NG 3.0.0-beta tuân thủ đặc tả **Jakarta EE 10 / Servlet 6.0** (`ja
 |---|---|---|
 | **Jetty 12.x** | 12.1.x+ (Khuyên dùng) | **Hỗ trợ gốc**: Kích hoạt mô-đun `ee10`:<br/>`java -jar start.jar --add-modules=server,http,ee10-deploy,ee10-webapp`<br/>Hoặc chạy trực tiếp bản phân phối di động (`jtrac-ng-3.0.0-beta-portable.zip`). |
 | **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **Hỗ trợ gốc**: Tích hợp gốc Jakarta EE 10. Sao chép `target/jtrac.war` vào `webapps/ROOT.war`. |
-| **Vỏ chứa Docker** | 3.0.0-beta | **Hình ảnh chính thức**: Dựa trên `jetty:12.1-jre21-eclipse-temurin`. |
+| **Vỏ chứa Docker** | 3.0.0-beta | **Hình ảnh chính thức**: Dựa trên `jetty:12-jdk21-eclipse-temurin`. |
 
 ---
 
