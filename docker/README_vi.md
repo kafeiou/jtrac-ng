@@ -1,4 +1,4 @@
-# Đóng gói & Triển khai JTrac NG Docker (Jetty 12.x + Eclipse Temurin 17+)
+# Đóng gói & Triển khai JTrac NG Docker (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,8 +8,8 @@ Thư mục này cung cấp môi trường xây dựng nhiều giai đoạn (Mult
 
 ## Tính năng nổi bật (Features)
 
-- **Môi trường hiện đại**: Dựa trên hình ảnh chính thức `jetty:12-jre17-eclipse-temurin` tích hợp các mô-đun `ee8-deploy` và `ee8-webapp`, hỗ trợ nguyên bản Servlet 4.0 (`javax.servlet`).
-- **Xây dựng nhiều giai đoạn (Multi-stage Build)**: Tự động biên dịch `jtrac.war` từ mã nguồn bằng `maven:3.9-eclipse-temurin-17`, không yêu cầu cài đặt trước JDK hoặc Maven trên máy chủ.
+- **Môi trường hiện đại**: Dựa trên hình ảnh chính thức `jetty:12.1-jre21-eclipse-temurin` tích hợp các mô-đun `ee10-deploy` và `ee10-webapp`, hỗ trợ nguyên bản Jakarta Servlet 6.0 (`jakarta.servlet`).
+- **Xây dựng nhiều giai đoạn (Multi-stage Build)**: Tự động biên dịch `jtrac.war` từ mã nguồn bằng `maven:3.9-eclipse-temurin-21`, không yêu cầu cài đặt trước JDK hoặc Maven trên máy chủ.
 - **Hỗ trợ đầy đủ phông chữ đa ngôn ngữ**: Tích hợp sẵn `fontconfig`, `fonts-noto-cjk`, `fonts-noto-core` (tiếng Việt và dấu thanh), `fonts-dejavu-core`, đảm bảo không bị lỗi ô vuông (tofu) hay lỗi font khi trích xuất văn bản và xuất báo cáo.
 - **Tự động sửa quyền và hạ quyền an toàn**: Entrypoint tự động sửa quyền sở hữu thư mục gắn kết `/jtrac-data` thành `jetty:jetty` (UID 999) và hạ quyền thực thi an toàn thông qua `gosu`.
 

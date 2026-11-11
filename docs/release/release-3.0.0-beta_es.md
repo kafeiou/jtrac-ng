@@ -1,16 +1,18 @@
-# Notas de la Versión de JTrac NG (Release Notes) - 3.0.0-beta
+﻿# Notas de la Versión de JTrac NG (Release Notes) - 3.0.0-beta
 
 [English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
 [![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
 [![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_es.md)
-[![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
-[![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
+[![Wicket](https://img.shields.io/badge/Wicket-10.12.0-blue.svg)](https://wicket.apache.org/)
+[![Spring](https://img.shields.io/badge/Spring-6.2.19-brightgreen.svg)](https://spring.io/)
+[![Jetty](https://img.shields.io/badge/Jetty-12.1%20EE10-blue.svg)](https://eclipse.dev/jetty/)
+[![Dependabot](https://img.shields.io/badge/Vulnerabilities-0%20Clean-brightgreen.svg)](https://github.com/kafeiou/jtrac-ng/security/dependabot)
 
 > [!NOTE]
 > **Estado actual: Versión previa de pruebas Beta (Pre-release / Beta Preview)**  
@@ -21,7 +23,7 @@
 ## Índice
 1. [Resumen de características principales](#1-resumen-de-características-principales)
 2. [🤖 Asistente de consultas por correo con IA (AI Query Copilot con Ollama)](#2--asistente-de-consultas-por-correo-con-ia-ai-query-copilot-con-ollama)
-3. [📦 Actualización de dependencias y eliminación de advertencias en Java 11](#3--actualización-de-dependencias-y-eliminación-de-advertencias-en-java-11)
+3. [📦 Modernización de arquitectura (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) y 0 vulnerabilidades](#3--modernización-de-arquitectura-jdk-21--jakarta-ee-10--spring-62--jetty-121-y-0-vulnerabilidades)
 4. [🎨 Modernización de interfaz, Accesibilidad de fuentes y Temas](#4--modernización-de-interfaz-accesibilidad-de-fuentes-y-temas)
 5. [🛡️ Fortalecimiento de seguridad en producción y protecciones](#5--fortalecimiento-de-seguridad-en-producción-y-protecciones)
 6. [⚙️ Configuración del sistema y mejoras de estabilidad](#6--configuración-del-sistema-y-mejoras-de-estabilidad)
@@ -88,11 +90,26 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 
 ---
 
-## 3. 📦 Actualización de dependencias y eliminación de advertencias en Java 11
+## 3. 📦 Modernización de arquitectura (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) y 0 vulnerabilidades
 
-1. **Actualización de `dom4j` a `2.1.4`**:
-   - Reemplaza la biblioteca histórica `dom4j:1.6.1` por `org.dom4j:dom4j:2.1.4`.
-   - Elimina la advertencia `WARNING: An illegal reflective access operation has occurred` en Tomcat 9 y Java 11.
+1. **Actualización completa a JDK 21 LTS**:
+   - Entorno de compilación y ejecución actualizado a **Java 21 LTS**, con soporte completo para classfile version 65; rendimiento JVM y compatibilidad con contenedores optimizados.
+2. **Migración a Jakarta EE 10 (javax.* ➜ jakarta.*)**:
+   - Transición integral de javax.servlet.* y javax.mail.* hacia **Jakarta EE 10**: jakarta.servlet.* (Servlet 6.0) y jakarta.mail.* (Jakarta Mail 2.1).
+   - Soporte nativo para contenedores **Jetty 12.1 EE10** (ee10-deploy,ee10-webapp).
+3. **Actualización a Spring Framework 6.2.19 y Spring Security 6.5.11**:
+   - Marco base actualizado a **Spring 6.2.19** y **Spring Security 6.5.11**.
+   - Declaraciones DTD obsoletas eliminadas en favor de esquemas Spring XSD estándar.
+4. **Eliminación de dependencia Spring MVC y 16 CVEs con JtracApiServlet**:
+   - Eliminación total de spring-webmvc; el servlet nativo JtracApiServlet (Jakarta Servlet) gestiona /api/* y compatibilidad /flow/*.
+   - Erradica 16 alertas históricas de vulnerabilidades CVE de Spring MVC reportadas por GitHub Dependabot.
+5. **Modernización a Apache Wicket 10.12.0**:
+   - Capa UI modernizada a **Wicket 10.12.0**, integrada nativamente con Jakarta EE 10, Servlet 6.0 y Java 21.
+6. **100% de alertas Dependabot eliminadas (0 Vulnerabilities)**:
+   - Bibliotecas base actualizadas: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
+   - Verificado mediante auditoría OSV.dev y GHSA: **0 vulnerabilidades (100% Limpio)**.
+7. **Imagen Docker actualizada a Jetty 12.1 EE10**:
+   - Imagen de ejecución actualizada a jetty:12.1-jre21-eclipse-temurin con módulos ee10-deploy,ee10-webapp.
 
 ---
 
@@ -158,9 +175,18 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 
 ---
 
+12. **Distribución portable independiente y scripts de inicio/parada**:
+    - **Paquete autónomo**: Genera jtrac-ng-3.0.0-beta-portable.zip con Jetty 12.1 (EE10) y JTrac NG WAR integrados, ejecutable de inmediato con Java 21+ sin requerir configuración de servidor externo.
+    - **Scripts multiplataforma**: Proporciona scripts para Windows (start.bat / stop.bat) y Linux / macOS (start.sh / stop.sh), con detección automática de Java 21, verificación de puertos, soporte de puerto personalizado (ej. start.bat 8888) y apertura automática del navegador en http://localhost:8080/.
+    - **Almacenamiento aislado sin residuos (./data)**: Fija el directorio de datos a ./data mediante -Djtrac.home. La base de datos HSQLDB, archivos adjuntos e índices Lucene permanecen contenidos sin dejar residuos en el sistema.
+    - **Perfil Maven para empaquetado**: Incorpora <profile><id>portable</id></profile> en pom.xml para empaquetar mediante mvn package -Pportable, o ejecutando package-portable.bat / ./package-portable.sh.
+
+---
+
 ## 7. Guía de actualización y compatibilidad
 
 - **Base de datos**: Totalmente compatible con la versión 2.3.3-2.0.0; **no requiere scripts de migración**.
+- **Ejecución portable**: Descargue y descomprima jtrac-ng-3.0.0-beta-portable.zip, luego ejecute start.bat (Windows) o ./start.sh (Linux / macOS) (credenciales predeterminadas: dmin / dmin; requiere Java 21+).
 - **Despliegue**: Sustituya el archivo `ROOT.war` existente en el servidor por `target/jtrac.war`.
 - **Documentación relacionada**:
   - [Guía práctica de consultas por correo y Prompts](../llm/PROMPT_EXAMPLES_es.md)

@@ -1,4 +1,4 @@
-# Empaquetado y Despliegue con Docker de JTrac NG (Jetty 12.x + Eclipse Temurin 17+)
+# Empaquetado y Despliegue con Docker de JTrac NG (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,8 +8,8 @@ Este directorio proporciona un entorno nativo de construcción multietapa (Multi
 
 ## Características principales (Features)
 
-- **Entorno modernizado**: Basado en la imagen oficial `jetty:12-jre17-eclipse-temurin` con módulos `ee8-deploy` y `ee8-webapp`, con soporte nativo para Servlet 4.0 (`javax.servlet`).
-- **Construcción multietapa (Multi-stage Build)**: Compilación automática de `jtrac.war` desde el código fuente mediante `maven:3.9-eclipse-temurin-17`, sin requerir JDK ni Maven en el host.
+- **Entorno modernizado**: Basado en la imagen oficial `jetty:12.1-jre21-eclipse-temurin` con módulos `ee10-deploy` y `ee10-webapp`, con soporte nativo para Jakarta Servlet 6.0 (`jakarta.servlet`).
+- **Construcción multietapa (Multi-stage Build)**: Compilación automática de `jtrac.war` desde el código fuente mediante `maven:3.9-eclipse-temurin-21`, sin requerir JDK ni Maven en el host.
 - **Soporte multilingüe de fuentes completo**: Incluye `fontconfig`, `fonts-noto-cjk`, `fonts-noto-core` y `fonts-dejavu-core`, evitando caracteres faltantes o corruptos durante la indexación y generación de informes.
 - **Corrección automática de permisos y ejecución segura**: En el arranque, el Entrypoint corrige la propiedad de `/jtrac-data` a `jetty:jetty` (UID 999) y desescala privilegios mediante `gosu`.
 

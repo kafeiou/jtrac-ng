@@ -1,16 +1,18 @@
-# Ghi chú Phát hành JTrac NG (Release Notes) - 3.0.0-beta
+﻿# Ghi chú Phát hành JTrac NG (Release Notes) - 3.0.0-beta
 
 [English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
 [![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
 [![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_vi.md)
-[![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
-[![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
+[![Wicket](https://img.shields.io/badge/Wicket-10.12.0-blue.svg)](https://wicket.apache.org/)
+[![Spring](https://img.shields.io/badge/Spring-6.2.19-brightgreen.svg)](https://spring.io/)
+[![Jetty](https://img.shields.io/badge/Jetty-12.1%20EE10-blue.svg)](https://eclipse.dev/jetty/)
+[![Dependabot](https://img.shields.io/badge/Vulnerabilities-0%20Clean-brightgreen.svg)](https://github.com/kafeiou/jtrac-ng/security/dependabot)
 
 > [!NOTE]
 > **Trạng thái hiện tại: Bản xem trước thử nghiệm Beta (Pre-release / Beta Preview)**  
@@ -21,7 +23,7 @@
 ## Mục lục
 1. [Tổng quan về các điểm nổi bật](#1-tổng-quan-về-các-điểm-nổi-bật)
 2. [🤖 Trợ lý truy vấn Email AI (AI Query Copilot với Ollama)](#2--trợ-lý-truy-vấn-email-ai-ai-query-copilot-với-ollama)
-3. [📦 Nâng cấp thư viện cốt lõi & Loại bỏ cảnh báo Java 11](#3--nâng-cấp-thư-viện-cốt-lõi--loại-bỏ-cảnh-báo-java-11)
+3. [📦 Hiện đại hóa kiến trúc (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) & 0 Lỗ hổng bảo mật](#3--hiện-đại-hóa-kiến-trúc-jdk-21--jakarta-ee-10--spring-62--jetty-121--0-lỗ-hổng-bảo-mật)
 4. [🎨 Hiện đại hóa giao diện, Phóng to chữ & Chuyển đổi giao diện](#4--hiện-đại-hóa-giao-diện-phóng-to-chữ--chuyển-đổi-giao-diện)
 5. [🛡️ Tăng cường bảo mật môi trường Production](#5--tăng-cường-bảo-mật-môi-trường-production)
 6. [⚙️ Cấu hình hệ thống và cải thiện độ ổn định](#6--cấu-hình-hệ-thống-và-cải-thiện-độ-ổn-định)
@@ -88,11 +90,26 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 
 ---
 
-## 3. 📦 Nâng cấp thư viện cốt lõi & Loại bỏ cảnh báo Java 11
+## 3. 📦 Hiện đại hóa kiến trúc (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) & 0 Lỗ hổng bảo mật
 
-1. **Nâng cấp `dom4j` lên `2.1.4`**:
-   - Nâng cấp thư viện cũ `dom4j:1.6.1` lên bản `org.dom4j:dom4j:2.1.4`.
-   - Giải quyết triệt để cảnh báo `WARNING: An illegal reflective access operation has occurred` khi chạy trên Tomcat 9 và JDK 11.
+1. **Nâng cấp toàn diện lên JDK 21 LTS**:
+   - Nâng cấp môi trường biên dịch và thực thi lên **Java 21 LTS**, hỗ trợ đầy đủ classfile version 65, tối ưu hóa hiệu năng máy ảo JVM và khả năng tương thích container hiện đại.
+2. **Chuyển đổi tiêu chuẩn Jakarta EE 10 (javax.* ➜ jakarta.*)**:
+   - Di chuyển toàn diện từ javax.servlet.* và javax.mail.* sang các tiêu chuẩn mới của **Jakarta EE 10**: jakarta.servlet.* (Servlet 6.0) và jakarta.mail.* (Jakarta Mail 2.1).
+   - Hỗ trợ gốc cho môi trường container **Jetty 12.1 EE10** (ee10-deploy,ee10-webapp).
+3. **Nâng cấp Spring Framework 6.2.19 & Spring Security 6.5.11**:
+   - Nâng cấp bộ khung cốt lõi lên **Spring Framework 6.2.19** và **Spring Security 6.5.11**.
+   - Loại bỏ hoàn toàn khai báo DTD cũ, chuyển sang định dạng Spring XSD Schema chuẩn.
+4. **Loại bỏ phụ thuộc Spring MVC, giải quyết 16 lỗ hổng CVE với JtracApiServlet**:
+   - Loại bỏ hoàn toàn thư viện spring-webmvc, triển khai JtracApiServlet (Jakarta Servlet) gọn nhẹ xử lý các yêu cầu REST /api/* và điều hướng tương thích /flow/*.
+   - Kết hợp Hibernate OpenSessionInViewFilter bao quát toàn diện, xóa bỏ 16 cảnh báo lỗ hổng CVE lịch sử của Spring MVC từ GitHub Dependabot.
+5. **Nâng cấp Apache Wicket 10.12.0**:
+   - Nâng cấp tầng giao diện web lên **Wicket 10.12.0**, tích hợp nguyên bản với Jakarta EE 10, Servlet 6.0 và Java 21.
+6. **Xóa sạch 100% cảnh báo bảo mật Dependabot (0 Vulnerabilities)**:
+   - Nâng cấp toàn diện các thư viện: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
+   - Kiểm tra qua OSV.dev và GHSA đạt chuẩn an toàn tuyệt đối **0 Lỗ hổng (100% Sạch)**.
+7. **Nâng cấp Docker Image lên Jetty 12.1 EE10**:
+   - Image runtime cập nhật thành jetty:12.1-jre21-eclipse-temurin với các mô-đun ee10-deploy,ee10-webapp.
 
 ---
 
@@ -159,9 +176,18 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 
 ---
 
+12. **Bản phân phối di động (Portable Standalone) & Tập lệnh Khởi động/Dừng**:
+    - **Đóng gói độc lập tự túc**: Hỗ trợ tạo jtrac-ng-3.0.0-beta-portable.zip tích hợp sẵn máy chủ Jetty 12.1 (EE10) và WAR JTrac NG, giải nén và chạy ngay lập tức trên môi trường Java 21+ mà không cần cài đặt máy chủ servlet bên ngoài.
+    - **Tập lệnh đa nền tảng**: Cung cấp tập lệnh cho Windows (start.bat / stop.bat) và Linux / macOS (start.sh / stop.sh), tự động nhận diện Java 21, cảnh báo xung đột cổng, hỗ trợ tham số cổng tùy chỉnh (ví dụ: start.bat 8888) và tự động mở trình duyệt tới http://localhost:8080/ sau 4 giây.
+    - **Cô lập dữ liệu cục bộ (./data)**: Tự động liên kết thư mục dữ liệu với ./data thông qua -Djtrac.home. Cơ sở dữ liệu HSQLDB nhúng, tệp đính kèm và chỉ mục Lucene được lưu trữ độc lập hoàn toàn, không để lại tệp rác trên hệ thống.
+    - **Đóng gói bằng Maven Profile**: Tích hợp <profile><id>portable</id></profile> trong pom.xml, cho phép đóng gói qua lệnh mvn package -Pportable hoặc chạy trực tiếp package-portable.bat / ./package-portable.sh.
+
+---
+
 ## 7. Hướng dẫn nâng cấp và tính tương thích
 
 - **Cơ sở dữ liệu**: Tương thích hoàn toàn với bản 2.3.3-2.0.0; **không cần chạy bất kỳ mã script nâng cấp nào**.
+- **Chạy bản Portable**: Tải xuống và giải nén jtrac-ng-3.0.0-beta-portable.zip, chạy start.bat (Windows) hoặc ./start.sh (Linux / macOS) để sử dụng ngay (tài khoản mặc định: dmin / dmin; yêu cầu Java 21+).
 - **Triển khai**: Ghi đè tệp `target/jtrac.war` vào `ROOT.war` hiện có trên máy chủ.
 - **Tài liệu liên quan**:
   - [Hướng dẫn truy vấn Email và viết Prompt cho JTrac AI](../llm/PROMPT_EXAMPLES_vi.md)

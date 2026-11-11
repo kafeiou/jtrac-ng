@@ -1,4 +1,4 @@
-# JTrac NG Docker Packaging & Deployment (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker Packaging & Deployment (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,8 +8,8 @@ This directory provides native multi-stage Docker packaging and containerized ru
 
 ## Features
 
-- **Modernized Runtime Environment**: Based on official `jetty:12-jre17-eclipse-temurin` with `--add-modules=ee8-deploy,ee8-webapp`, natively supporting Servlet 4.0 (`javax.servlet`).
-- **Multi-stage Build**: Automatically compiles `jtrac.war` from source using `maven:3.9-eclipse-temurin-17` with `-DskipTests`, requiring no local JDK or Maven installation.
+- **Modernized Runtime Environment**: Based on official `jetty:12.1-jre21-eclipse-temurin` with `--add-modules=ee10-deploy,ee10-webapp`, natively supporting Jakarta Servlet 6.0 (`jakarta.servlet`).
+- **Multi-stage Build**: Automatically compiles `jtrac.war` from source using `maven:3.9-eclipse-temurin-21` with `-DskipTests`, requiring no local JDK or Maven installation.
 - **Full Multilingual Font Support**: Pre-installed `fontconfig`, `fonts-noto-cjk` (CJK characters), `fonts-noto-core` (Vietnamese and diacritics), and `fonts-dejavu-core` (European accents), preventing missing glyphs (tofu) and garbled characters during PDF/Office full-text indexing and report generation.
 - **Dynamic Volume Permission Fix & Secure Step-down**: The entrypoint runs as root on boot to automatically repair `/jtrac-data` ownership to `jetty:jetty` (UID 999), and then steps down using `gosu` to run Jetty securely without manual host `chown`.
 

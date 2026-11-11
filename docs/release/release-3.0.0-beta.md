@@ -1,16 +1,18 @@
-# JTrac NG Release Notes - 3.0.0-beta
+﻿# JTrac NG Release Notes - 3.0.0-beta
 
-[English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
+[English](release-3.0.0-beta.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
 [![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
-[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_en.md)
-[![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
-[![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
+[![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta.md)
+[![Wicket](https://img.shields.io/badge/Wicket-10.12.0-blue.svg)](https://wicket.apache.org/)
+[![Spring](https://img.shields.io/badge/Spring-6.2.19-brightgreen.svg)](https://spring.io/)
+[![Jetty](https://img.shields.io/badge/Jetty-12.1%20EE10-blue.svg)](https://eclipse.dev/jetty/)
+[![Dependabot](https://img.shields.io/badge/Vulnerabilities-0%20Clean-brightgreen.svg)](https://github.com/kafeiou/jtrac-ng/security/dependabot)
 
 > [!NOTE]
 > **Current Status: Pre-release / Beta Preview - Living Release Notes**  
@@ -21,7 +23,7 @@
 ## Table of Contents
 1. [Core Highlights Overview](#1-core-highlights-overview)
 2. [🤖 AI Query Copilot (Ollama Integration)](#2--ai-query-copilot-ollama-integration)
-3. [📦 Dependency Upgrade & Java 11 Warning Elimination](#3--dependency-upgrade--java-11-warning-elimination)
+3. [📦 Architecture Modernization (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) & 0 Vulnerabilities](#3--architecture-modernization-jdk-21--jakarta-ee-10--spring-62--jetty-121--0-vulnerabilities)
 4. [🎨 UI/UX Modernization & Accessibility Enhancements](#4--uiux-modernization--accessibility-enhancements)
 5. [🛡️ Production Security Hardening & Guardrails](#5--production-security-hardening--guardrails)
 6. [⚙️ System Configuration & Stability Fixes](#6--system-configuration--stability-fixes)
@@ -54,8 +56,6 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - **Zero Email Gateway Blocking**: Emails no longer carry `.html` attachments that are prone to corporate email firewall rejections (Exchange/Outlook/Gmail), replaced by safe direct links.
    - **14-Day Lifecycle & Automated Hourly Cleanup (TTL Auto-Pruning)**: The server retains reports for 14 days and automatically cleans up expired files via an hourly scheduler with zero maintenance overhead.
    - **100% Offline Usable with One-Click Download**: The report features a sticky action bar supporting one-click download (`JTrac-AI-Report-[Date].html`), embedding the full Mermaid.js engine for complete air-gapped offline use.
-   - **Standalone HTML**: Built in-memory via `ByteArrayResource` (under 3ms, zero disk I/O).
-   - **Modern Design**: Crisp table borders (`border-collapse: collapse`), native `<details>` expandable cards, dark/light theme switching (`@media prefers-color-scheme: dark`), and print expansion.
 5. **Multilingual Prompt Engineering Guide & 4 Real-world Examples**:
    - Published comprehensive practical guides [`docs/llm/PROMPT_EXAMPLES_*.md`](../llm/PROMPT_EXAMPLES_en.md) across 8 languages.
 6. **Ticket Space Grouping, ID DESC Sorting & 100% Air-gapped Offline Mermaid.js Integration**:
@@ -94,12 +94,26 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 
 ---
 
-## 3. 📦 Dependency Upgrade & Java 11 Warning Elimination
+## 3. 📦 Architecture Modernization (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) & 0 Vulnerabilities
 
-1. **Upgrade `dom4j` to `2.1.4`**:
-   - Upgraded legacy `dom4j:1.6.1` (from 2005) to `org.dom4j:dom4j:2.1.4`.
-   - Fixed generic node casting in [`Metadata.java`](../../src/main/java/info/jtrac/domain/Metadata.java).
-   - Completely resolved `WARNING: An illegal reflective access operation has occurred (org.dom4j.io.SAXContentHandler)` under Tomcat 9 / Java 11.
+1. **Full JDK 21 LTS Modernization**:
+   - Upgraded build target and runtime baseline to **Java 21 LTS**, fully supporting classfile version 65 for enhanced JVM performance, throughput, and container support.
+2. **Jakarta EE 10 Specification Migration (javax.* ➜ jakarta.*)**:
+   - Completely migrated from legacy javax.servlet.* and javax.mail.* to modern **Jakarta EE 10** standards: jakarta.servlet.* (Servlet 6.0) and jakarta.mail.* (Jakarta Mail 2.1).
+   - Natively supported on **Jetty 12.1 EE10** container environments (ee10-deploy,ee10-webapp).
+3. **Spring Framework 6.2.19 & Spring Security 6.5.11**:
+   - Core framework upgraded to **Spring Framework 6.2.19** and **Spring Security 6.5.11**.
+   - Retired deprecated Spring DTD declarations in favor of modern Spring XSD Schema across all XML context configurations.
+4. **Eliminated Spring MVC Dependency & 16 CVEs via Lightweight JtracApiServlet**:
+   - Completely replaced DispatcherServlet and excluded spring-webmvc, eliminating 16 historical Spring MVC CVE advisories reported by GitHub Dependabot.
+   - Introduced a lightweight Jakarta JtracApiServlet handling /api/* REST APIs and /flow/* compatibility routes with global Hibernate OpenSessionInViewFilter coverage.
+5. **Apache Wicket 10.12.0 Modernization**:
+   - Modernized the web UI tier to **Wicket 10.12.0**, natively integrated with Jakarta EE 10, Servlet 6.0, and Java 21.
+6. **100% Dependabot Vulnerability Clean (0 Vulnerabilities)**:
+   - Upgraded all foundational libraries: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), and dom4j (2.1.4).
+   - Verified via OSV.dev and GHSA batch audits across all direct and transitive dependencies, achieving **0 Vulnerabilities (100% Clean)**.
+7. **Docker Runtime Image Upgraded to Jetty 12.1 EE10**:
+   - Runtime base updated to jetty:12.1-jre21-eclipse-temurin with --add-modules=ee10-deploy,ee10-webapp, built via multi-stage maven:3.9-eclipse-temurin-21.
 
 ---
 
@@ -148,9 +162,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - Detects text attachment encoding and injects charset headers to prevent garbled text.
 5. **Context-Relative Logo Resolution**:
    - Resolves system header logo paths correctly behind reverse proxies.
-6. **Docker Build Safeguards & Git Sync Guidance**:
-   - Added startup prompts to `docker/build.bat` and `docker/build.sh` terminals, reminding users of the one-click synchronization command (`git fetch --tags -f && git reset --hard origin/master`) when encountering tag conflicts or file changes before compilation.
-   - Provided comprehensive 8-language build documentation in `docker/`, appending troubleshooting and tag conflict resolution guides.
+6. **Docker Build Script Guidance & Git Tag Conflict Prevention**:
+   - Added startup troubleshooting tips to `docker/build.bat` and `docker/build.sh` with one-click sync instructions (`git fetch --tags -f && git reset --hard origin/master`) for build machines encountering tag clobbering or local build diffs.
+   - Expanded `docker/` documentation across all 8 supported languages with troubleshooting guides for build environment synchronization.
 7. **JTrac NG Rebranding & Semantic Versioning Leap (v3.0.0-beta)**:
    - Officially rebranded the project to **JTrac NG** (Next Generation) and bumped version to **3.0.0-beta**, eliminating 15-year-old search collisions with legacy JTrac 2.1.0/2.3.x and dramatically boosting Google SEO indexation.
    - Migrated official repository to [https://github.com/kafeiou/jtrac-ng](https://github.com/kafeiou/jtrac-ng), synchronizing web footers, mobile navigation bar, and Maven POM descriptors.
@@ -180,9 +194,18 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 
 ---
 
+12. **Portable Standalone Distribution & Start/Stop Scripts**:
+    - **Self-Contained Bundle**: Supports generating jtrac-ng-3.0.0-beta-portable.zip, embedding Jetty 12.1 (EE10) server and JTrac NG WAR. It runs immediately on systems with Java 21+ without requiring external servlet container setup.
+    - **Cross-Platform Startup/Shutdown Scripts**: Provides startup/shutdown scripts for Windows (start.bat / stop.bat) and Linux / macOS (start.sh / stop.sh), featuring automatic Java 21 detection, port conflict warnings, custom port parameter support (e.g. start.bat 8888), and auto-opening the browser at http://localhost:8080/ after 4 seconds.
+    - **Zero-Residue Isolated Storage (./data)**: Automatically locks the data directory to ./data inside the portable bundle via -Djtrac.home. Embedded HSQLDB database, uploaded attachments, and Lucene search indexes remain 100% self-contained with zero residue in system temporary or AppData directories.
+    - **One-Command Maven Profile Packaging**: Integrated <profile><id>portable</id></profile> into pom.xml, enabling cross-platform distribution packaging via mvn package -Pportable, or by executing package-portable.bat / ./package-portable.sh directly.
+
+---
+
 ## 7. Upgrade & Compatibility Guidance
 
 - **Database Upgrade**: Fully compatible with 2.3.3-2.0.0; **no schema migration script is required**.
+- **Portable Distribution**: Download and extract jtrac-ng-3.0.0-beta-portable.zip, then run start.bat (Windows) or ./start.sh (Linux / macOS) to start immediately (default credentials: dmin / dmin; Java 21+ required).
 - **WAR Deployment**: Replace the existing `ROOT.war` with `target/jtrac.war`.
 - **Related Links**:
   - [JTrac AI Email Query & Prompt Writing Practical Guide](../llm/PROMPT_EXAMPLES_en.md)

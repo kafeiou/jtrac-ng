@@ -1,7 +1,7 @@
 # ==============================================================================
 # Stage 1: Build JTrac Web Application Archive (WAR)
 # ==============================================================================
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /build
 
 # Copy Maven descriptor and source tree
@@ -12,9 +12,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # ==============================================================================
-# Stage 2: Runtime Image (Eclipse Temurin 17 + Jetty 12 EE8)
+# Stage 2: Runtime Image (Eclipse Temurin 21 + Jetty 12.1 EE10)
 # ==============================================================================
-FROM jetty:12-jre17-eclipse-temurin
+FROM jetty:12.1-jre21-eclipse-temurin
 
 USER root
 
@@ -29,9 +29,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && fc-cache -fv \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure Jetty Base with ee8-deploy and ee8-webapp modules for javax.servlet 4.0 support
+# Configure Jetty Base with ee10-deploy and ee10-webapp modules for jakarta.servlet 6.0 support
 WORKDIR $JETTY_BASE
-RUN java -jar "$JETTY_HOME/start.jar" --add-modules=ee8-deploy,ee8-webapp
+RUN java -jar "$JETTY_HOME/start.jar" --add-modules=ee10-deploy,ee10-webapp
 
 # Create persistent data directory with jetty ownership
 RUN mkdir -p /jtrac-data && chown -R jetty:jetty /jtrac-data

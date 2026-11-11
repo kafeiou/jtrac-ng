@@ -18,17 +18,15 @@ package info.jtrac.web;
 
 import info.jtrac.Jtrac;
 import java.lang.reflect.Method;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
 
 /**
- * Base class for MultiActionControllers implementing Spring 5 Controller
+ * Base class for MultiActionControllers handling HTTP requests
  */
-public abstract class AbstractMultiActionController implements Controller {        
+public abstract class AbstractMultiActionController {        
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -38,28 +36,22 @@ public abstract class AbstractMultiActionController implements Controller {
         this.jtrac = jtrac;
     }
 
-    @Override
-    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return handleRequestInternal(request, response);
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        handleRequestInternal(request, response);
     }
 
-    protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    protected void handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String methodName = getHandlerMethodName(request);
         if (methodName == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return;
         }
         try {
             Method method = getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
-            Object result = method.invoke(this, request, response);
-            if (result instanceof ModelAndView) {
-                return (ModelAndView) result;
-            }
-            return null;
+            method.invoke(this, request, response);
         } catch (NoSuchMethodException e) {
             logger.warn("Handler method '{}' not found: {}", methodName, e.getMessage());
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return null;
         }
     }
 

@@ -1,16 +1,18 @@
-# JTrac NG 发布说明 (Release Notes) - 3.0.0-beta
+﻿# JTrac NG 发布说明 (Release Notes) - 3.0.0-beta
 
 [English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
 [![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
 [![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_zh-CN.md)
-[![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
-[![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
+[![Wicket](https://img.shields.io/badge/Wicket-10.12.0-blue.svg)](https://wicket.apache.org/)
+[![Spring](https://img.shields.io/badge/Spring-6.2.19-brightgreen.svg)](https://spring.io/)
+[![Jetty](https://img.shields.io/badge/Jetty-12.1%20EE10-blue.svg)](https://eclipse.dev/jetty/)
+[![Dependabot](https://img.shields.io/badge/Vulnerabilities-0%20Clean-brightgreen.svg)](https://github.com/kafeiou/jtrac-ng/security/dependabot)
 
 > [!NOTE]
 > **当前状态：Beta 测试预览版 (Pre-release / Beta Preview) - 尚未正式封版**  
@@ -21,7 +23,7 @@
 ## 目录
 1. [版本核心亮点概述](#一版本核心亮点概述)
 2. [🤖 AI 智慧邮件查询秘书 (AI Query Copilot)](#二-ai-智慧邮件查询秘书-ai-query-copilot)
-3. [📦 核心依赖组件升级与 Java 11 警告消除](#三-核心依赖组件升级与-java-11-警告消除)
+3. [📦 核心架构升级 (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) 与 0 漏洞清零](#三-核心架构升级-jdk-21--jakarta-ee-10--spring-62--jetty-121-与-0-漏洞清零)
 4. [🎨 界面现代化、字号无障碍与主题切换](#四-界面现代化字号无障碍与主题切换)
 5. [🛡️ 生产环境安全防护与防呆机制](#五-生产环境安全防护与防呆机制)
 6. [⚙️ 系统配置与稳定性修复](#六-系统配置与稳定性修复)
@@ -93,12 +95,26 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
 
 ---
 
-## 三、📦 核心依赖组件升级与 Java 11 警告消除
+## 三、📦 核心架构升级 (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) 与 0 漏洞清零
 
-1. **升级 `dom4j` 至 `2.1.4`**：
-   - 将旧有 `dom4j:1.6.1`（发布于 2005 年）升级为最新版 `org.dom4j:dom4j:2.1.4`。
-   - 修复 [`Metadata.java`](../../src/main/java/info/jtrac/domain/Metadata.java) 中泛型转换引起的编译警告。
-   - 彻底消除了在 Apache Tomcat 9 与 JDK 11 环境下运行时的 `WARNING: An illegal reflective access operation has occurred` 告警。
+1. **JDK 21 LTS 全面升级**：
+   - 项目编译与运行环境升级至 **Java 21 LTS**，全面支持 classfile version 65，大幅提升底层 JVM 执行效能、垃圾回收表现与现代容器兼容性。
+2. **Jakarta EE 10 规格迁移 (javax.* ➜ jakarta.*)**：
+   - 全面迁移至 **Jakarta EE 10**，将旧有 javax.servlet.* 与 javax.mail.* 升级为标准 jakarta.servlet.* (Servlet 6.0) 与 jakarta.mail.* (Jakarta Mail 2.1)。
+   - 原生支持 **Jetty 12.1 EE10** 容器环境（ee10-deploy,ee10-webapp）。
+3. **Spring Framework 6.2.19 与 Spring Security 6.5.11 升级**：
+   - 核心框架升级至 **Spring Framework 6.2.19** 与 **Spring Security 6.5.11**。
+   - 淘汰已被 Spring 6 废弃之 <!DOCTYPE beans ...> DTD 声明，全数现代化迁移为标准 Spring XSD Schema 规范。
+4. **淘汰 Spring MVC 依赖，以轻量级 Jakarta Servlet (JtracApiServlet) 彻底消除 16 项 CVE 漏洞**：
+   - 全面移除 spring-webmvc 依赖库，由项目原生轻量级 JtracApiServlet 统一处理 /api/* REST API 与 /flow/* 历史兼容性路由。
+   - 配合 Hibernate OpenSessionInViewFilter 覆盖全局端点，一举根除 Spring MVC 长年累积的 16 项 GitHub Dependabot / GHSA 安全脆弱性通报。
+5. **Apache Wicket 10.12.0 现代化升级**：
+   - 网页界面层全面升级至 **Wicket 10.12.0**，原生整合 Jakarta EE 10、Servlet 6.0 与 Java 21。
+6. **Dependabot 安全告警 100% 清零 (0 Vulnerabilities)**：
+   - 全面升级底层依赖组件：Jackson (2.18.12)、Junrar (7.6.1)、Log4j 2 (2.25.5)、SLF4J (2.0.20)、PDFBox (2.0.37)、BouncyCastle (1.86)、HSQLDB (2.7.4)、HikariCP (5.1.0)、dom4j (2.1.4)。
+   - 经 OSV.dev 与 GHSA 全依赖组件漏洞扫描认证，达成 **0 漏洞（100% Clean）** 之最高安全等级。
+7. **Docker 容器镜像升级至 Jetty 12.1 EE10**：
+   - 容器基底采用 jetty:12.1-jre21-eclipse-temurin，多阶段构建采用 maven:3.9-eclipse-temurin-21，自动配置 ee10-deploy,ee10-webapp 模块。
 
 ---
 
@@ -171,9 +187,18 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
 
 ---
 
+12. **绿色免安装便携版发行与一键启动脚本 (Portable Standalone Distribution & Start/Stop Scripts)**：
+    - **自给自足独立封装**：支持产出 jtrac-ng-3.0.0-beta-portable.zip，内置 Jetty 12.1 (EE10) 服务器与 JTrac NG WAR，解压缩即可在具备 Java 21+ 的环境下立即运行，彻底免除外部应用服务器安装配置流程。
+    - **跨平台一键启闭脚本**：提供 Windows (start.bat / stop.bat) 与 Linux / macOS (start.sh / stop.sh) 启闭脚本，具备 Java 21 运行环境自动检测、端口占用提示、自定义端口传参（如 start.bat 8888）以及启动 4 秒后自动打开默认浏览器访问 http://localhost:8080/。
+    - **纯粹绿色数据隔离 (./data)**：系统启动时自动通过 -Djtrac.home 将数据目录绑定至便携包内部的 ./data，内置 HSQLDB 数据库、附件文件、Lucene 全文索引完全收拢，系统分区与 AppData 零残留，U 盘即插即用、整包复制即可备份迁移。
+    - **Maven Profile 一键打包**：在 pom.xml 中整合 <profile><id>portable</id></profile>，运行 mvn package -Pportable 即可跨平台自动触发打包流程；亦可直接在项目根目录运行 package-portable.bat 或 ./package-portable.sh。
+
+---
+
 ## 七、版本升级与兼容性指引
 
 - **数据库升级**：本版本完全兼容 2.3.3-2.0.0 数据库结构，**无需执行任何数据库迁移脚本**。
+- **便携版运行**：下载并解压 jtrac-ng-3.0.0-beta-portable.zip，双击 start.bat（Windows）或运行 ./start.sh（Linux / macOS）即可立即使用（默认账号 dmin / 密码 dmin，需具备 Java 21+ 运行环境）。
 - **WAR 部署**：直接使用 `target/jtrac.war` 覆盖现有容器之 `ROOT.war` 即可。
 - **相关链接**：
   - [JTrac AI 邮件查询与 Prompt 实战范例指南](../llm/PROMPT_EXAMPLES_zh-CN.md)

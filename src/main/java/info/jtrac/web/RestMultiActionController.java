@@ -17,7 +17,6 @@
 package info.jtrac.web;
 
 import info.jtrac.domain.Item;
-import info.jtrac.domain.ItemSearch;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.exception.InvalidRefIdException;
@@ -27,17 +26,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.StringTokenizer;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Spring Controller that handles REST requests
+ * Controller that handles REST requests
  * returns XML messages
  */
 public class RestMultiActionController extends AbstractMultiActionController {
@@ -65,14 +62,14 @@ public class RestMultiActionController extends AbstractMultiActionController {
     }
 
     @Override
-    protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    protected void handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!authenticate(request)) {
             String title = "Basic realm=\"JTrac Remote API\"";
             response.setHeader("WWW-Authenticate", title);
             response.setStatus(401);
-            return null;
+            return;
         }
-        return super.handleRequestInternal(request, response);
+        super.handleRequestInternal(request, response);
     }
 
     private boolean authenticate(HttpServletRequest request) {

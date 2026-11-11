@@ -32,8 +32,8 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.context.MessageSource;
-import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import org.commonmark.Extension;
@@ -267,8 +267,8 @@ public final class ItemUtils {
     }
 
     public static String getAsHtml(Item item, HttpServletRequest request, HttpServletResponse response) {
-        Locale locale = RequestContextUtils.getLocale(request);
-        MessageSource messageSource = RequestContextUtils.findWebApplicationContext(request);        
+        Locale locale = request != null ? request.getLocale() : null;
+        MessageSource messageSource = request != null ? WebApplicationContextUtils.getWebApplicationContext(request.getServletContext()) : null;        
         return getAsHtml(item, request, response, messageSource, locale);
     }    
     

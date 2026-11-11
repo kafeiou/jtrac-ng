@@ -24,7 +24,7 @@ import info.jtrac.domain.User;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 

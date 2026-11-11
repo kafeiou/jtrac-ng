@@ -3,7 +3,7 @@ package info.jtrac.web;
 import info.jtrac.Jtrac;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

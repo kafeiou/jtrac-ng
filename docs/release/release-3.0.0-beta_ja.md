@@ -1,16 +1,18 @@
-# JTrac NG リリースノート (Release Notes) - 3.0.0-beta
+﻿# JTrac NG リリースノート (Release Notes) - 3.0.0-beta
 
 [English](release-3.0.0-beta_en.md) | [繁體中文](release-3.0.0-beta_zh-TW.md) | [简体中文](release-3.0.0-beta_zh-CN.md) | [日本語](release-3.0.0-beta_ja.md) | [Tiếng Việt](release-3.0.0-beta_vi.md) | [Deutsch](release-3.0.0-beta_de.md) | [Español](release-3.0.0-beta_es.md) | [Français](release-3.0.0-beta_fr.md)
 
 ---
 
-[![Java](https://img.shields.io/badge/Java-11%20%7C%2017-orange.svg)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
 [![Maven](https://img.shields.io/badge/Maven-3.9+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](../../license.txt)
 [![Version](https://img.shields.io/badge/Version-3.0.0--beta-orange.svg)](../../pom.xml)
 [![Status](https://img.shields.io/badge/Status-Beta%20Preview-yellow.svg)](release-3.0.0-beta_ja.md)
-[![Wicket](https://img.shields.io/badge/Wicket-9.16.0-blue.svg)](https://wicket.apache.org/)
-[![Spring](https://img.shields.io/badge/Spring-5.3.37-brightgreen.svg)](https://spring.io/)
+[![Wicket](https://img.shields.io/badge/Wicket-10.12.0-blue.svg)](https://wicket.apache.org/)
+[![Spring](https://img.shields.io/badge/Spring-6.2.19-brightgreen.svg)](https://spring.io/)
+[![Jetty](https://img.shields.io/badge/Jetty-12.1%20EE10-blue.svg)](https://eclipse.dev/jetty/)
+[![Dependabot](https://img.shields.io/badge/Vulnerabilities-0%20Clean-brightgreen.svg)](https://github.com/kafeiou/jtrac-ng/security/dependabot)
 
 > [!NOTE]
 > **現在のステータス：Beta テストプレビュー版 (Pre-release / Beta Preview) - 未確定版**  
@@ -21,7 +23,7 @@
 ## 目次
 1. [バージョン概要と主要ハイライト](#1-バージョン概要と主要ハイライト)
 2. [🤖 AI メール問い合わせアシスタント (AI Query Copilot)](#2--ai-メール問い合わせアシスタント-ai-query-copilot)
-3. [📦 依存ライブラリ刷新と Java 11 警告の解消](#3--依存ライブラリ刷新と-java-11-警告の解消)
+3. [📦 アーキテクチャ刷新 (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) と脆弱性ゼロ化](#3--アーキテクチャ刷新-jdk-21--jakarta-ee-10--spring-62--jetty-121-と脆弱性ゼロ化)
 4. [🎨 UI モダン化・アクセシビリティ強化・テーマ切替](#4--ui-モダン化アクセシビリティ強化テーマ切替)
 5. [🛡️ 本番セキュリティ強化とフェイルセーフ機構](#5--本番セキュリティ強化とフェイルセーフ機構)
 6. [⚙️ システム設定・互換性・安定性の改善](#6--システム設定互換性安定性の改善)
@@ -89,11 +91,26 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
 
 ---
 
-## 3. 📦 依存ライブラリ刷新と Java 11 警告の解消
+## 3. 📦 アーキテクチャ刷新 (JDK 21 + Jakarta EE 10 + Spring 6.2 + Jetty 12.1) と脆弱性ゼロ化
 
-1. **`dom4j` を `2.1.4` へアップデート**：
-   - 従来の `dom4j:1.6.1` から最新の `org.dom4j:dom4j:2.1.4` へ移行。
-   - Apache Tomcat 9 および JDK 11 環境で発生していた `WARNING: An illegal reflective access operation has occurred` を完全解消。
+1. **JDK 21 LTS への全面アップグレード**：
+   - ビルドターゲットおよび実行環境を **Java 21 LTS** に統一し、classfile version 65 を完全サポート。JVM 実行効率と最新コンテナ環境への親和性を大幅に向上。
+2. **Jakarta EE 10 仕様への移行 (javax.* ➜ jakarta.*)**：
+   - 従来の javax.servlet.* および javax.mail.* を最新の **Jakarta EE 10** 標準である jakarta.servlet.* (Servlet 6.0) と jakarta.mail.* (Jakarta Mail 2.1) に全面移行。
+   - **Jetty 12.1 EE10** コンテナ（ee10-deploy,ee10-webapp）をネイティブサポート。
+3. **Spring Framework 6.2.19 & Spring Security 6.5.11 への更新**：
+   - コアフレームワークを **Spring 6.2.19** および **Spring Security 6.5.11** に刷新。
+   - 非推奨の DTD 宣言を完全撤廃し、最新の Spring XSD Schema 形式へ移行。
+4. **Spring MVC 依存の撤廃と軽量 Jakarta Servlet (JtracApiServlet) による 16 件の CVE 解消**：
+   - 脆弱性を抱える spring-webmvc 依存を完全除外。独自の軽量 JtracApiServlet で /api/* REST API および /flow/* 互換ルーティングを処理。
+   - Spring MVC に蓄積されていた 16 件の GitHub Dependabot / GHSA 脆弱性アラートを完全解消。
+5. **Apache Wicket 10.12.0 へのアップグレード**：
+   - Web UI 層を **Wicket 10.12.0** へ刷新し、Jakarta EE 10・Servlet 6.0・Java 21 とネイティブ統合。
+6. **Dependabot 脆弱性 100% 解消 (0 Vulnerabilities)**：
+   - 全依存ライブラリを最新版へ更新：Jackson (2.18.12)、Junrar (7.6.1)、Log4j 2 (2.25.5)、SLF4J (2.0.20)、PDFBox (2.0.37)、BouncyCastle (1.86)、HSQLDB (2.7.4)、HikariCP (5.1.0)、dom4j (2.1.4)。
+   - OSV.dev / GHSA 監査により **脆弱性ゼロ（100% クリーン）** を達成。
+7. **Docker イメージを Jetty 12.1 EE10 へ更新**：
+   - ベースイメージを jetty:12.1-jre21-eclipse-temurin（ee10-deploy,ee10-webapp）に更新。
 
 ---
 
@@ -163,9 +180,18 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
 
 ---
 
+12. **ポータブル版配布とワンクリック起動／停止スクリプト (Portable Standalone Distribution & Start/Stop Scripts)**：
+    - **自己完結型スタンドアロン配布**：jtrac-ng-3.0.0-beta-portable.zip の出力をサポート。Jetty 12.1 (EE10) サーバーと JTrac NG WAR を内包し、Java 21+ 環境下で解凍後すぐに起動可能。外部サーブレットコンテナの個別セットアップが不要です。
+    - **クロスプラットフォーム起動・停止スクリプト**：Windows 用 (start.bat / stop.bat) および Linux / macOS 用 (start.sh / stop.sh) スクリプトを提供。Java 21 自動検出、ポート競合警告、カスタムポート指定（例: start.bat 8888）、起動 4 秒後のブラウザ自動オープン (http://localhost:8080/) を備えています。
+    - **ゼロレジデューな完全データ分離 (./data)**：-Djtrac.home によりデータ保存先をポータブルフォルダ内の ./data に自動固定。組み込み HSQLDB データベース、添付ファイル、Lucene 全文検索インデックスを完全分離し、システム領域に一切のゴミを残しません。
+    - **Maven Profile ワンコマンドビルド**：pom.xml に <profile><id>portable</id></profile> を追加し、mvn package -Pportable またはルートの package-portable.bat / ./package-portable.sh で手軽にパッケージング可能です。
+
+---
+
 ## 7. アップグレードと互換性ガイド
 
 - **データベース移行**：2.3.3-2.0.0 と完全互換であり、**SQL 移行スクリプトの実行は不要**です。
+- **ポータブル版の実行**：jtrac-ng-3.0.0-beta-portable.zip をダウンロード・解凍後、start.bat (Windows) または ./start.sh (Linux / macOS) を実行するだけですぐに利用できます（初期管理者: dmin / dmin、Java 21+ 必須）。
 - **WAR デプロイ**：`target/jtrac.war` を既存の `ROOT.war` に上書き配置するだけで完了します。
 - **関連ドキュメント**：
   - [JTrac AI メール問い合わせ＆プロンプト作成 実践ガイド](../llm/PROMPT_EXAMPLES_ja.md)

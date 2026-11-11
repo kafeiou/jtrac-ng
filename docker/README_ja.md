@@ -1,4 +1,4 @@
-# JTrac NG Docker パッケージングとデプロイ (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker パッケージングとデプロイ (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,8 +8,8 @@
 
 ## 主な機能 (Features)
 
-- **近代化された実行環境**：公式 `jetty:12-jre17-eclipse-temurin` をベースとし、`--add-modules=ee8-deploy,ee8-webapp` により Servlet 4.0 (`javax.servlet`) をネイティブサポート。
-- **マルチステージビルド**：`maven:3.9-eclipse-temurin-17` を用いてソースコードから `jtrac.war` を自動コンパイル。ローカル環境への JDK や Maven のインストールは不要です。
+- **近代化された実行環境**：公式 `jetty:12.1-jre21-eclipse-temurin` をベースとし、`--add-modules=ee10-deploy,ee10-webapp` により Jakarta Servlet 6.0 (`jakarta.servlet`) をネイティブサポート。
+- **マルチステージビルド**：`maven:3.9-eclipse-temurin-21` を用いてソースコードから `jtrac.war` を自動コンパイル。ローカル環境への JDK や Maven のインストールは不要です。
 - **多言語フォントの完全サポート**：`fontconfig`、`fonts-noto-cjk`（日中韓）、`fonts-noto-core`（ベトナム語等の記号）、`fonts-dejavu-core`（欧州言語アクセント）を標準装備し、文字化けや豆腐化（□）を防止します。
 - **権限自動修復とセキュア実行**：起動時にマウントボリューム `/jtrac-data` の所有権を `jetty:jetty` (UID 999) に自動修復し、`gosu` により非 root ユーザーで安全に実行します。
 

@@ -24,8 +24,8 @@ import info.jtrac.util.WebUtils;
 
 import java.util.List;
 import java.util.Locale;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationManager;

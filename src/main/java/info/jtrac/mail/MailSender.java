@@ -40,12 +40,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.mail.Header;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Header;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
-import net.markenwerk.utils.mail.dkim.DkimMessage;
-import net.markenwerk.utils.mail.dkim.DkimSigner;
+import org.simplejavamail.utils.mail.dkim.DkimMessage;
+import org.simplejavamail.utils.mail.dkim.DkimSigner;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ByteArrayResource;

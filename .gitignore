@@ -26,6 +26,10 @@ data/
 /export*/
 /jtrac-html-export*/
 
+# Jetty Home Base Cache
+/tools/jetty/*.zip
+!/tools/jetty/.gitkeep
+
 # Development specifications & agent configurations
 .agents/
 openspec/

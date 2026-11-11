@@ -25,12 +25,11 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.web.servlet.ModelAndView;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Spring controller, for backwards compatibility with old email links
+ * Controller for backwards compatibility with old email links and report viewing
  */
 public class DefaultMultiActionController extends AbstractMultiActionController {     
 
@@ -53,17 +52,17 @@ public class DefaultMultiActionController extends AbstractMultiActionController 
         return "itemViewHandler";
     }
 
-    public ModelAndView itemViewHandler(HttpServletRequest request, HttpServletResponse response) {
+    public void itemViewHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String itemId = request.getParameter("itemId");
-        return new ModelAndView("redirect:/app/item/" + itemId);
+        response.sendRedirect(request.getContextPath() + "/app/item/" + (itemId != null ? itemId : ""));
     }
 
-    public ModelAndView reportHandler(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void reportHandler(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String token = request.getParameter("token");
         if (token == null || !token.matches("^[a-zA-Z0-9\\-]+$")) {
             renderReportNotice(response, "無效的報告連結 (Invalid Report Token)",
                     "抱歉，您提供的報告憑證識別碼格式不正確或無效。<br>(The provided report token is missing or invalid.)");
-            return null;
+            return;
         }
 
         String home = (jtrac != null && jtrac.getJtracHome() != null) ? jtrac.getJtracHome() : (System.getProperty("user.home") + "/.jtrac");
@@ -73,13 +72,13 @@ public class DefaultMultiActionController extends AbstractMultiActionController 
         // Canonical path check to prevent directory traversal
         if (!reportFile.getCanonicalPath().startsWith(reportsDir.getCanonicalPath())) {
             renderReportNotice(response, "非法請求 (Access Denied)", "權限不足或非法存取路徑。<br>(Invalid file path access.)");
-            return null;
+            return;
         }
 
         if (!reportFile.exists() || !reportFile.isFile()) {
             renderReportNotice(response, "報告已過期或不存在 (Report Not Found or Expired)",
                     "此 AI 診斷報告已超過 <strong>14 天</strong> 之系統保留期限，或該報告已被自動清理。<br>若需獲取最新分析，請再次發送郵件查詢或於 JTrac 內發起診斷。<br>(This report has expired under the 14-day retention limit or was removed.)");
-            return null;
+            return;
         }
 
         long fourteenDays = 14L * 24 * 60 * 60 * 1000;
@@ -87,7 +86,7 @@ public class DefaultMultiActionController extends AbstractMultiActionController 
             reportFile.delete();
             renderReportNotice(response, "報告已過期 (Report Expired)",
                     "此 AI 診斷報告已超過 <strong>14 天</strong> 之系統保留期限，系統已進行安全銷毀。<br>若需最新分析，請重新發送郵件發起查詢。<br>(This report has expired under the 14-day retention limit.)");
-            return null;
+            return;
         }
 
         String download = request.getParameter("download");
@@ -106,7 +105,7 @@ public class DefaultMultiActionController extends AbstractMultiActionController 
                 }
                 out.flush();
             }
-            return null;
+            return;
         }
 
         // Direct Browser View
@@ -121,7 +120,6 @@ public class DefaultMultiActionController extends AbstractMultiActionController 
             }
             out.flush();
         }
-        return null;
     }
 
     private void renderReportNotice(HttpServletResponse response, String title, String message) throws IOException {

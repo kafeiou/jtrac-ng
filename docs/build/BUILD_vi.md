@@ -1,159 +1,138 @@
-# Hướng dẫn Biên dịch và Đóng gói JTrac (Tiếng Việt)
+# Hướng dẫn Biên dịch và Đóng gói JTrac NG (Tiếng Việt)
 
 [English](BUILD_en.md) | [繁體中文](BUILD_zh-TW.md) | [简体中文](BUILD_zh-CN.md) | [日本語](BUILD_ja.md) | [Tiếng Việt](BUILD_vi.md) | [Deutsch](BUILD_de.md) | [Español](BUILD_es.md) | [Français](BUILD_fr.md)
 
-Tài liệu này hướng dẫn chi tiết cách sử dụng Apache Maven để biên dịch và đóng gói dự án JTrac NG 3.0.0-beta, phân tích vòng đời Maven, cơ chế lưu bộ nhớ đệm thư viện, cấu trúc gói WAR và CLI, ma trận kiểm thử Web Container và xử lý sự cố biên dịch.
+Tài liệu này cung cấp hướng dẫn toàn diện về cách biên dịch và đóng gói dự án JTrac NG 3.0.0-beta bằng Apache Maven, bao gồm vòng đời Maven, quản lý bộ nhớ đệm phụ thuộc, cấu trúc lưu trữ WAR và bản phân phối Portable độc lập, khả năng tương thích máy chủ servlet và xử lý sự cố.
 
 ---
 
-## 1. Yêu cầu Môi trường
+## 1. Yêu cầu môi trường tiên quyết
 
-Trước khi bắt đầu biên dịch, hãy đảm bảo môi trường phát triển của bạn đáp ứng các yêu cầu sau:
+Trước khi bắt đầu biên dịch, hãy đảm bảo rằng môi trường cục bộ của bạn đáp ứng các điều kiện sau:
 
 - **Hệ điều hành**: Windows / Linux / macOS
-- **Bộ công cụ Java (JDK)**: **Java 11+ / 17+** (Khuyến nghị JDK 17 LTS, ví dụ: `W:\developer\jdk-17.0.9`, yêu cầu tối thiểu Java 11+)
+- **Bộ phát triển Java (JDK)**: **Java 21 LTS** (Khuyên dùng [Eclipse Temurin JDK 21+](https://adoptium.net/temurin/releases/?version=21), ví dụ `W:\developer\jdk-21.0.9`, yêu cầu tối thiểu Java 21)
   > [!IMPORTANT]
-  > Phiên bản hiện đại hóa đã nâng cấp lên Spring 5.3.x, Hibernate 5.6.x và Apache Wicket 9.x với bytecode mục tiêu là **Java 11**. **JDK 8 không còn được hỗ trợ**, vui lòng không sử dụng JDK 8 để biên dịch.
-- **Apache Maven**: **Maven 3.9+** (ví dụ: `W:\developer\apache-maven-3.9.9`)
+  > Kiến trúc cốt lõi đã được nâng cấp toàn diện lên **Spring 6.2.x**, **Jakarta EE 10 (Servlet 6.0)**, **Hibernate 5.6.x (Jakarta)** và **Apache Wicket 10.x**, hướng tới bytecode mục tiêu là **Java 21**. **JDK 8 / 11 / 17 không còn được hỗ trợ**. Bạn bắt buộc phải biên dịch bằng JDK 21+.
+- **Apache Maven**: **Maven 3.9+** (ví dụ `W:\developer\apache-maven-3.9.9`)
 
-### Ví dụ Cấu hình Biến Môi trường
+### Cấu hình biến môi trường cục bộ
 
 - **Windows (PowerShell)**:
   ```powershell
-  $env:JAVA_HOME = "W:\developer\jdk-17.0.9"
+  $env:JAVA_HOME = "W:\developer\jdk-21.0.9"
   $env:PATH = "W:\developer\apache-maven-3.9.9\bin;$env:PATH"
   ```
 - **Windows (CMD)**:
   ```cmd
-  set "JAVA_HOME=W:\developer\jdk-17.0.9"
+  set "JAVA_HOME=W:\developer\jdk-21.0.9"
   set "PATH=W:\developer\apache-maven-3.9.9\bin;%PATH%"
   ```
 - **Linux / macOS (Bash/Zsh)**:
   ```bash
-  export JAVA_HOME="/usr/lib/jvm/java-17-openjdk"
+  export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
   export PATH="$JAVA_HOME/bin:$PATH"
   ```
 
-Kiểm tra môi trường:
+Kiểm tra xác thực môi trường:
 ```bash
 mvn -version
 ```
-Kết quả hiển thị chính xác phiên bản Maven 3.9+ cùng Java 11 hoặc 17.
+Kết quả hiển thị phải xác nhận Maven 3.9+ và Java 21.
 
 ---
 
-## 2. Ma trận Lệnh Biên dịch Maven
+## 2. Bảng lệnh xây dựng và biên dịch Maven
 
-Chạy các lệnh sau tại thư mục gốc của dự án JTrac (nơi chứa `pom.xml`):
+Chạy các lệnh sau trong thư mục gốc của dự án (nơi chứa tệp `pom.xml`):
 
-| Lệnh | Giai đoạn / Tác vụ | Mô tả |
-|---|---|---|
-| `mvn clean compile` | Biên dịch Mã nguồn | Dọn dẹp tệp cũ và biên dịch `src/main/java`, xử lý lọc tài nguyên UTF-8 |
-| `mvn test-compile` | Biên dịch Kiểm thử | Biên dịch các lớp kiểm thử trong `src/test/java` |
-| `mvn test` | Chạy Kiểm thử | Thực thi kiểm thử đơn vị JUnit 5 (kết hợp HSQLDB bộ nhớ nhúng, không cần cơ sở dữ liệu ngoài) |
-| `mvn package` | Đóng gói Chính thức | Chạy toàn bộ kiểm thử và đóng gói thành tệp Web WAR (`target/jtrac.war`) |
-| `mvn package -DskipTests` | Đóng gói Nhanh | Bỏ qua kiểm thử để đóng gói nhanh `target/jtrac.war` |
-| `mvn clean` | Dọn dẹp | Xóa toàn bộ bộ nhớ đệm và tệp tạm trong thư mục `target/` |
-| `mvn clean package -f tools/jtrac-exporter/pom.xml -DskipTests` | Đóng gói Công cụ CLI | Biên dịch và đóng gói công cụ xuất HTML dòng lệnh độc lập thành `tools/jtrac-exporter.jar` |
-
----
-
-## 3. Cơ chế Lưu Bộ nhớ đệm Thư viện (`~/.m2/repository`)
-
-JTrac được xây dựng trên chuẩn Apache Maven. Toàn bộ thư viện phụ thuộc của bên thứ ba (Spring 5.3.x, Wicket 9.x, Hibernate 5.6.x, Spring Security 5.8.x...) đều được khai báo trong [`pom.xml`](../../pom.xml).
-
-### Quy trình Tải và Lưu đệm:
-1. Khi chạy `mvn compile` hoặc `mvn package` lần đầu, Maven kết nối đến kho trung tâm (Maven Central) để tải thư viện.
-2. Mọi tệp JAR tải về được lưu trong thư mục đệm cục bộ:
-   - **Windows**: `%USERPROFILE%\.m2\repository\`
-   - **Linux / macOS**: `~/.m2/repository/`
-3. Các lần đóng gói tiếp theo diễn ra ngoại tuyến từ bộ nhớ đệm này. **Lập trình viên không cần tải hoặc cấu hình tệp JAR thủ công**.
+| Lệnh | Giai đoạn / Tác vụ | Mô tả chi tiết | Tệp đầu ra |
+|---|---|---|---|
+| `mvn clean compile` | Biên dịch mã nguồn | Dọn dẹp và biên dịch `src/main/java` với bộ lọc UTF-8 | `target/classes/` |
+| `mvn test-compile` | Biên dịch kiểm thử | Biên dịch tất cả các lớp kiểm thử trong `src/test/java` | `target/test-classes/` |
+| `mvn test` | Chạy kiểm thử | Chạy 198 bài kiểm thử đơn vị JUnit 5 (tích hợp HSQLDB trong bộ nhớ) | Báo cáo kiểm thử |
+| `mvn package` | Đóng gói WAR tiêu chuẩn | Chạy kiểm thử và đóng gói ứng dụng Web tiêu chuẩn | `target/jtrac.war` |
+| `mvn package -DskipTests` | Đóng gói WAR nhanh | Bỏ qua kiểm thử để tạo tệp WAR nhanh chóng | `target/jtrac.war` |
+| `mvn package -Pportable` | Đóng gói bản Portable đầy đủ | Chạy kiểm thử và tạo bản phân phối ZIP độc lập với Jetty 12.1 EE10 | `target/jtrac-ng-3.0.0-beta-portable.zip` |
+| `mvn package -Pportable -DskipTests` | Đóng gói Portable nhanh | Bỏ qua kiểm thử để tạo tệp ZIP độc lập siêu tốc | `target/jtrac-ng-3.0.0-beta-portable.zip` |
+| `package-portable.bat` | Tập lệnh Windows | Nhấp đúp vào tệp ở thư mục gốc; tự động bỏ qua kiểm thử | `target/jtrac-ng-3.0.0-beta-portable.zip` |
+| `./package-portable.sh` | Tập lệnh Linux/macOS | Chạy tập lệnh Bash để tạo nhanh tệp ZIP di động | `target/jtrac-ng-3.0.0-beta-portable.zip` |
+| `mvn clean` | Dọn dẹp bản dựng | Xóa thư mục `target/` và các tệp tạm thời | - |
+| `mvn clean package -f tools/jtrac-exporter/pom.xml -DskipTests` | Đóng gói công cụ CLI | Biên dịch công cụ dòng lệnh xuất dữ liệu độc lập (Fat JAR) | `tools/jtrac-exporter.jar` |
 
 ---
 
-## 4. Cấu trúc Gói WAR (`WEB-INF/lib/`)
+## 3. Cơ chế tự động tải gói phụ thuộc (`~/.m2/repository`)
 
-Sau khi thực hiện `mvn package`, tệp gói Java Web chuẩn được tạo ra tại: [`target/jtrac.war`](../../target/jtrac.war).
+JTrac NG được xây dựng trên nền tảng Maven tiêu chuẩn. Tất cả các thư viện của bên thứ ba đều được khai báo trong [`pom.xml`](../../pom.xml).
 
-### Cấu trúc Thư mục Bên trong:
+---
+
+## 4. Cấu trúc lưu trữ nội bộ của gói WAR (`WEB-INF/lib/`)
+
+Lệnh `mvn package` tạo ra tệp lưu trữ ứng dụng Web hoàn chỉnh: [`target/jtrac.war`](../../target/jtrac.war).
+
 ```text
 jtrac.war
 ├── META-INF/
 │   └── MANIFEST.MF
 ├── WEB-INF/
-│   ├── classes/                 <-- Các class đã biên dịch và tài nguyên UTF-8
+│   ├── classes/                 <-- Các lớp đã biên dịch và tài nguyên UTF-8
 │   │   ├── info/jtrac/...
 │   │   └── messages*.properties
-│   ├── lib/                     <-- [Trọng tâm: Toàn bộ thư viện JAR bên thứ ba]
-│   │   ├── spring-core-5.3.37.jar
-│   │   ├── wicket-core-9.16.0.jar
+│   ├── lib/                     <-- [Thư viện phụ thuộc hiện đại Jakarta EE 10]
+│   │   ├── spring-core-6.2.19.jar
+│   │   ├── wicket-core-10.12.0.jar
 │   │   ├── hibernate-core-5.6.15.Final.jar
-│   │   ├── spring-security-core-5.8.14.jar
-│   │   ├── hsqldb-2.7.2.jar
+│   │   ├── spring-security-core-6.5.11.jar
+│   │   ├── jakarta.servlet-api-6.0.0.jar
+│   │   ├── hsqldb-2.7.4.jar
 │   │   └── ... (tất cả các thư viện còn lại)
-│   └── web.xml                  <-- Cấu hình Servlet 4.0
-└── resources/                   <-- Tài nguyên tĩnh (CSS, biểu tượng)
+│   └── web.xml                  <-- Tệp cấu hình chuẩn Servlet 6.0
+└── resources/                   <-- Tài nguyên tĩnh (CSS, logo vector SVG)
 ```
 
-- **Cô lập Classloader**: Servlet Container tự động cách ly `WEB-INF/lib/` của từng ứng dụng Web.
-- **Triển khai Tự trị**: Không cần cài thêm thư viện nào vào máy chủ, chỉ cần đặt tệp `jtrac.war` là có thể chạy ngay.
-
 ---
 
-## 5. Ma trận Tương thích Web Container
+## 5. Ma trận tương thích của máy chủ Servlet Web
 
-JTrac NG 3.0.0-beta tuân thủ chuẩn Servlet 4.0 (`javax.servlet`). Tệp WAR có thể triển khai trực tiếp trên các máy chủ hiện đại:
+JTrac NG 3.0.0-beta tuân thủ đặc tả **Jakarta EE 10 / Servlet 6.0** (`jakarta.servlet.*`):
 
-| Web Container | Phiên bản Hỗ trợ | Phương thức Triển khai |
+| Máy chủ Servlet | Phiên bản hỗ trợ | Phương thức triển khai |
 |---|---|---|
-| **Jetty 10.x** | 10.0.x (Khuyến nghị) | **Sẵn sàng chạy**: Sao chép `target/jtrac.war` thành `webapps/ROOT.war` và khởi động. |
-| **Jetty 12.x** | 12.0.x (Mới nhất) | **Hỗ trợ trực tiếp**: Kích hoạt mô-đun `ee8`:<br/>`java -jar start.jar --add-modules=server,http,ee8-deploy,ee8-webapp`. |
-| **Tomcat 9.x** | 9.0.x (Khuyến nghị) | **Sẵn sàng chạy**: Sao chép `target/jtrac.war` thành `webapps/ROOT.war` và khởi động. |
-| **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **Chuyển đổi Tự động**:<br/>1. **Cách A**: Đặt vào thư mục `webapps-javaee/` để máy chủ tự chuyển đổi.<br/>2. **Cách B**: Dùng công cụ `jakartaee-migration` để tạo `jtrac-jakarta.war` rồi đặt vào `webapps/`. |
-
-### Ví dụ Xác thực trên Jetty 10 Cục bộ:
-1. Sao chép `target/jtrac.war` thành `W:\developer\jetty-10.0.26\webapps\ROOT.war`.
-2. Khởi động Jetty:
-   ```powershell
-   & "W:\developer\jdk-17.0.9\bin\java.exe" -jar W:\developer\jetty-10.0.26\start.jar
-   ```
-3. Truy cập trình duyệt: `http://localhost:8888/` (tài khoản mặc định: `admin` / `admin`).
+| **Jetty 12.x** | 12.1.x+ (Khuyên dùng) | **Hỗ trợ gốc**: Kích hoạt mô-đun `ee10`:<br/>`java -jar start.jar --add-modules=server,http,ee10-deploy,ee10-webapp`<br/>Hoặc chạy trực tiếp bản phân phối di động (`jtrac-ng-3.0.0-beta-portable.zip`). |
+| **Tomcat 10.x / 11.x** | 10.1.x / 11.0.x | **Hỗ trợ gốc**: Tích hợp gốc Jakarta EE 10. Sao chép `target/jtrac.war` vào `webapps/ROOT.war`. |
+| **Vỏ chứa Docker** | 3.0.0-beta | **Hình ảnh chính thức**: Dựa trên `jetty:12.1-jre21-eclipse-temurin`. |
 
 ---
 
-## 6. Xác thực Sản phẩm và Xử lý Sự cố (Build Troubleshooting)
+## 6. Xác thực bản dựng và xử lý sự cố thường gặp
 
-### 6.1 Danh sách Kiểm tra
-Sau khi biên dịch xong, xác nhận các tệp sau đã được tạo:
-- [ ] `target/jtrac.war` (dung lượng khoảng 18~22 MB, đã tối ưu kích thước sau khi bỏ Apache POI)
-- [ ] `tools/jtrac-exporter.jar` (nếu có đóng gói công cụ CLI)
+### 6.1 Danh sách kiểm tra thành công
+- [ ] `target/jtrac.war` (dung lượng khoảng 50~56 MB)
+- [ ] `target/jtrac-ng-3.0.0-beta-portable.zip` (dung lượng khoảng 98 MB)
+- [ ] `tools/jtrac-exporter.jar` (nếu đã biên dịch công cụ dòng lệnh)
 
-### 6.2 Các Lỗi Thường gặp và Cách khắc phục
+### 6.2 Các sự cố thường gặp
 
-1. **Lỗi Bảng mã Ký tự (`unmappable character for encoding`)**:
-   - Nguyên nhân: Bảng mã mặc định của Windows console không đọc được chú thích UTF-8.
-   - Khắc phục: Thiết lập biến môi trường trước khi chạy Maven:
+1. **Lỗi phiên bản trình biên dịch (`invalid target release: 21`)**:
+   - Nguyên nhân: JDK đang hoạt động trong thiết bị đầu cuối là JDK 17 hoặc cũ hơn.
+   - Khắc phục: Thiết lập `JAVA_HOME` sang JDK 21+ và kiểm tra lại bằng lệnh `java -version`.
+2. **Lỗi mã hóa ký tự (`unmappable character for encoding`)**:
+   - Khắc phục: Thiết lập mã hóa UTF-8 cho Maven:
      ```powershell
      $env:MAVEN_OPTS = "-Dfile.encoding=UTF-8"
      ```
-2. **Lỗi Phiên bản JDK (`Fatal error compiling: invalid target release: 11`)**:
-   - Nguyên nhân: Đang dùng JDK 8 hoặc cũ hơn trong terminal.
-   - Khắc phục: Chuyển biến môi trường `JAVA_HOME` sang JDK 11 hoặc 17.
-3. **Thư viện Tải về Bị lỗi hoặc Ngắt quãng**:
-   - Khắc phục: Buộc Maven cập nhật lại toàn bộ bộ nhớ đệm:
+3. **Phụ thuộc tải về bị hỏng**:
+   - Khắc phục: Buộc Maven cập nhật lại bộ nhớ đệm:
      ```bash
      mvn clean compile -U
-     ```
-4. **Tràn Bộ nhớ (`java.lang.OutOfMemoryError`)**:
-   - Khắc phục: Tăng bộ nhớ heap cho tiến trình Maven:
-     ```bash
-     export MAVEN_OPTS="-Xmx1024m -XX:MaxMetaspaceSize=256m"
      ```
 
 ---
 
-## 7. Giải pháp Thay thế: Tự động Đóng gói bằng Docker Multi-Stage
+## 7. Giải pháp không cần cài đặt: Bản dựng đa tầng Docker
 
-Nếu bạn không muốn cài đặt JDK hoặc Maven trên máy cục bộ, dự án cung cấp sẵn giải pháp đóng gói tự động bằng Docker:
+Nếu bạn muốn biên dịch mà không cần cài đặt JDK hoặc Maven trên máy cục bộ:
 
 👉 **Xem hướng dẫn chi tiết tại: [`docker/README.md`](../../docker/README.md)**

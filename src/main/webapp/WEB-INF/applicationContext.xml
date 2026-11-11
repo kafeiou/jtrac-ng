@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<!-- application context / root Spring IoC container config for JTrac -->
-
-<beans>
     <!-- custom Configurer that extends the spring PropertyPlaceholderConfigurer -->
     <bean class="info.jtrac.config.JtracConfigurer"/>
     
@@ -80,6 +80,21 @@
     <!-- Hibernate DAO implementation.  Transactions (AOP) have been applied at the service layer not here -->
     <bean id="dao" class="info.jtrac.hibernate.HibernateJtracDao" init-method="createSchema">
         <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- MultiActionControllers for REST API and web flow -->
+    <bean id="defaultController" class="info.jtrac.web.DefaultMultiActionController">
+        <property name="mappings">
+            <props>
+                <prop key="/flow/item_view">itemViewHandler</prop>
+                <prop key="/flow/report">reportHandler</prop>
+            </props>
+        </property>
+        <property name="jtrac" ref="jtrac"/>
+    </bean>    
+    
+    <bean id="restController" class="info.jtrac.web.RestMultiActionController">
+        <property name="jtrac" ref="jtrac"/>
     </bean>
     
 </beans>

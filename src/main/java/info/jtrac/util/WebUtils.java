@@ -16,7 +16,7 @@
 
 package info.jtrac.util;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 /**
  * utilities for http, web related stuff etc
@@ -29,8 +29,6 @@ public class WebUtils {
                 + "path: '" + cookie.getPath() + "', " 
                 + "value: '" + cookie.getValue() + "', " 
                 + "secure: '" + cookie.getSecure() + "', " 
-                + "version: '" + cookie.getVersion() + "', " 
-                + "maxAge: '" + cookie.getMaxAge() + "', " 
-                + "comment: '" + cookie.getComment() + "'";
+                + "maxAge: '" + cookie.getMaxAge() + "'";
     }
 }

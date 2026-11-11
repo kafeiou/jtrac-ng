@@ -1,4 +1,4 @@
-# JTrac NG Docker 容器化建置與部署 (Jetty 12.x + Eclipse Temurin 17+)
+# JTrac NG Docker 容器化建置與部署 (Jetty 12.1 + Eclipse Temurin 21+)
 
 [English](README.md) | [繁體中文](README_zh-TW.md) | [簡體中文](README_zh-CN.md) | [日本語](README_ja.md) | [Tiếng Việt](README_vi.md) | [Deutsch](README_de.md) | [Español](README_es.md) | [Français](README_fr.md)
 
@@ -8,8 +8,8 @@
 
 ## 特性亮點 (Features)
 
-- **現代化基礎環境**：採用官方 `jetty:12-jre17-eclipse-temurin` 搭配 `ee8-deploy` 與 `ee8-webapp` 模組，原生支援 Servlet 4.0 (`javax.servlet`)。
-- **多階段建置 (Multi-stage Build)**：使用 `maven:3.9-eclipse-temurin-17` 自動自原始碼編譯 `jtrac.war`，無需在本機預先安裝 JDK 或 Maven。
+- **現代化基礎環境**：採用官方 `jetty:12.1-jre21-eclipse-temurin` 搭配 `ee10-deploy` 與 `ee10-webapp` 模組，原生支援 Jakarta Servlet 6.0 (`jakarta.servlet`)。
+- **多階段建置 (Multi-stage Build)**：使用 `maven:3.9-eclipse-temurin-21` 自動自原始碼編譯 `jtrac.war`，無需在本機預先安裝 JDK 或 Maven。
 - **完整多國語系字型支援**：內建 `fontconfig`、`fonts-noto-cjk`（中日韓）、`fonts-noto-core`（越南語等音標字元）、`fonts-dejavu-core`（歐系重音字元），確保全文檢索字元抽取與報表繪圖 0% 缺字或亂碼。
 - **權限自動校正與安全降權**：Entrypoint 啟動時自動檢查並修復掛載 Volume `/jtrac-data` 為 `jetty:jetty`，並透過 `gosu` 降權至非 root 帳號（UID 999）執行，安全且免手動 chown。
 

@@ -19,7 +19,7 @@ package info.jtrac.wicket;
 import info.jtrac.domain.User;
 import info.jtrac.util.WebUtils;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
