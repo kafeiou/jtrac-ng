@@ -109,7 +109,7 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
    - Nâng cấp toàn diện các thư viện: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
    - Kiểm tra qua OSV.dev và GHSA đạt chuẩn an toàn tuyệt đối **0 Lỗ hổng (100% Sạch)**.
 7. **Nâng cấp Docker Image lên Jetty 12.1 EE10**:
-   - Image runtime cập nhật thành jetty:12.1-jre21-eclipse-temurin với các mô-đun ee10-deploy,ee10-webapp.
+   - Image runtime cập nhật thành jetty:12-jdk21-eclipse-temurin với các mô-đun ee10-deploy,ee10-webapp.
 
 ---
 
@@ -181,6 +181,9 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
     - **Tập lệnh đa nền tảng**: Cung cấp tập lệnh cho Windows (start.bat / stop.bat) và Linux / macOS (start.sh / stop.sh), tự động nhận diện Java 21, cảnh báo xung đột cổng, hỗ trợ tham số cổng tùy chỉnh (ví dụ: start.bat 8888) và tự động mở trình duyệt tới http://localhost:8080/ sau 4 giây.
     - **Cô lập dữ liệu cục bộ (./data)**: Tự động liên kết thư mục dữ liệu với ./data thông qua -Djtrac.home. Cơ sở dữ liệu HSQLDB nhúng, tệp đính kèm và chỉ mục Lucene được lưu trữ độc lập hoàn toàn, không để lại tệp rác trên hệ thống.
     - **Đóng gói bằng Maven Profile**: Tích hợp <profile><id>portable</id></profile> trong pom.xml, cho phép đóng gói qua lệnh mvn package -Pportable hoặc chạy trực tiếp package-portable.bat / ./package-portable.sh.
+
+13. **Đồng bộ nhận diện thương hiệu "JTrac NG" cho tiêu đề trang đăng nhập và thẻ trình duyệt đa ngôn ngữ (Login Page & Browser Tab Title Brand Consistency)**：
+    - Đồng bộ hóa tiêu đề trang đăng nhập (`login.title`) trên toàn bộ 25 tệp tài nguyên ngôn ngữ từ "JTrac Đăng nhập" cũ sang "JTrac NG Đăng nhập" (tiếng Anh là "JTrac NG Login", v.v.), đảm bảo tiêu đề thẻ trình duyệt (Tab Title) đồng nhất thương hiệu "JTrac NG" giữa trang chủ và trang đăng nhập.
 
 ---
 

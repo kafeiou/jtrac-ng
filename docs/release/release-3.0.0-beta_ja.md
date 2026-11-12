@@ -110,7 +110,7 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
    - 全依存ライブラリを最新版へ更新：Jackson (2.18.12)、Junrar (7.6.1)、Log4j 2 (2.25.5)、SLF4J (2.0.20)、PDFBox (2.0.37)、BouncyCastle (1.86)、HSQLDB (2.7.4)、HikariCP (5.1.0)、dom4j (2.1.4)。
    - OSV.dev / GHSA 監査により **脆弱性ゼロ（100% クリーン）** を達成。
 7. **Docker イメージを Jetty 12.1 EE10 へ更新**：
-   - ベースイメージを jetty:12.1-jre21-eclipse-temurin（ee10-deploy,ee10-webapp）に更新。
+   - ベースイメージを jetty:12-jdk21-eclipse-temurin（ee10-deploy,ee10-webapp）に更新。
 
 ---
 
@@ -185,6 +185,9 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
     - **クロスプラットフォーム起動・停止スクリプト**：Windows 用 (start.bat / stop.bat) および Linux / macOS 用 (start.sh / stop.sh) スクリプトを提供。Java 21 自動検出、ポート競合警告、カスタムポート指定（例: start.bat 8888）、起動 4 秒後のブラウザ自動オープン (http://localhost:8080/) を備えています。
     - **ゼロレジデューな完全データ分離 (./data)**：-Djtrac.home によりデータ保存先をポータブルフォルダ内の ./data に自動固定。組み込み HSQLDB データベース、添付ファイル、Lucene 全文検索インデックスを完全分離し、システム領域に一切のゴミを残しません。
     - **Maven Profile ワンコマンドビルド**：pom.xml に <profile><id>portable</id></profile> を追加し、mvn package -Pportable またはルートの package-portable.bat / ./package-portable.sh で手軽にパッケージング可能です。
+
+13. **ログイン画面および多言語ブラウザタブタイトルの「JTrac NG」ブランド統一 (Login Page & Browser Tab Title Brand Consistency)**：
+    - 全25言語のリソースバンドルファイルにおいて、ログイン画面タイトル（`login.title`）を旧版の「JTrac ログイン」から「JTrac NG ログイン」（英語は「JTrac NG Login」等）へと一斉更新し、ホームページとログイン画面の間でブラウザタブタイトルの「JTrac NG」ブランド表記を完全に統一しました。
 
 ---
 

@@ -113,7 +113,7 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
    - Upgraded all foundational libraries: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), and dom4j (2.1.4).
    - Verified via OSV.dev and GHSA batch audits across all direct and transitive dependencies, achieving **0 Vulnerabilities (100% Clean)**.
 7. **Docker Runtime Image Upgraded to Jetty 12.1 EE10**:
-   - Runtime base updated to jetty:12.1-jre21-eclipse-temurin with --add-modules=ee10-deploy,ee10-webapp, built via multi-stage maven:3.9-eclipse-temurin-21.
+   - Runtime base updated to jetty:12-jdk21-eclipse-temurin with --add-modules=ee10-deploy,ee10-webapp, built via multi-stage maven:3.9-eclipse-temurin-21.
 
 ---
 
@@ -199,6 +199,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
     - **Cross-Platform Startup/Shutdown Scripts**: Provides startup/shutdown scripts for Windows (start.bat / stop.bat) and Linux / macOS (start.sh / stop.sh), featuring automatic Java 21 detection, port conflict warnings, custom port parameter support (e.g. start.bat 8888), and auto-opening the browser at http://localhost:8080/ after 4 seconds.
     - **Zero-Residue Isolated Storage (./data)**: Automatically locks the data directory to ./data inside the portable bundle via -Djtrac.home. Embedded HSQLDB database, uploaded attachments, and Lucene search indexes remain 100% self-contained with zero residue in system temporary or AppData directories.
     - **One-Command Maven Profile Packaging**: Integrated <profile><id>portable</id></profile> into pom.xml, enabling cross-platform distribution packaging via mvn package -Pportable, or by executing package-portable.bat / ./package-portable.sh directly.
+
+13. **Login Page & Browser Tab Title "JTrac NG" Brand Consistency**:
+    - Synchronized login page titles (`login.title`) across all 25 localized resource bundle files from legacy "JTrac Login" to "JTrac NG Login" (and respective localized equivalents), ensuring browser tab titles present consistent "JTrac NG" brand identity between the home page and login page.
 
 ---
 

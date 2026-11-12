@@ -109,7 +109,7 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
    - Bibliotecas base actualizadas: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
    - Verificado mediante auditoría OSV.dev y GHSA: **0 vulnerabilidades (100% Limpio)**.
 7. **Imagen Docker actualizada a Jetty 12.1 EE10**:
-   - Imagen de ejecución actualizada a jetty:12.1-jre21-eclipse-temurin con módulos ee10-deploy,ee10-webapp.
+   - Imagen de ejecución actualizada a jetty:12-jdk21-eclipse-temurin con módulos ee10-deploy,ee10-webapp.
 
 ---
 
@@ -180,6 +180,9 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
     - **Scripts multiplataforma**: Proporciona scripts para Windows (start.bat / stop.bat) y Linux / macOS (start.sh / stop.sh), con detección automática de Java 21, verificación de puertos, soporte de puerto personalizado (ej. start.bat 8888) y apertura automática del navegador en http://localhost:8080/.
     - **Almacenamiento aislado sin residuos (./data)**: Fija el directorio de datos a ./data mediante -Djtrac.home. La base de datos HSQLDB, archivos adjuntos e índices Lucene permanecen contenidos sin dejar residuos en el sistema.
     - **Perfil Maven para empaquetado**: Incorpora <profile><id>portable</id></profile> en pom.xml para empaquetar mediante mvn package -Pportable, o ejecutando package-portable.bat / ./package-portable.sh.
+
+13. **Consistencia de marca "JTrac NG" en la página de inicio de sesión y títulos de pestaña del navegador en múltiples idiomas (Login Page & Browser Tab Title Brand Consistency)**:
+    - Se actualizó el título de la página de inicio de sesión (`login.title`) en los 25 archivos de recursos localizados de "JTrac Login / JTrac Inicio de Sesión" a "JTrac NG Login / JTrac NG Inicio de Sesión", garantizando una identidad de marca "JTrac NG" coherente en la pestaña del navegador entre la página principal y la página de inicio de sesión.
 
 ---
 

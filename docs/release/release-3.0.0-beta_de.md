@@ -109,7 +109,7 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
    - Alle Basispakete aktualisiert: Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
    - Über OSV.dev und GHSA verifiziert: **0 Schwachstellen (100% Clean)**.
 7. **Docker-Laufzeitumgebung auf Jetty 12.1 EE10 aktualisiert**:
-   - Basisimage auf jetty:12.1-jre21-eclipse-temurin mit ee10-deploy,ee10-webapp aktualisiert.
+   - Basisimage auf jetty:12-jdk21-eclipse-temurin mit ee10-deploy,ee10-webapp aktualisiert.
 
 ---
 
@@ -180,6 +180,9 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
     - **Plattformübergreifende Skripte**: Bereitstellung von Start- und Stopp-Skripten für Windows (start.bat / stop.bat) und Linux / macOS (start.sh / stop.sh) mit automatischer Java 21-Erkennung, Port-Konfliktprüfung, benutzerdefiniertem Port-Parameter (z. B. start.bat 8888) und automatischem Browseraufruf von http://localhost:8080/.
     - **Isolierter Datenspeicher (./data)**: Bindet das Datenverzeichnis über -Djtrac.home an ./data innerhalb des Verzeichnisses. HSQLDB, Dateianhänge und Lucene-Index bleiben vollständig isoliert ohne Rückstände im System.
     - **Maven Profile Build**: Integration über <profile><id>portable</id></profile> in pom.xml via mvn package -Pportable oder direkt über package-portable.bat / ./package-portable.sh.
+
+13. **Markenkonsistenz für Anmeldeseite und mehrsprachige Browser-Tab-Titel "JTrac NG" (Login Page & Browser Tab Title Brand Consistency)**:
+    - Der Titel der Anmeldeseite (`login.title`) wurde in allen 25 Lokalisierungsdateien von „JTrac Login“ auf „JTrac NG Login“ (bzw. entsprechende lokalisierte Versionen) aktualisiert, um eine einheitliche „JTrac NG“-Markenidentität im Browser-Tab zwischen Startseite und Anmeldeseite zu gewährleisten.
 
 ---
 

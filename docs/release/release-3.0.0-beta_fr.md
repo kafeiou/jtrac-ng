@@ -109,7 +109,7 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
    - Bibliothèques de base mises à jour : Jackson (2.18.12), Junrar (7.6.1), Log4j 2 (2.25.5), SLF4J (2.0.20), PDFBox (2.0.37), BouncyCastle (1.86), HSQLDB (2.7.4), HikariCP (5.1.0), dom4j (2.1.4).
    - Audit complet OSV.dev et GHSA validé : **0 vulnérabilité (100% Sain)**.
 7. **Image Docker mise à niveau vers Jetty 12.1 EE10** :
-   - Image runtime actualisée en jetty:12.1-jre21-eclipse-temurin avec modules ee10-deploy,ee10-webapp.
+   - Image runtime actualisée en jetty:12-jdk21-eclipse-temurin avec modules ee10-deploy,ee10-webapp.
 
 ---
 
@@ -180,6 +180,9 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
     - **Scripts multiplateformes**: Fournit start.bat / stop.bat (Windows) et start.sh / stop.sh (Linux / macOS) avec détection automatique de Java 21, gestion des conflits de port, prise en charge de ports personnalisés (ex: start.bat 8888) et ouverture automatique du navigateur vers http://localhost:8080/.
     - **Isolation des données (./data)**: Utilise -Djtrac.home pour confiner la base HSQLDB, les pièces jointes et les index Lucene dans ./data, garantissant zéro résidu système.
     - **Profil Maven intégré**: Compilation simplifiée via mvn package -Pportable dans pom.xml, ou via package-portable.bat / ./package-portable.sh.
+
+13. **Cohérence de la marque « JTrac NG » pour la page de connexion et les titres d'onglets du navigateur multilingues (Login Page & Browser Tab Title Brand Consistency)** :
+    - Le titre de la page de connexion (`login.title`) a été harmonisé dans les 25 fichiers de ressources localisés, passant de « JTrac Connexion » à « Connexion JTrac NG » (et équivalents multilingues), garantissant une identité de marque « JTrac NG » parfaitement cohérente sur les onglets du navigateur entre la page d'accueil et la page de connexion.
 
 ---
 

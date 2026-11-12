@@ -114,7 +114,7 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
    - 全面升级底层依赖组件：Jackson (2.18.12)、Junrar (7.6.1)、Log4j 2 (2.25.5)、SLF4J (2.0.20)、PDFBox (2.0.37)、BouncyCastle (1.86)、HSQLDB (2.7.4)、HikariCP (5.1.0)、dom4j (2.1.4)。
    - 经 OSV.dev 与 GHSA 全依赖组件漏洞扫描认证，达成 **0 漏洞（100% Clean）** 之最高安全等级。
 7. **Docker 容器镜像升级至 Jetty 12.1 EE10**：
-   - 容器基底采用 jetty:12.1-jre21-eclipse-temurin，多阶段构建采用 maven:3.9-eclipse-temurin-21，自动配置 ee10-deploy,ee10-webapp 模块。
+   - 容器基底采用 jetty:12-jdk21-eclipse-temurin，多阶段构建采用 maven:3.9-eclipse-temurin-21，自动配置 ee10-deploy,ee10-webapp 模块。
 
 ---
 
@@ -192,6 +192,9 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
     - **跨平台一键启闭脚本**：提供 Windows (start.bat / stop.bat) 与 Linux / macOS (start.sh / stop.sh) 启闭脚本，具备 Java 21 运行环境自动检测、端口占用提示、自定义端口传参（如 start.bat 8888）以及启动 4 秒后自动打开默认浏览器访问 http://localhost:8080/。
     - **纯粹绿色数据隔离 (./data)**：系统启动时自动通过 -Djtrac.home 将数据目录绑定至便携包内部的 ./data，内置 HSQLDB 数据库、附件文件、Lucene 全文索引完全收拢，系统分区与 AppData 零残留，U 盘即插即用、整包复制即可备份迁移。
     - **Maven Profile 一键打包**：在 pom.xml 中整合 <profile><id>portable</id></profile>，运行 mvn package -Pportable 即可跨平台自动触发打包流程；亦可直接在项目根目录运行 package-portable.bat 或 ./package-portable.sh。
+
+13. **登录页面与多语言浏览器标签页标题「JTrac NG」品牌一致化 (Login Page & Browser Tab Title Brand Consistency)**：
+    - 将全语言（25 种语言属性文件）之登录页面标题（`login.title`）由旧版「JTrac 登录」全面同步更新为「JTrac NG 登录」（英文为「JTrac NG Login」等），确保浏览器标签页（Tab Title）在首页与登录页面具备一致的「JTrac NG」品牌标识。
 
 ---
 
