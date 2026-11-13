@@ -184,6 +184,9 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
 13. **Cohérence de la marque « JTrac NG » pour la page de connexion et les titres d'onglets du navigateur multilingues (Login Page & Browser Tab Title Brand Consistency)** :
     - Le titre de la page de connexion (`login.title`) a été harmonisé dans les 25 fichiers de ressources localisés, passant de « JTrac Connexion » à « Connexion JTrac NG » (et équivalents multilingues), garantissant une identité de marque « JTrac NG » parfaitement cohérente sur les onglets du navigateur entre la page d'accueil et la page de connexion.
 
+14. **Mise à niveau de Commons IO 2.21.0 et correction de compatibilité pour le téléversement de pièces jointes (Commons IO 2.21.0 Upgrade & File Upload Fix)** :
+    - Verrouillage et mise à niveau explicite de `commons-io` vers `2.21.0` dans le fichier `pom.xml`, résolvant définitivement l'erreur d'incompatibilité binaire `IllegalAccessError` lors de l'ouverture ou de la soumission du formulaire de ticket (`/app/item/form`) due à la visibilité `protected` de `AbstractStreamBuilder.getPath()` dans l'ancienne version `commons-io:2.15.1`, avec ajout d'une couverture de test de régression automatisée.
+
 ---
 
 ## 7. Guide de mise à niveau et de compatibilité

@@ -204,6 +204,9 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心現代化架構的基礎上，引進了革�
 13. **登入頁面與多語系瀏覽器頁籤標題「JTrac NG」品牌一致化 (Login Page & Browser Tab Title Brand Consistency)**：
     - 將全語系（25 種語系屬性檔）之登入頁面標題（`login.title`）由舊版「JTrac 登入」全面同步更新為「JTrac NG 登入」（英文為「JTrac NG Login」等），確保瀏覽器頁籤（Tab Title）在首頁與登入頁面具備一致的「JTrac NG」品牌標誌。
 
+14. **Commons IO 2.21.0 升級與工單上傳相容性修復 (Commons IO 2.21.0 Upgrade & File Upload Fix)**：
+    - 顯式鎖定並升級 `commons-io` 至 `2.21.0`，徹底修復開啟或送出工單表單（`/app/item/form`）時因舊版 `commons-io:2.15.1` 中 `AbstractStreamBuilder.getPath()` 存取修飾元為 `protected` 而導致 `commons-fileupload2:2.0.0-M5` 拋出 `IllegalAccessError` 二進位不相容問題，並加入自動化防呆回歸測試。
+
 ---
 
 ## 七、版本升級與相容性指引

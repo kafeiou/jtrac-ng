@@ -184,6 +184,9 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
 13. **Markenkonsistenz für Anmeldeseite und mehrsprachige Browser-Tab-Titel "JTrac NG" (Login Page & Browser Tab Title Brand Consistency)**:
     - Der Titel der Anmeldeseite (`login.title`) wurde in allen 25 Lokalisierungsdateien von „JTrac Login“ auf „JTrac NG Login“ (bzw. entsprechende lokalisierte Versionen) aktualisiert, um eine einheitliche „JTrac NG“-Markenidentität im Browser-Tab zwischen Startseite und Anmeldeseite zu gewährleisten.
 
+14. **Commons IO 2.21.0 Upgrade & Kompatibilitätskorrektur für Dateiuploads (Commons IO 2.21.0 Upgrade & File Upload Fix)**:
+    - `commons-io` wurde in der `pom.xml` explizit auf `2.21.0` aktualisiert, wodurch der Laufzeitfehler `IllegalAccessError` beim Öffnen oder Absenden des Ticketformulars (`/app/item/form`) behoben wurde (verursacht durch `protected` Sichtbarkeit von `AbstractStreamBuilder.getPath()` in `commons-io:2.15.1`), und um automatisierte Regressionstests ergänzt.
+
 ---
 
 ## 7. Upgrade- und Kompatibilitätshinweise

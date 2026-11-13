@@ -184,6 +184,9 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 13. **Consistencia de marca "JTrac NG" en la página de inicio de sesión y títulos de pestaña del navegador en múltiples idiomas (Login Page & Browser Tab Title Brand Consistency)**:
     - Se actualizó el título de la página de inicio de sesión (`login.title`) en los 25 archivos de recursos localizados de "JTrac Login / JTrac Inicio de Sesión" a "JTrac NG Login / JTrac NG Inicio de Sesión", garantizando una identidad de marca "JTrac NG" coherente en la pestaña del navegador entre la página principal y la página de inicio de sesión.
 
+14. **Actualización de Commons IO 2.21.0 y corrección de compatibilidad de carga de archivos (Commons IO 2.21.0 Upgrade & File Upload Fix)**:
+    - Se fijó y actualizó explícitamente `commons-io` a `2.21.0` en `pom.xml`, solucionando por completo la excepción de incompatibilidad binaria `IllegalAccessError` al abrir o enviar el formulario de ticket (`/app/item/form`) debido a que `AbstractStreamBuilder.getPath()` era `protected` en la versión anterior `commons-io:2.15.1`, e incorporando pruebas de regresión automatizadas.
+
 ---
 
 ## 7. Guía de actualización y compatibilidad

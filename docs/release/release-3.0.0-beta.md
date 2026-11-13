@@ -203,6 +203,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 13. **Login Page & Browser Tab Title "JTrac NG" Brand Consistency**:
     - Synchronized login page titles (`login.title`) across all 25 localized resource bundle files from legacy "JTrac Login" to "JTrac NG Login" (and respective localized equivalents), ensuring browser tab titles present consistent "JTrac NG" brand identity between the home page and login page.
 
+14. **Commons IO 2.21.0 Upgrade & Multipart Upload Linkage Fix**:
+    - Explicitly pinned and upgraded `commons-io` to `2.21.0` in `pom.xml`, resolving runtime `IllegalAccessError` caused by binary incompatibility when instantiating `DiskFileItemFactory` (`AbstractStreamBuilder.getPath()` was `protected` in legacy `commons-io:2.15.1` but `public` in `2.21.0`) on `/app/item/form`, and added automated regression test coverage.
+
 ---
 
 ## 7. Upgrade & Compatibility Guidance

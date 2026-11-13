@@ -189,6 +189,9 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
 13. **ログイン画面および多言語ブラウザタブタイトルの「JTrac NG」ブランド統一 (Login Page & Browser Tab Title Brand Consistency)**：
     - 全25言語のリソースバンドルファイルにおいて、ログイン画面タイトル（`login.title`）を旧版の「JTrac ログイン」から「JTrac NG ログイン」（英語は「JTrac NG Login」等）へと一斉更新し、ホームページとログイン画面の間でブラウザタブタイトルの「JTrac NG」ブランド表記を完全に統一しました。
 
+14. **Commons IO 2.21.0 へのアップグレードと添付ファイルアップロード互換性修正 (Commons IO 2.21.0 Upgrade & File Upload Fix)**：
+    - `pom.xml` で `commons-io` を `2.21.0` に明示的に固定・アップグレードし、チケット作成・編集画面（`/app/item/form`）で旧版 `commons-io:2.15.1` の `AbstractStreamBuilder.getPath()` が `protected` であったために `commons-fileupload2:2.0.0-M5` からの呼び出し時に発生していた `IllegalAccessError` バイナリ非互換例外を解消し、自動回帰テストを追加しました。
+
 ---
 
 ## 7. アップグレードと互換性ガイド

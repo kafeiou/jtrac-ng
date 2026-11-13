@@ -185,6 +185,9 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 13. **Đồng bộ nhận diện thương hiệu "JTrac NG" cho tiêu đề trang đăng nhập và thẻ trình duyệt đa ngôn ngữ (Login Page & Browser Tab Title Brand Consistency)**：
     - Đồng bộ hóa tiêu đề trang đăng nhập (`login.title`) trên toàn bộ 25 tệp tài nguyên ngôn ngữ từ "JTrac Đăng nhập" cũ sang "JTrac NG Đăng nhập" (tiếng Anh là "JTrac NG Login", v.v.), đảm bảo tiêu đề thẻ trình duyệt (Tab Title) đồng nhất thương hiệu "JTrac NG" giữa trang chủ và trang đăng nhập.
 
+14. **Nâng cấp Commons IO 2.21.0 và sửa lỗi tương thích tải tệp đính kèm (Commons IO 2.21.0 Upgrade & File Upload Fix)**：
+    - Khóa rõ ràng và nâng cấp `commons-io` lên `2.21.0` trong `pom.xml`, khắc phục hoàn toàn lỗi không tương thích nhị phân `IllegalAccessError` khi mở hoặc gửi biểu mẫu sự vụ (`/app/item/form`) do phương thức `AbstractStreamBuilder.getPath()` trong phiên bản cũ `commons-io:2.15.1` mang phạm vi truy cập `protected` đối với `commons-fileupload2:2.0.0-M5`, đồng thời bổ sung kiểm thử hồi quy tự động.
+
 ---
 
 ## 7. Hướng dẫn nâng cấp và tính tương thích
