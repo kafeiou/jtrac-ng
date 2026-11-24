@@ -206,6 +206,16 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 14. **Commons IO 2.21.0 Upgrade & Multipart Upload Linkage Fix**:
     - Explicitly pinned and upgraded `commons-io` to `2.21.0` in `pom.xml`, resolving runtime `IllegalAccessError` caused by binary incompatibility when instantiating `DiskFileItemFactory` (`AbstractStreamBuilder.getPath()` was `protected` in legacy `commons-io:2.15.1` but `public` in `2.21.0`) on `/app/item/form`, and added automated regression test coverage.
 
+15. **Three-Tier Exact-Match-First & Latest-Timestamp Search Ranking (AI & Non-AI Compatible)**:
+    - **Three-Tier Priority Ranking**: Search results automatically prioritize **Tier 1** (100% case-insensitive contiguous phrase match of the raw query in `summary`, `detail`, or `comment`, e.g. `app.hlmt@gmail.com`) above **Tier 2** (100% contiguous match of AI / Traditional-Simplified Chinese expanded variants; gracefully bypassed when AI is disabled or offline) and **Tier 3** (partial sub-token or attachment hits), ordering tickets within each tier by **latest timestamp descending (newest first)**.
+    - **Ticket-Grouped History Adjacency & Lucene Boost Guardrail**: Keeps matching rows of the same ticket adjacent in chronological order (`showHistory = true`), adds Lucene `SHOULD` phrase/token boosts (`^20` / `^10`) so exact matches are never truncated by the 1,000-hit window, and respects manual column header sorting when clicked.
+
+16. **Portable Package Builder Auto-Detection of Latest Jetty 12.1.x & Offline Fallback**:
+    - Upgraded `scripts/package-portable.ps1` and `package-portable.sh` to query Maven Central `maven-metadata.xml` for the latest stable `12.1.x` Jetty release, automatically downloading and verifying SHA-1 checksums when a newer patch is available while seamlessly falling back to the highest cached `tools/jetty/jetty-home-*.zip` in offline environments.
+
+17. **Header Search Bar Empty-Workspace Guardrail**:
+    - Wrapped desktop quick-search container (`nav-tab-quicksearch` and `nav-search-divider`) and mobile search button/drawer in Wicket visibility enclosures within `HeaderPanel`, eliminating empty button shells next to Dashboard when zero project spaces exist.
+
 ---
 
 ## 7. Upgrade & Compatibility Guidance

@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,10 +107,15 @@ public class HibernateJtracDao implements JtracDao {
                 .getResultList();
     }
 
+    public static final int TIER_EXACT = 1;
+    public static final int TIER_VARIANT = 2;
+    public static final int TIER_PARTIAL = 3;
+
     public List<Item> findItems(ItemSearch itemSearch) {
         int pageSize = itemSearch.getPageSize();
         Field.Name sortFieldName = Field.isValidName(itemSearch.getSortFieldName()) ? Field.convertToName(itemSearch.getSortFieldName()) : null;
-        boolean doInMemorySort = "lastChanged".equals(itemSearch.getSortFieldName())
+        boolean doInMemorySort = itemSearch.isSearchRelevanceSortActive()
+                || "lastChanged".equals(itemSearch.getSortFieldName())
                 || (sortFieldName != null && sortFieldName.isDropDownType() && itemSearch.getSpace() != null);
         if (pageSize == -1 || doInMemorySort) {
             Criteria criteria = itemSearch.getCriteria().getExecutableCriteria(getCurrentSession());
@@ -151,6 +157,10 @@ public class HibernateJtracDao implements JtracDao {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doInMemorySort(List<Item> list, ItemSearch itemSearch) {
+        if (itemSearch.isSearchRelevanceSortActive()) {
+            sortBySearchRelevanceInDao((List) list, itemSearch);
+            return;
+        }
         if ("lastChanged".equals(itemSearch.getSortFieldName())) {
             Map<Long, Date> latestTimeMap = new HashMap<Long, Date>();
             List<Long> parentIds = new ArrayList<Long>();
@@ -247,6 +257,253 @@ public class HibernateJtracDao implements JtracDao {
             }
         }
         return targetItem.getTimeStamp() != null ? targetItem.getTimeStamp() : row.getTimeStamp();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void sortBySearchRelevanceInDao(List list, ItemSearch itemSearch) {
+        String rawSearchText = itemSearch.getSearchText();
+        String exactPhrase = normalizeExactPhrase(rawSearchText);
+        if (exactPhrase.isEmpty()) {
+            return;
+        }
+        List<String> normalizedVariants = normalizeVariantPhrases(exactPhrase, itemSearch.getExpandedSearchTerms());
+
+        Map<Long, Integer> dbTicketTierMap = new HashMap<Long, Integer>();
+        Map<Long, Date> latestTimeMap = new HashMap<Long, Date>();
+        List<Long> parentIds = new ArrayList<Long>();
+        Set<Long> seenIds = new HashSet<Long>();
+
+        for (Object obj : list) {
+            AbstractItem ai = (AbstractItem) obj;
+            Item target = (ai instanceof Item) ? (Item) ai : ((History) ai).getParent();
+            if (target != null && target.getId() > 0 && seenIds.add(target.getId())) {
+                parentIds.add(target.getId());
+            }
+        }
+
+        if (!parentIds.isEmpty() && sessionFactory != null) {
+            int batchSize = 500;
+            for (int i = 0; i < parentIds.size(); i += batchSize) {
+                List<Long> chunk = parentIds.subList(i, Math.min(i + batchSize, parentIds.size()));
+                if (itemSearch.isShowHistory()) {
+                    // Check parent Item summary/detail & timeStamp in one batch
+                    List<Object[]> itemRows = getCurrentSession()
+                            .createQuery("select i.id, i.summary, i.detail, i.timeStamp from Item i where i.id in (:ids)", Object[].class)
+                            .setParameterList("ids", chunk)
+                            .getResultList();
+                    for (Object[] row : itemRows) {
+                        Long itemId = (Long) row[0];
+                        if (itemId != null) {
+                            int tier = computeTextMatchTier(exactPhrase, normalizedVariants, (String) row[1], (String) row[2], null);
+                            mergeBestTier(dbTicketTierMap, itemId, tier);
+                            mergeLatestDate(latestTimeMap, itemId, (Date) row[3]);
+                        }
+                    }
+                    // Fetch latest history timestamp per ticket in one batch
+                    List<Object[]> histTimeRows = getCurrentSession()
+                            .createQuery("select h.parent.id, max(h.timeStamp) from History h where h.parent.id in (:ids) group by h.parent.id", Object[].class)
+                            .setParameterList("ids", chunk)
+                            .getResultList();
+                    for (Object[] row : histTimeRows) {
+                        if (row[0] != null && row[1] != null) {
+                            mergeLatestDate(latestTimeMap, (Long) row[0], (Date) row[1]);
+                        }
+                    }
+                } else {
+                    // showHistory = false: inspect all History summaries/details/comments & timestamps for matched items in one batch
+                    List<Object[]> histRows = getCurrentSession()
+                            .createQuery("select h.parent.id, h.summary, h.detail, h.comment, h.timeStamp from History h where h.parent.id in (:ids)", Object[].class)
+                            .setParameterList("ids", chunk)
+                            .getResultList();
+                    for (Object[] row : histRows) {
+                        Long itemId = (Long) row[0];
+                        if (itemId != null) {
+                            int tier = computeTextMatchTier(exactPhrase, normalizedVariants, (String) row[1], (String) row[2], (String) row[3]);
+                            mergeBestTier(dbTicketTierMap, itemId, tier);
+                            mergeLatestDate(latestTimeMap, itemId, (Date) row[4]);
+                        }
+                    }
+                }
+            }
+        }
+
+        sortBySearchRelevance(list, rawSearchText, itemSearch.getExpandedSearchTerms(), dbTicketTierMap, latestTimeMap);
+    }
+
+    /**
+     * Sorts search results into 3 tiers while keeping same-ticket rows adjacent:
+     *   Tier 1 (TIER_EXACT):   100% case-insensitive contiguous match of rawSearchText in summary, detail, or comment
+     *   Tier 2 (TIER_VARIANT): 100% case-insensitive contiguous match of AI / TC-SC expanded variant in summary, detail, or comment
+     *   Tier 3 (TIER_PARTIAL): Partial / sub-token / attachment match
+     * Within each tier, tickets are ordered by latest timestamp DESC (newest first), then ticket ID DESC,
+     * with revisions of the same ticket ordered chronologically (history.id ASC).
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sortBySearchRelevance(List list, String rawSearchText, Collection<String> expandedTerms,
+                                             Map<Long, Integer> externalTicketTierMap, Map<Long, Date> externalLatestTimeMap) {
+        if (list == null || list.size() <= 1) {
+            return;
+        }
+        final String exactPhrase = normalizeExactPhrase(rawSearchText);
+        if (exactPhrase.isEmpty()) {
+            return;
+        }
+        final List<String> normalizedVariants = normalizeVariantPhrases(exactPhrase, expandedTerms);
+
+        final Map<Long, Integer> effectiveTierMap = new HashMap<Long, Integer>();
+        if (externalTicketTierMap != null) {
+            effectiveTierMap.putAll(externalTicketTierMap);
+        }
+        final Map<Long, Date> effectiveTimeMap = new HashMap<Long, Date>();
+        if (externalLatestTimeMap != null) {
+            effectiveTimeMap.putAll(externalLatestTimeMap);
+        }
+
+        // Aggregate best tier and latest timestamp across all in-memory rows per ticket
+        for (Object obj : list) {
+            AbstractItem ai = (AbstractItem) obj;
+            Item target = (ai instanceof Item) ? (Item) ai : ((History) ai).getParent();
+            long ticketId = target != null ? target.getId() : ai.getId();
+            String comment = (ai instanceof History) ? ((History) ai).getComment() : null;
+            int rowTier = computeTextMatchTier(exactPhrase, normalizedVariants, ai.getSummary(), ai.getDetail(), comment);
+            mergeBestTier(effectiveTierMap, ticketId, rowTier);
+            mergeLatestDate(effectiveTimeMap, ticketId, ai.getTimeStamp());
+
+            // When external DB maps are not supplied (e.g. unit tests with detached domain objects), inspect initialized targetItem
+            if (externalTicketTierMap == null && target != null && target != ai) {
+                int parentTier = computeTextMatchTier(exactPhrase, normalizedVariants, target.getSummary(), target.getDetail(), null);
+                mergeBestTier(effectiveTierMap, ticketId, parentTier);
+                mergeLatestDate(effectiveTimeMap, ticketId, target.getTimeStamp());
+            }
+            if (externalTicketTierMap == null && ai instanceof Item) {
+                Item item = (Item) ai;
+                if (item.getHistory() != null) {
+                    for (History h : item.getHistory()) {
+                        int hTier = computeTextMatchTier(exactPhrase, normalizedVariants, h.getSummary(), h.getDetail(), h.getComment());
+                        mergeBestTier(effectiveTierMap, ticketId, hTier);
+                        mergeLatestDate(effectiveTimeMap, ticketId, h.getTimeStamp());
+                    }
+                }
+            }
+        }
+
+        Comparator<AbstractItem> comp = new Comparator<AbstractItem>() {
+            public int compare(AbstractItem left, AbstractItem right) {
+                Item leftItem = (left instanceof Item) ? (Item) left : ((History) left).getParent();
+                Item rightItem = (right instanceof Item) ? (Item) right : ((History) right).getParent();
+                long leftTicketId = leftItem != null ? leftItem.getId() : left.getId();
+                long rightTicketId = rightItem != null ? rightItem.getId() : right.getId();
+
+                Integer leftTierObj = effectiveTierMap.get(leftTicketId);
+                Integer rightTierObj = effectiveTierMap.get(rightTicketId);
+                int leftTier = leftTierObj != null ? leftTierObj.intValue() : TIER_PARTIAL;
+                int rightTier = rightTierObj != null ? rightTierObj.intValue() : TIER_PARTIAL;
+                if (leftTier != rightTier) {
+                    return Integer.compare(leftTier, rightTier);
+                }
+
+                Date leftTime = effectiveTimeMap.get(leftTicketId);
+                Date rightTime = effectiveTimeMap.get(rightTicketId);
+                int timeCmp = compareDatesDescending(leftTime, rightTime);
+                if (timeCmp != 0) {
+                    return timeCmp;
+                }
+
+                int ticketCmp = Long.compare(rightTicketId, leftTicketId);
+                if (ticketCmp != 0) {
+                    return ticketCmp;
+                }
+
+                return Long.compare(left.getId(), right.getId());
+            }
+        };
+        Collections.sort(list, comp);
+    }
+
+    public static String normalizeExactPhrase(String text) {
+        if (text == null) {
+            return "";
+        }
+        String trimmed = text.trim();
+        if (trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            trimmed = trimmed.substring(1, trimmed.length() - 1).trim();
+        }
+        return trimmed.toLowerCase(Locale.ROOT);
+    }
+
+    private static List<String> normalizeVariantPhrases(String exactPhrase, Collection<String> expandedTerms) {
+        if (expandedTerms == null || expandedTerms.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<String>();
+        for (String term : expandedTerms) {
+            String norm = normalizeExactPhrase(term);
+            if (!norm.isEmpty() && !norm.equals(exactPhrase) && !result.contains(norm)) {
+                result.add(norm);
+            }
+        }
+        return result;
+    }
+
+    public static int computeTextMatchTier(String exactPhrase, List<String> normalizedVariants,
+                                           String summary, String detail, String comment) {
+        if (exactPhrase == null || exactPhrase.isEmpty()) {
+            return TIER_PARTIAL;
+        }
+        String normSummary = summary != null ? summary.toLowerCase(Locale.ROOT) : null;
+        String normDetail = detail != null ? detail.toLowerCase(Locale.ROOT) : null;
+        String normComment = comment != null ? comment.toLowerCase(Locale.ROOT) : null;
+
+        if ((normSummary != null && normSummary.contains(exactPhrase))
+                || (normDetail != null && normDetail.contains(exactPhrase))
+                || (normComment != null && normComment.contains(exactPhrase))) {
+            return TIER_EXACT;
+        }
+
+        if (normalizedVariants != null && !normalizedVariants.isEmpty()) {
+            for (String variant : normalizedVariants) {
+                if ((normSummary != null && normSummary.contains(variant))
+                        || (normDetail != null && normDetail.contains(variant))
+                        || (normComment != null && normComment.contains(variant))) {
+                    return TIER_VARIANT;
+                }
+            }
+        }
+
+        return TIER_PARTIAL;
+    }
+
+    private static void mergeBestTier(Map<Long, Integer> map, Long ticketId, int candidateTier) {
+        if (ticketId == null) {
+            return;
+        }
+        Integer existing = map.get(ticketId);
+        if (existing == null || candidateTier < existing.intValue()) {
+            map.put(ticketId, Integer.valueOf(candidateTier));
+        }
+    }
+
+    private static void mergeLatestDate(Map<Long, Date> map, Long ticketId, Date candidate) {
+        if (ticketId == null || candidate == null) {
+            return;
+        }
+        Date existing = map.get(ticketId);
+        if (existing == null || candidate.after(existing)) {
+            map.put(ticketId, candidate);
+        }
+    }
+
+    private static int compareDatesDescending(Date left, Date right) {
+        if (left != null && right != null) {
+            return right.compareTo(left);
+        }
+        if (left != null) {
+            return -1;
+        }
+        if (right != null) {
+            return 1;
+        }
+        return 0;
     }
 
     public int loadCountOfAllItems() {

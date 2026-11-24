@@ -55,6 +55,8 @@ public class ItemSearch implements Serializable {
     private String relatingItemRefId;
     private Collection<Long> itemIds;
     private Collection<Long> historyIds;
+    private List<String> expandedSearchTerms;
+    private boolean explicitSort;
 
     private List<ColumnHeading> columnHeadings;
     private Map<String, FilterCriteria> filterCriteriaMap = new LinkedHashMap<String, FilterCriteria>();
@@ -86,6 +88,7 @@ public class ItemSearch implements Serializable {
         sortDescending = !params.get("sortAscending").toBoolean(false);
         String candidateSortField = params.get("sortFieldName").toString("id");
         sortFieldName = ColumnHeading.isValidFieldOrColumnName(candidateSortField) ? candidateSortField : "id";
+        explicitSort = !params.get("sortFieldName").isNull() || !params.get("sortAscending").isNull();
         for(String name : params.getNamedKeys()) {
             if(ColumnHeading.isValidFieldOrColumnName(name)) {
                 ColumnHeading ch = getColumnHeading(name);
@@ -165,7 +168,7 @@ public class ItemSearch implements Serializable {
         if(!sortDescending) {
             params.set("sortAscending", "true");
         }
-        if(!sortFieldName.equals("id")) {
+        if(explicitSort || !sortFieldName.equals("id")) {
             params.set("sortFieldName", sortFieldName);
         }
         if(relatingItemRefId != null) {
@@ -528,6 +531,30 @@ public class ItemSearch implements Serializable {
 
     public void setHistoryIds(Collection<Long> historyIds) {
         this.historyIds = historyIds;
+    }
+
+    public List<String> getExpandedSearchTerms() {
+        return expandedSearchTerms;
+    }
+
+    public void setExpandedSearchTerms(List<String> expandedSearchTerms) {
+        this.expandedSearchTerms = expandedSearchTerms;
+    }
+
+    public boolean isExplicitSort() {
+        return explicitSort;
+    }
+
+    public void setExplicitSort(boolean explicitSort) {
+        this.explicitSort = explicitSort;
+    }
+
+    public boolean isSearchRelevanceSortActive() {
+        String st = getSearchText();
+        return st != null && !st.trim().isEmpty()
+                && !explicitSort
+                && (sortFieldName == null || "id".equals(sortFieldName))
+                && sortDescending;
     }
 
     public List<ColumnHeading> getColumnHeadings() {

@@ -187,6 +187,16 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
 14. **Mise à niveau de Commons IO 2.21.0 et correction de compatibilité pour le téléversement de pièces jointes (Commons IO 2.21.0 Upgrade & File Upload Fix)** :
     - Verrouillage et mise à niveau explicite de `commons-io` vers `2.21.0` dans le fichier `pom.xml`, résolvant définitivement l'erreur d'incompatibilité binaire `IllegalAccessError` lors de l'ouverture ou de la soumission du formulaire de ticket (`/app/item/form`) due à la visibilité `protected` de `AbstractStreamBuilder.getPath()` dans l'ancienne version `commons-io:2.15.1`, avec ajout d'une couverture de test de régression automatisée.
 
+15. **Classement de recherche à trois niveaux « Correspondance exacte à 100 % en tête + horodatage le plus récent » (compatible avec et sans IA)** :
+    - **Hiérarchisation à trois niveaux** : Les résultats placent automatiquement en tête le **Niveau 1** (correspondance contiguë à 100 % insensible à la casse de la requête brute dans `summary`, `detail` ou `comment`, ex. `app.hlmt@gmail.com`), suivi du **Niveau 2** (correspondance exacte des variantes IA / chinois traditionnel-simplifié ; ignoré de façon transparente sans IA) et du **Niveau 3** (correspondances partielles de sous-jetons ou pièces jointes), triés dans chaque niveau par **horodatage le plus récent en premier**.
+    - **Regroupement adjacent par ticket et protection de boost Lucene** : Maintient adjacentes par ordre chronologique les lignes d'historique d'un même ticket (`showHistory = true`), applique un boost Lucene (`^20` / `^10`) garantissant la présence des correspondances exactes dans la fenêtre des 1 000 résultats, et respecte le tri manuel par colonne.
+
+16. **Détection automatique de la dernière version stable Jetty 12.1.x et repli hors ligne pour le générateur Portable** :
+    - Mise à niveau de `scripts/package-portable.ps1` et `package-portable.sh` pour interroger `maven-metadata.xml` sur Maven Central, télécharger la dernière version stable `12.1.x` avec vérification SHA-1, et basculer automatiquement sur l'archive locale la plus récente dans `tools/jetty/jetty-home-*.zip` hors connexion.
+
+17. **Masquage des conteneurs de recherche vides en l'absence d'espaces projet** :
+    - Encapsulation de la recherche rapide bureau (`nav-tab-quicksearch`, `nav-search-divider`) et du bouton/tiroir mobile dans `<wicket:enclosure>` au sein de `HeaderPanel`, supprimant l'affichage de deux boutons vides à côté du Tableau de bord lorsqu'aucun espace n'existe.
+
 ---
 
 ## 7. Guide de mise à niveau et de compatibilité

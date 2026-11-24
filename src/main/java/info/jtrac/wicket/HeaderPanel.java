@@ -186,6 +186,10 @@ public class HeaderPanel extends BasePanel {
         desktopSearchForm.setVisible(spaces.size() > 0);
         add(desktopSearchForm);
 
+        WebMarkupContainer mobileSearchBtn = new WebMarkupContainer("mobileSearchBtn");
+        mobileSearchBtn.setVisible(spaces.size() > 0);
+        add(mobileSearchBtn);
+
         final Model<String> mobileSearchModel = new Model<String>();
         Form<Void> mobileSearchForm = new Form<Void>("mobileSearchForm") {
             @Override

@@ -718,6 +718,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
             }
             itemSearch.setItemIds(itemIds);
             itemSearch.setHistoryIds(historyIds);
+            itemSearch.setExpandedSearchTerms(hits.getExpandedTerms());
+        } else {
+            itemSearch.setExpandedSearchTerms(null);
         }
         return dao.findItems(itemSearch);
     }

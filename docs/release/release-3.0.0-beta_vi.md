@@ -188,6 +188,16 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 14. **Nâng cấp Commons IO 2.21.0 và sửa lỗi tương thích tải tệp đính kèm (Commons IO 2.21.0 Upgrade & File Upload Fix)**：
     - Khóa rõ ràng và nâng cấp `commons-io` lên `2.21.0` trong `pom.xml`, khắc phục hoàn toàn lỗi không tương thích nhị phân `IllegalAccessError` khi mở hoặc gửi biểu mẫu sự vụ (`/app/item/form`) do phương thức `AbstractStreamBuilder.getPath()` trong phiên bản cũ `commons-io:2.15.1` mang phạm vi truy cập `protected` đối với `commons-fileupload2:2.0.0-M5`, đồng thời bổ sung kiểm thử hồi quy tự động.
 
+15. **Xếp hạng tìm kiếm 3 tầng "Ưu tiên khớp chính xác 100% + Dấu thời gian mới nhất" (Tương thích cả khi có và không có AI)**：
+    - **Xếp hạng ưu tiên 3 tầng**: Kết quả tìm kiếm mặc định đưa **Tầng 1** (khớp liên tiếp 100% không phân biệt hoa thường cụm từ gốc trong `summary`, `detail` hoặc `comment`, ví dụ `app.hlmt@gmail.com`) lên đầu tiên, tiếp theo là **Tầng 2** (khớp 100% từ mở rộng AI / Phồn-Giản thể; tự động bỏ qua khi tắt AI) và **Tầng 3** (khớp từ khóa phụ hoặc tệp đính kèm); trong mỗi tầng sắp xếp theo **dấu thời gian mới nhất giảm dần**.
+    - **Gom nhóm liền kề theo sự vụ & Bảo vệ trọng số Lucene**: Giữ các dòng lịch sử của cùng một sự vụ nằm liền kề theo thứ tự thời gian (`showHistory = true`), bổ sung trọng số ưu tiên Lucene (`^20` / `^10`) để không bị cắt bởi giới hạn 1.000 kết quả, đồng thời tôn trọng thao tác sắp xếp thủ công khi nhấp tiêu đề cột.
+
+16. **Tự động cập nhật Jetty 12.1.x mới nhất và dự phòng ngoại tuyến cho bộ đóng gói Portable**：
+    - Nâng cấp `scripts/package-portable.ps1` và `package-portable.sh` tự động truy vấn `maven-metadata.xml` chính thức từ Maven Central để tải bản ổn định `12.1.x` mới nhất kèm kiểm tra toàn vẹn SHA-1; khi không có mạng sẽ tự động chọn tệp `tools/jetty/jetty-home-*.zip` mới nhất sẵn có.
+
+17. **Chặn hiển thị nút trống thanh tìm kiếm khi chưa có không gian dự án**：
+    - Bao bọc khung tìm kiếm nhanh trên máy tính (`nav-tab-quicksearch`, `nav-search-divider`) và nút/ngăn tìm kiếm di động bằng `<wicket:enclosure>` trong `HeaderPanel`, khắc phục lỗi xuất hiện hai nút trống cạnh Bảng điều khiển khi chưa tạo không gian dự án nào (`spaces.size() == 0`).
+
 ---
 
 ## 7. Hướng dẫn nâng cấp và tính tương thích

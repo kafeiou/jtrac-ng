@@ -1,6 +1,6 @@
 ﻿# JTrac NG Portable Distribution Packaging Script (PowerShell)
 param(
-    [string]$JettyZipPath = "$PSScriptRoot\..\tools\jetty\jetty-home-12.1.14.zip",
+    [string]$JettyZipPath = "",
     [string]$WarFilePath = "$PSScriptRoot\..\target\jtrac.war",
     [string]$OutputDirectory = "$PSScriptRoot\..\target",
     [string]$OutputZipName = "jtrac-ng-3.0.0-beta-portable.zip"
@@ -9,12 +9,6 @@ param(
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = (Resolve-Path "$PSScriptRoot\..").Path
-$JettyZip = (Resolve-Path $JettyZipPath -ErrorAction SilentlyContinue)
-if (-not $JettyZip) {
-    $JettyZip = [System.IO.Path]::GetFullPath("$ProjectRoot\tools\jetty\jetty-home-12.1.14.zip")
-} else {
-    $JettyZip = $JettyZip.Path
-}
 $WarFile = (Resolve-Path $WarFilePath -ErrorAction SilentlyContinue)
 if (-not $WarFile) {
     $WarFile = [System.IO.Path]::GetFullPath("$ProjectRoot\target\jtrac.war")
@@ -27,24 +21,149 @@ Write-Host "  JTrac NG (v3.0.0-beta) Portable Package Builder" -ForegroundColor 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "Project Root: $ProjectRoot"
 
-# 1. Check or Download Base Jetty ZIP
-$JettyDir = Split-Path $JettyZip -Parent
+# Helper: Find highest semantic version among jetty-home-*.zip in a directory
+function Get-LatestLocalJettyZip {
+    param([string]$SearchDir, [switch]$Recurse)
+    if (-not (Test-Path $SearchDir)) { return $null }
+    $files = if ($Recurse) {
+        Get-ChildItem -Path $SearchDir -Filter "jetty-home-*.zip" -File -Recurse -ErrorAction SilentlyContinue
+    } else {
+        Get-ChildItem -Path $SearchDir -Filter "jetty-home-*.zip" -File -ErrorAction SilentlyContinue
+    }
+    $candidates = @()
+    foreach ($f in $files) {
+        if ($f.Length -gt 1048576 -and $f.Name -match '^jetty-home-(\d+\.\d+\.\d+)\.zip$') {
+            $candidates += [PSCustomObject]@{
+                Version = [version]$Matches[1]
+                VersionText = $Matches[1]
+                File = $f
+            }
+        }
+    }
+    if ($candidates.Count -eq 0) { return $null }
+    return ($candidates | Sort-Object Version -Descending | Select-Object -First 1)
+}
+
+# 1. Resolve Base Jetty ZIP (Explicit Override -> Online Latest 12.1.x -> Local Latest Fallback)
+$JettyDir = [System.IO.Path]::GetFullPath("$ProjectRoot\tools\jetty")
 if (-not (Test-Path $JettyDir)) {
     New-Item -ItemType Directory -Path $JettyDir -Force | Out-Null
 }
 
-if (-not (Test-Path $JettyZip)) {
-    Write-Host "[1/5] Base Jetty ZIP not found at $JettyZip. Downloading from Maven Central..." -ForegroundColor Yellow
-    & mvn dependency:get "-Dartifact=org.eclipse.jetty:jetty-home:12.1.14:zip" -Dtransitive=false
-    $M2Zip = "$env:USERPROFILE\.m2\repository\org\eclipse\jetty\jetty-home\12.1.14\jetty-home-12.1.14.zip"
-    if (Test-Path $M2Zip) {
-        Copy-Item -Path $M2Zip -Destination $JettyZip -Force
-        Write-Host "       Successfully cached Jetty ZIP to $JettyZip" -ForegroundColor Green
-    } else {
-        throw "Failed to acquire jetty-home-12.1.14.zip from Maven repository."
+$JettyZip = $null
+if (-not [string]::IsNullOrWhiteSpace($JettyZipPath)) {
+    $ResolvedCustom = Resolve-Path $JettyZipPath -ErrorAction SilentlyContinue
+    if (-not $ResolvedCustom) {
+        throw "Specified -JettyZipPath does not exist: $JettyZipPath"
     }
+    $JettyZip = $ResolvedCustom.Path
+    Write-Host "[1/5] Using explicitly specified Jetty ZIP: $JettyZip" -ForegroundColor Green
 } else {
-    Write-Host "[1/5] Using base Jetty ZIP: $JettyZip" -ForegroundColor Green
+    # Ensure TLS 1.2+ for Maven Central HTTPS connections on Windows PowerShell 5.1
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    } catch {}
+
+    $LocalBest = Get-LatestLocalJettyZip -SearchDir $JettyDir
+    $MetadataUrl = "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/maven-metadata.xml"
+    $RemoteLatestVerText = $null
+
+    Write-Host "[1/5] Checking Maven Central for latest stable Jetty 12.1.x release..." -ForegroundColor Cyan
+    $prevProgress = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
+    try {
+        $resp = Invoke-WebRequest -Uri $MetadataUrl -UseBasicParsing -TimeoutSec 6 -ErrorAction Stop
+        $xmlContent = $resp.Content
+        if ($xmlContent -is [byte[]]) {
+            $xmlContent = [System.Text.Encoding]::UTF8.GetString($xmlContent)
+        }
+        $verMatches = [regex]::Matches($xmlContent, '<version>(12\.1\.\d+)</version>')
+        $remoteCandidates = @()
+        foreach ($m in $verMatches) {
+            $remoteCandidates += [PSCustomObject]@{
+                Version = [version]$m.Groups[1].Value
+                Text = $m.Groups[1].Value
+            }
+        }
+        if ($remoteCandidates.Count -gt 0) {
+            $RemoteLatestVerText = ($remoteCandidates | Sort-Object Version -Descending | Select-Object -First 1).Text
+        }
+    } catch {
+        Write-Host "       [Offline/Timeout] Could not reach Maven Central ($($_.Exception.Message))." -ForegroundColor Yellow
+    } finally {
+        $ProgressPreference = $prevProgress
+    }
+
+    if ($RemoteLatestVerText) {
+        $TargetZip = Join-Path $JettyDir "jetty-home-$RemoteLatestVerText.zip"
+        if ((Test-Path $TargetZip) -and ((Get-Item $TargetZip).Length -gt 1048576)) {
+            $JettyZip = $TargetZip
+            Write-Host "       Local Jetty is already up to date (v$RemoteLatestVerText): $JettyZip" -ForegroundColor Green
+        } else {
+            # Check local .m2 cache before downloading over network
+            $M2Candidate = "$env:USERPROFILE\.m2\repository\org\eclipse\jetty\jetty-home\$RemoteLatestVerText\jetty-home-$RemoteLatestVerText.zip"
+            if ((Test-Path $M2Candidate) -and ((Get-Item $M2Candidate).Length -gt 1048576)) {
+                Copy-Item -Path $M2Candidate -Destination $TargetZip -Force
+                $JettyZip = $TargetZip
+                Write-Host "       Copied latest Jetty v$RemoteLatestVerText from local Maven repository to $JettyZip" -ForegroundColor Green
+            } else {
+                $LocalLabel = if ($LocalBest) { "v$($LocalBest.VersionText)" } else { "none" }
+                Write-Host "       Downloading latest Jetty v$RemoteLatestVerText (local: $LocalLabel)..." -ForegroundColor Yellow
+                $BaseArtifactUrl = "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/$RemoteLatestVerText/jetty-home-$RemoteLatestVerText.zip"
+                $TempDownload = "$TargetZip.tmp"
+                $prevProgress = $ProgressPreference
+                $ProgressPreference = 'SilentlyContinue'
+                try {
+                    if (Test-Path $TempDownload) { Remove-Item -Path $TempDownload -Force }
+                    Invoke-WebRequest -Uri $BaseArtifactUrl -OutFile $TempDownload -UseBasicParsing -TimeoutSec 120 -ErrorAction Stop
+
+                    # Optional SHA-1 verification against Maven Central checksum
+                    $Sha1Resp = $null
+                    try {
+                        $Sha1Resp = Invoke-WebRequest -Uri "$BaseArtifactUrl.sha1" -UseBasicParsing -TimeoutSec 6 -ErrorAction Stop
+                    } catch {}
+                    if ($Sha1Resp -and $Sha1Resp.Content) {
+                        $rawSha = if ($Sha1Resp.Content -is [byte[]]) { [System.Text.Encoding]::ASCII.GetString($Sha1Resp.Content) } else { [string]$Sha1Resp.Content }
+                        if ($rawSha -match '([0-9a-fA-F]{40})') {
+                            $expectedSha1 = $Matches[1].ToLowerInvariant()
+                            $actualSha1 = (Get-FileHash -Path $TempDownload -Algorithm SHA1).Hash.ToLowerInvariant()
+                            if ($actualSha1 -ne $expectedSha1) {
+                                throw "SHA-1 checksum mismatch (expected $expectedSha1, got $actualSha1)"
+                            }
+                        }
+                    }
+
+                    Move-Item -Path $TempDownload -Destination $TargetZip -Force
+                    $JettyZip = $TargetZip
+                    Write-Host "       Successfully downloaded and verified Jetty v$RemoteLatestVerText -> $JettyZip" -ForegroundColor Green
+                } catch {
+                    if (Test-Path $TempDownload) { Remove-Item -Path $TempDownload -Force -ErrorAction SilentlyContinue }
+                    Write-Host "       [WARN] Download failed ($($_.Exception.Message))." -ForegroundColor Yellow
+                } finally {
+                    $ProgressPreference = $prevProgress
+                }
+            }
+        }
+    }
+
+    # Fallback to newest local ZIP in tools/jetty (or .m2 cache) if offline or download failed
+    if (-not $JettyZip) {
+        $LocalBest = Get-LatestLocalJettyZip -SearchDir $JettyDir
+        if ($LocalBest) {
+            $JettyZip = $LocalBest.File.FullName
+            Write-Host "       Using newest local Jetty (v$($LocalBest.VersionText)): $JettyZip" -ForegroundColor Green
+        } else {
+            $M2Best = Get-LatestLocalJettyZip -SearchDir "$env:USERPROFILE\.m2\repository\org\eclipse\jetty\jetty-home" -Recurse
+            if ($M2Best) {
+                $CachedDest = Join-Path $JettyDir $M2Best.File.Name
+                Copy-Item -Path $M2Best.File.FullName -Destination $CachedDest -Force
+                $JettyZip = $CachedDest
+                Write-Host "       Using newest Jetty from local .m2 cache (v$($M2Best.VersionText)): $JettyZip" -ForegroundColor Green
+            } else {
+                throw "No network access to Maven Central and no local jetty-home-*.zip found in $JettyDir."
+            }
+        }
+    }
 }
 
 # 2. Check or Build jtrac WAR

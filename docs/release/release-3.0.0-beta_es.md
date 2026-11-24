@@ -187,6 +187,16 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 14. **Actualización de Commons IO 2.21.0 y corrección de compatibilidad de carga de archivos (Commons IO 2.21.0 Upgrade & File Upload Fix)**:
     - Se fijó y actualizó explícitamente `commons-io` a `2.21.0` en `pom.xml`, solucionando por completo la excepción de incompatibilidad binaria `IllegalAccessError` al abrir o enviar el formulario de ticket (`/app/item/form`) debido a que `AbstractStreamBuilder.getPath()` era `protected` en la versión anterior `commons-io:2.15.1`, e incorporando pruebas de regresión automatizadas.
 
+15. **Clasificación de búsqueda en tres niveles "Coincidencia exacta 100% primero + marca de tiempo más reciente" (con y sin IA)**:
+    - **Prioridad en tres niveles**: Los resultados de búsqueda posicionan automáticamente en primer lugar el **Nivel 1** (coincidencia continua del 100% sin distinción de mayúsculas en `summary`, `detail` o `comment`, p. ej., `app.hlmt@gmail.com`), seguido del **Nivel 2** (coincidencia exacta de variantes expandidas por IA / chino tradicional-simplificado; omitido automáticamente sin IA) y el **Nivel 3** (coincidencias parciales de sub-tokens o adjuntos), ordenando cada nivel por **marca de tiempo más reciente primero**.
+    - **Agrupación por ticket y protección de relevancia en Lucene**: Mantiene adyacentes en orden cronológico las filas de historial de un mismo ticket (`showHistory = true`), aplica impulsos `^20` / `^10` en Lucene para evitar truncamientos en el límite de 1.000 resultados y respeta la ordenación manual al hacer clic en encabezados de columna.
+
+16. **Detección automática de la última versión estable de Jetty 12.1.x y respaldo sin conexión en el empaquetador Portable**:
+    - Se actualizaron `scripts/package-portable.ps1` y `package-portable.sh` para consultar `maven-metadata.xml` en Maven Central y descargar la última versión estable `12.1.x` con verificación SHA-1, recurriendo automáticamente al archivo local más reciente en `tools/jetty/jetty-home-*.zip` cuando no hay conexión.
+
+17. **Ocultación de contenedores vacíos de búsqueda sin espacios de proyecto**:
+    - Se envolvieron el buscador rápido de escritorio (`nav-tab-quicksearch`, `nav-search-divider`) y el botón/panel móvil en `<wicket:enclosure>` dentro de `HeaderPanel`, eliminando los dos botones vacíos junto al Panel de control cuando aún no existen espacios creados.
+
 ---
 
 ## 7. Guía de actualización y compatibilidad

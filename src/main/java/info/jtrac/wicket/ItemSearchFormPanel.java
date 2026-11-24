@@ -137,6 +137,9 @@ public class ItemSearchFormPanel extends BasePanel {
                         form.error(localize("item_search_form.error.summary.invalid"));
                         return;
                     }
+                    itemSearch.setExplicitSort(false);
+                    itemSearch.setSortFieldName("id");
+                    itemSearch.setSortDescending(true);
                 }
                 setResponsePage(ItemListPage.class, itemSearch.getAsQueryString());
             }

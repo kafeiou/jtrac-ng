@@ -20,13 +20,18 @@ import info.jtrac.exception.SearchQueryParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
@@ -95,7 +100,8 @@ public class IndexSearcher {
         parser.setPhraseSlop(2);
 
         Query query;
-        String expandedText = expandQueryText(text);
+        List<String> collectedVariants = new ArrayList<String>();
+        String expandedText = expandQueryText(text, collectedVariants);
         try {
             query = parser.parse(expandedText);
         } catch (ParseException pe0) {
@@ -127,13 +133,14 @@ public class IndexSearcher {
         try {
             reader = IndexReader.open(indexDirectory, true);
             searcher = new org.apache.lucene.search.IndexSearcher(reader);
-            TopDocs topDocs = searcher.search(query, 1000);
+            Query searchQuery = buildBoostedQuery(query, text, collectedVariants);
+            TopDocs topDocs = searcher.search(searchQuery, 1000);
 
             // If no hits found and query text contains special characters (e.g. Service:Auth), attempt escaped query fallback
             if (topDocs.scoreDocs.length == 0 && containsLuceneSpecialChars(text)) {
                 try {
                     Query escapedQuery = parser.parse(QueryParser.escape(text));
-                    TopDocs escapedDocs = searcher.search(escapedQuery, 1000);
+                    TopDocs escapedDocs = searcher.search(buildBoostedQuery(escapedQuery, text, collectedVariants), 1000);
                     if (escapedDocs.scoreDocs.length > 0) {
                         topDocs = escapedDocs;
                     }
@@ -156,6 +163,7 @@ public class IndexSearcher {
             }
 
             SearchResultHits hits = new SearchResultHits();
+            hits.getExpandedTerms().addAll(collectedVariants);
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 String type = doc.get("type");
@@ -234,6 +242,10 @@ public class IndexSearcher {
     }
 
     protected String expandQueryText(String text) {
+        return expandQueryText(text, null);
+    }
+
+    protected String expandQueryText(String text, List<String> collectedVariants) {
         if (text == null) {
             return null;
         }
@@ -251,7 +263,13 @@ public class IndexSearcher {
                     StringBuilder sb = new StringBuilder("(");
                     sb.append(trimmed);
                     for (String variant : variants) {
-                        sb.append(" OR \"").append(variant).append("\"");
+                        if (variant != null && !variant.trim().isEmpty()) {
+                            String cleanVariant = variant.trim();
+                            if (collectedVariants != null && !cleanVariant.equalsIgnoreCase(inner) && !collectedVariants.contains(cleanVariant)) {
+                                collectedVariants.add(cleanVariant);
+                            }
+                            sb.append(" OR \"").append(cleanVariant).append("\"");
+                        }
                     }
                     sb.append(")");
                     return sb.toString();
@@ -273,9 +291,15 @@ public class IndexSearcher {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(").append(originalExpanded).append(")");
                 for (String variant : variants) {
-                    String vExpanded = expandSingleText(variant);
-                    if (!vExpanded.isEmpty()) {
-                        sb.append(" OR (").append(vExpanded).append(")");
+                    if (variant != null && !variant.trim().isEmpty()) {
+                        String cleanVariant = variant.trim();
+                        if (collectedVariants != null && !cleanVariant.equalsIgnoreCase(trimmed) && !collectedVariants.contains(cleanVariant)) {
+                            collectedVariants.add(cleanVariant);
+                        }
+                        String vExpanded = expandSingleText(cleanVariant);
+                        if (!vExpanded.isEmpty()) {
+                            sb.append(" OR (").append(vExpanded).append(")");
+                        }
                     }
                 }
                 return sb.toString();
@@ -283,6 +307,64 @@ public class IndexSearcher {
         }
 
         return expandSingleText(trimmed);
+    }
+
+    /**
+     * Wraps the base query with optional SHOULD boost clauses for exact token and exact contiguous phrase matches.
+     * Because baseQuery is MUST, the matched document set is strictly unchanged while exact matches are boosted
+     * to the top of Lucene's TopDocs(1000) window so they are never truncated by partial/sub-token noise.
+     */
+    private Query buildBoostedQuery(Query baseQuery, String rawText, List<String> variants) {
+        if (baseQuery == null || rawText == null) {
+            return baseQuery;
+        }
+        String clean = rawText.trim();
+        if (clean.length() >= 2 && clean.startsWith("\"") && clean.endsWith("\"")) {
+            clean = clean.substring(1, clean.length() - 1).trim();
+        }
+        if (clean.isEmpty() || clean.indexOf('*') != -1 || clean.indexOf('?') != -1) {
+            return baseQuery;
+        }
+        try {
+            BooleanQuery boosted = new BooleanQuery();
+            boosted.add(baseQuery, BooleanClause.Occur.MUST);
+
+            // 1. Exact full token boost (e.g. full email address app.hlmt@gmail.com indexed prior to SubTokenFilter)
+            TermQuery exactTermQuery = new TermQuery(new Term("text", clean.toLowerCase(Locale.ROOT)));
+            exactTermQuery.setBoost(20.0f);
+            boosted.add(exactTermQuery, BooleanClause.Occur.SHOULD);
+
+            // 2. Exact contiguous phrase boost (slop = 0, works for CJK unigrams and multi-word sentences)
+            QueryParser exactPhraseParser = new QueryParser(Version.LUCENE_29, "text", analyzer);
+            exactPhraseParser.setPhraseSlop(0);
+            try {
+                Query exactPhrase = exactPhraseParser.parse("\"" + escapeQuotedPhrase(clean) + "\"");
+                exactPhrase.setBoost(10.0f);
+                boosted.add(exactPhrase, BooleanClause.Occur.SHOULD);
+            } catch (Exception ignored) {
+            }
+
+            // 3. Variant / TC-SC contiguous phrase boost
+            if (variants != null) {
+                for (String v : variants) {
+                    if (v != null && !v.trim().isEmpty()) {
+                        try {
+                            Query variantPhrase = exactPhraseParser.parse("\"" + escapeQuotedPhrase(v.trim()) + "\"");
+                            variantPhrase.setBoost(5.0f);
+                            boosted.add(variantPhrase, BooleanClause.Occur.SHOULD);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            }
+            return boosted;
+        } catch (Exception e) {
+            return baseQuery;
+        }
+    }
+
+    private String escapeQuotedPhrase(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private String expandSingleText(String text) {

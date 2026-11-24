@@ -199,6 +199,16 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
 14. **Commons IO 2.21.0 升级与工单上传兼容性修复 (Commons IO 2.21.0 Upgrade & File Upload Fix)**：
     - 显式锁定并升级 `commons-io` 至 `2.21.0`，彻底修复打开或提交工单表单（`/app/item/form`）时因旧版 `commons-io:2.15.1` 中 `AbstractStreamBuilder.getPath()` 访问修饰符为 `protected` 而导致 `commons-fileupload2:2.0.0-M5` 抛出 `IllegalAccessError` 二进制不兼容问题，并加入自动化防呆回归测试。
 
+15. **搜索结果“三阶 100% 完整句子置顶 + 最新时间戳”智能排序（兼容有 AI 与无 AI 环境）**：
+    - **三阶精准置顶排序**：搜索结果默认优先将**第一梯队**（摘要 `summary`、详情 `detail` 或批注 `comment` 不区分大小写 100% 完整连续包含搜索原句，如 `app.hlmt@gmail.com`）强制排在最前；其次为**第二梯队**（100% 完整包含 AI／繁简转换扩展词；无 AI 或离线时自动无缝退化为两阶）；最后为**第三梯队**（部分分词如 `gmail` 或附件全文命中）。各梯队内部均严格按工单**最新时间戳由新到旧（最新在前）**排列。
+    - **同工单相邻分组、Lucene 召回加权与手动排序衔接**：展开历史（`showHistory = true`）时同一张工单的命中行保持相邻（主单在前、修订批注依序在后）；在 Lucene 层加入完整词元与连续短语高权重加分（`^20` / `^10`）确保超过 1,000 条噪声时仍必进召回窗口；用户手动点击任意表头字段时自动切换为指定字段排序。
+
+16. **便携版打包脚本自动升级最新 Jetty 12.1.x 与离线缓存降级机制 (Auto-Latest Jetty 12.1.x & Offline Fallback)**：
+    - 升级 Windows（`scripts/package-portable.ps1`）与 Linux / macOS（`package-portable.sh`）打包脚本，自动查询 Maven Central 官方 `maven-metadata.xml` 检测最新稳定版 `12.1.x`；若本地版本较旧则自动下载并执行 SHA-1 完整性校验与 `.tmp` 原子写入；若处于无网络环境则自动选用 `tools/jetty/jetty-home-*.zip` 中版本号最高的缓存完成离线打包。
+
+17. **无项目空间时顶部导航栏搜索空壳隐藏防呆 (Empty-Spaces Header Search Guardrail)**：
+    - 修复系统尚未创建任何项目空间（`spaces.size() == 0`）时，`HeaderPanel` 未将桌面端搜索外框（`nav-tab-quicksearch` 与分隔线 `nav-search-divider`）及移动端搜索按钮纳入 `<wicket:enclosure>` 导致“仪表盘”旁出现两个空白按钮的问题。
+
 ---
 
 ## 七、版本升级与兼容性指引

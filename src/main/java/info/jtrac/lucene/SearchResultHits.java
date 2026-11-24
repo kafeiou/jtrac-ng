@@ -12,6 +12,7 @@ public class SearchResultHits implements Serializable {
     private final List<Long> itemIds = new ArrayList<Long>();
     private final List<Long> historyIds = new ArrayList<Long>();
     private final List<Long> itemLevelHitItemIds = new ArrayList<Long>();
+    private final List<String> expandedTerms = new ArrayList<String>();
 
     public List<Long> getItemIds() {
         return itemIds;
@@ -23,6 +24,10 @@ public class SearchResultHits implements Serializable {
 
     public List<Long> getItemLevelHitItemIds() {
         return itemLevelHitItemIds;
+    }
+
+    public List<String> getExpandedTerms() {
+        return expandedTerms;
     }
 
     public boolean isEmpty() {

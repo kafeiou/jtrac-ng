@@ -59,6 +59,7 @@ public class ItemListPanel extends BasePanel {
     
     private void doSort(String sortFieldName) {
         itemSearch.setCurrentPage(0);
+        itemSearch.setExplicitSort(true);
         if (itemSearch.getSortFieldName().equals(sortFieldName)) {
             itemSearch.toggleSortDirection();
         } else {
@@ -229,8 +230,12 @@ public class ItemListPanel extends BasePanel {
                 itemSearch.setSearchText(val);
                 if (val != null && !val.trim().isEmpty()) {
                     itemSearch.setShowHistory(true);
+                    itemSearch.setExplicitSort(false);
+                    itemSearch.setSortFieldName("id");
+                    itemSearch.setSortDescending(true);
                 } else {
                     itemSearch.setShowHistory(false);
+                    itemSearch.setExplicitSort(false);
                 }
                 JtracSession.get().setItemSearch(itemSearch);
                 setResponsePage(new ItemListPage(itemSearch));
@@ -249,6 +254,7 @@ public class ItemListPanel extends BasePanel {
                     itemSearch.setCurrentPage(0);
                     itemSearch.setSearchText(null);
                     itemSearch.setShowHistory(false);
+                    itemSearch.setExplicitSort(false);
                     JtracSession.get().setItemSearch(itemSearch);
                     setResponsePage(new ItemListPage(itemSearch));
                 }

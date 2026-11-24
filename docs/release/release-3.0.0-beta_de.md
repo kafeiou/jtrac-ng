@@ -187,6 +187,16 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
 14. **Commons IO 2.21.0 Upgrade & Kompatibilitätskorrektur für Dateiuploads (Commons IO 2.21.0 Upgrade & File Upload Fix)**:
     - `commons-io` wurde in der `pom.xml` explizit auf `2.21.0` aktualisiert, wodurch der Laufzeitfehler `IllegalAccessError` beim Öffnen oder Absenden des Ticketformulars (`/app/item/form`) behoben wurde (verursacht durch `protected` Sichtbarkeit von `AbstractStreamBuilder.getPath()` in `commons-io:2.15.1`), und um automatisierte Regressionstests ergänzt.
 
+15. **Dreistufiges Suchranking „100 % exakte Übereinstimmung zuerst + neuester Zeitstempel“ (mit & ohne KI kompatibel)**:
+    - **Dreistufige Priorisierung**: Suchergebnisse platzieren automatisch **Stufe 1** (100 % zusammenhängende, Groß-/Kleinschreibung ignorierende Übereinstimmung der Suchphrase in `summary`, `detail` oder `comment`, z. B. `app.hlmt@gmail.com`) vor **Stufe 2** (exakte Übereinstimmung von KI-/Traditionell-Vereinfacht-Chinesisch-Varianten; ohne KI nahtlos übersprungen) und **Stufe 3** (Teil-Token- oder Anhangstreffer), jeweils absteigend nach **neuestem Zeitstempel** sortiert.
+    - **Ticket-Gruppierung & Lucene-Boost-Schutz**: Hält zusammengehörige Verlaufszeilen eines Tickets chronologisch nebeneinander (`showHistory = true`), schützt exakte Treffer per Lucene-Boost (`^20` / `^10`) vor dem 1.000-Treffer-Limit und respektiert manuelle Spaltensortierungen.
+
+16. **Automatische Erkennung des neuesten Jetty 12.1.x & Offline-Fallback im Portable-Builder**:
+    - `scripts/package-portable.ps1` und `package-portable.sh` prüfen nun `maven-metadata.xml` auf Maven Central auf das neueste stabile `12.1.x`-Release inkl. SHA-1-Prüfsummenvalidierung und greifen offline automatisch auf das neueste lokale `tools/jetty/jetty-home-*.zip` zurück.
+
+17. **Ausblenden leerer Suchschaltflächen ohne Projektbereiche**:
+    - Desktop-Schnellsuche (`nav-tab-quicksearch`, `nav-search-divider`) sowie mobile Suchschaltfläche in `HeaderPanel` wurden in `<wicket:enclosure>` eingefasst, sodass ohne angelegte Projektbereiche keine leeren Schaltflächen neben dem Dashboard erscheinen.
+
 ---
 
 ## 7. Upgrade- und Kompatibilitätshinweise
