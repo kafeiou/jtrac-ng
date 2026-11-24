@@ -198,6 +198,11 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
 17. **Chặn hiển thị nút trống thanh tìm kiếm khi chưa có không gian dự án**：
     - Bao bọc khung tìm kiếm nhanh trên máy tính (`nav-tab-quicksearch`, `nav-search-divider`) và nút/ngăn tìm kiếm di động bằng `<wicket:enclosure>` trong `HeaderPanel`, khắc phục lỗi xuất hiện hai nút trống cạnh Bảng điều khiển khi chưa tạo không gian dự án nào (`spaces.size() == 0`).
 
+18. **Chuyển đổi cụm từ Phồn-Giản ngoại tuyến OpenCC không cần AI, tìm kiếm Email chính xác & Huy hiệu từ khóa mở rộng**：
+    - **Chuyển đổi cụm từ hai chiều ngoại tuyến dưới 1ms (Không cần AI)**: Tích hợp `opencc4j:1.14.0` (`tw2sp` / `s2twp`) cùng từ điển thuật ngữ CNTT/nghiệp vụ (`ChineseVariantConverter`), tự động mở rộng cụm từ hai chiều (như `記憶體洩漏 ⇄ 内存泄漏`, `軟體預設設定 ⇄ 软件默认设置`, `專案程式碼 ⇄ 项目代码`) ngay cả khi không cài đặt Ollama AI hoặc mất mạng, đồng thời kết hợp từ đồng nghĩa ngữ nghĩa khi bật AI.
+    - **Chỉ tách từ phụ khi lập chỉ mục (Loại bỏ nhiễu `.com` / `gmail` khi tìm kiếm)**: Tắt tách ký tự `@ . _ -` lúc truy vấn nhưng giữ nguyên `SubTokenFilter` lúc lập chỉ mục (bổ sung phần tên trước `@` như `app.hlmt`), giúp tìm `app.hlmt@gmail.com` khớp chính xác mà không kéo theo các sự vụ `.com` hay `@gmail.com` không liên quan.
+    - **Hiển thị huy hiệu từ khóa mở rộng minh bạch**: Nâng cấp thanh thông báo kết quả tìm kiếm (`ItemListPanel`) đa ngôn ngữ để hiển thị các từ khóa tách/mở rộng dưới dạng huy hiệu trực quan.
+
 ---
 
 ## 7. Hướng dẫn nâng cấp và tính tương thích

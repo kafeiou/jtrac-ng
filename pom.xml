@@ -329,6 +329,11 @@
 			<artifactId>commons-io</artifactId>
 			<version>${commons.io.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.houbb</groupId>
+			<artifactId>opencc4j</artifactId>
+			<version>${opencc4j.version}</version>
+		</dependency>
 
     </dependencies>
 
@@ -447,6 +452,7 @@
 		<jackson.version>2.18.12</jackson.version>
 		<bouncycastle.version>1.86</bouncycastle.version>
 		<commons.io.version>2.21.0</commons.io.version>
+		<opencc4j.version>1.14.0</opencc4j.version>
 	</properties>
 
 	<profiles>

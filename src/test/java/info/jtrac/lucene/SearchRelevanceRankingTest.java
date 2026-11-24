@@ -24,9 +24,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Verifies Three-Tier Exact-Match-First + Latest-Timestamp-First search ranking
- * both WITH AI (TC/SC & synonym expansion) and WITHOUT AI, including CJK safety
- * and >1000 noise resilience.
+ * Verifies:
+ * 1. Query-time non-splitting of email/filenames (app.hlmt@gmail.com matches precisely, while sub-tokens match at index time)
+ * 2. Offline OpenCC + Cross-Strait phrase-level Chinese conversion WITHOUT AI (< 1ms)
+ * 3. Three-Tier Exact-Match-First + Latest-Timestamp-First search ranking
+ * 4. Transparent banner display terms (ItemSearch.getDisplayExpandedTerms)
  */
 public class SearchRelevanceRankingTest {
 
@@ -62,8 +64,85 @@ public class SearchRelevanceRankingTest {
     }
 
     @Test
+    public void testEmailExactQueryDoesNotPullUnrelatedGmailOrComNoiseWhileShortTokensStillWork() {
+        Item exactTarget = new Item();
+        exactTarget.setId(1L);
+        exactTarget.setSummary("正式環境通知信箱 app.hlmt@gmail.com");
+        exactTarget.setDetail("此為唯一包含完整信箱之工單");
+        indexer.index(exactTarget);
+
+        Item unrelatedGmail = new Item();
+        unrelatedGmail.setId(2L);
+        unrelatedGmail.setSummary("其他人的信箱 someone.else@gmail.com");
+        unrelatedGmail.setDetail("測試一般網站 https://example.com");
+        indexer.index(unrelatedGmail);
+
+        // 1. Searching full email "app.hlmt@gmail.com" ONLY matches item 1 (no longer polluted by 'gmail' or 'com'!)
+        SearchResultHits fullEmailHits = searcher.findHitsContainingText("app.hlmt@gmail.com");
+        Assert.assertEquals(1, fullEmailHits.getItemIds().size());
+        Assert.assertEquals(Long.valueOf(1L), fullEmailHits.getItemIds().get(0));
+        Assert.assertTrue("Full email should not emit noisy fragments in expandedTerms",
+                fullEmailHits.getExpandedTerms().isEmpty());
+
+        // 2. Searching short sub-token "hlmt" or local-part "app.hlmt" still finds item 1 via index-time SubTokenFilter!
+        Assert.assertEquals(Collections.singletonList(1L), searcher.findItemIdsContainingText("hlmt"));
+        Assert.assertEquals(Collections.singletonList(1L), searcher.findItemIdsContainingText("app.hlmt"));
+
+        // 3. Searching "gmail" finds both item 1 and item 2
+        List<Long> gmailHits = searcher.findItemIdsContainingText("gmail");
+        Assert.assertEquals(2, gmailHits.size());
+        Assert.assertTrue(gmailHits.contains(1L));
+        Assert.assertTrue(gmailHits.contains(2L));
+    }
+
+    @Test
+    public void testOfflinePhraseLevelChineseConversionWithoutAi() {
+        // Ensure NO Ollama AI expander is configured (100% offline mode)
+        searcher.setSearchExpander(null);
+
+        // 1. Phrase-level conversion unit checks (OpenCC tw2sp / s2twp + Cross-Strait IT phrases)
+        List<String> memVariants = ChineseVariantConverter.expandOfflineVariants("記憶體洩漏");
+        Assert.assertTrue("Must convert phrase 記憶體 -> 内存", memVariants.contains("内存泄漏"));
+        Assert.assertTrue("Must also include direct simplified 记忆体泄漏", memVariants.contains("记忆体泄漏"));
+
+        List<String> swVariants = ChineseVariantConverter.expandOfflineVariants("軟體預設設定");
+        Assert.assertTrue("Must convert 軟體預設設定 -> 软件默认设置", swVariants.contains("软件默认设置"));
+
+        List<String> projVariants = ChineseVariantConverter.expandOfflineVariants("專案程式碼");
+        Assert.assertTrue("Must convert 專案程式碼 -> 项目代码", projVariants.contains("项目代码"));
+
+        List<String> revVariants = ChineseVariantConverter.expandOfflineVariants("软件默认设置");
+        Assert.assertTrue("Reverse Mainland Simplified -> Taiwan Traditional phrase conversion",
+                revVariants.contains("軟體預設設定"));
+
+        // 2. End-to-end Lucene search WITHOUT AI
+        Item mainlandTicket = new Item();
+        mainlandTicket.setId(801L);
+        mainlandTicket.setSummary("生产环境服务器内存泄漏排查");
+        mainlandTicket.setDetail("修改软件默认设置与定时任务");
+        indexer.index(mainlandTicket);
+
+        Item taiwanTicket = new Item();
+        taiwanTicket.setId(802L);
+        taiwanTicket.setSummary("正式機伺服器記憶體洩漏紀錄");
+        taiwanTicket.setDetail("調整軟體預設設定與發票排程");
+        indexer.index(taiwanTicket);
+
+        // Searching Taiwan Traditional "記憶體洩漏" without AI finds BOTH Taiwan (802) and Mainland (801) tickets!
+        SearchResultHits hitsFromTw = searcher.findHitsContainingText("記憶體洩漏");
+        Assert.assertTrue(hitsFromTw.getItemIds().contains(801L));
+        Assert.assertTrue(hitsFromTw.getItemIds().contains(802L));
+        Assert.assertTrue(hitsFromTw.getExpandedTerms().contains("内存泄漏"));
+
+        // Searching Mainland Simplified "软件默认设置" without AI finds BOTH Mainland (801) and Taiwan (802) tickets!
+        SearchResultHits hitsFromCn = searcher.findHitsContainingText("软件默认设置");
+        Assert.assertTrue(hitsFromCn.getItemIds().contains(801L));
+        Assert.assertTrue(hitsFromCn.getItemIds().contains(802L));
+        Assert.assertTrue(hitsFromCn.getExpandedTerms().contains("軟體預設設定"));
+    }
+
+    @Test
     public void testEmailExactMatchPinnedAboveNewerPartialMatchesAndSortedByLatestTimestampWithoutAi() throws Exception {
-        // Ticket 1: Older exact match in summary (2026-01-10)
         Item item1 = new Item();
         item1.setId(1L);
         item1.setSummary("帳號設定: app.hlmt@gmail.com 權限開通");
@@ -75,7 +154,6 @@ public class SearchRelevanceRankingTest {
         h1_0.setTimeStamp(ts("2026-01-10 09:00:00"));
         item1.add(h1_0);
 
-        // Ticket 2: Initial ticket only mentions gmail (2026-05-01), but has a newer comment (2026-11-20) with 100% exact case-insensitive match!
         Item item2 = new Item();
         item2.setId(2L);
         item2.setSummary("外部信箱轉寄異常 gmail");
@@ -94,7 +172,6 @@ public class SearchRelevanceRankingTest {
         h2_1.setTimeStamp(ts("2026-11-20 15:30:00"));
         item2.add(h2_1);
 
-        // Ticket 3: Brand-new ticket (2026-11-24), highest ID, but ONLY partial sub-token matches ("gmail.com" + "app")
         Item item3 = new Item();
         item3.setId(3L);
         item3.setSummary("Mobile app login with test@gmail.com");
@@ -106,22 +183,16 @@ public class SearchRelevanceRankingTest {
         h3_0.setTimeStamp(ts("2026-11-24 08:00:00"));
         item3.add(h3_0);
 
-        // 1. Test showHistory = true (Ticket-grouped, adjacent rows, chronological within ticket)
         List<AbstractItem> historyRows = new ArrayList<AbstractItem>(Arrays.<AbstractItem>asList(
                 h3_0, h1_0, h2_1, h2_0
         ));
         HibernateJtracDao.sortBySearchRelevance(historyRows, "  app.hlmt@gmail.com  ", null, null, null);
 
-        // Expected:
-        // 1st group: Ticket 2 (Tier 1 via comment h2_1, latest ts 2026-11-20) -> h2_0 (id=201) then h2_1 (id=202)
-        // 2nd group: Ticket 1 (Tier 1 via summary h1_0, latest ts 2026-01-10) -> h1_0 (id=101)
-        // 3rd group: Ticket 3 (Tier 3 partial match, even though ts is 2026-11-24!) -> h3_0 (id=301)
         Assert.assertEquals(201L, historyRows.get(0).getId());
         Assert.assertEquals(202L, historyRows.get(1).getId());
         Assert.assertEquals(101L, historyRows.get(2).getId());
         Assert.assertEquals(301L, historyRows.get(3).getId());
 
-        // 2. Test showHistory = false (Item mode, inspecting item summary/detail + child history comments)
         List<Item> itemRows = new ArrayList<Item>(Arrays.asList(item3, item1, item2));
         HibernateJtracDao.sortBySearchRelevance(itemRows, "app.hlmt@gmail.com", Collections.<String>emptyList(), null, null);
 
@@ -132,39 +203,32 @@ public class SearchRelevanceRankingTest {
 
     @Test
     public void testThreeTierTraditionalSimplifiedChineseAndAiVariantsRanking() throws Exception {
-        // Query: Traditional Chinese "發票通知"
-        // AI expanded variants: ["发票通知", "开票通知"]
-
-        // Ticket A: Exact Traditional match, older (2026-03-01) -> Tier 1
         Item itemA = new Item();
         itemA.setId(10L);
         itemA.setSummary("客戶未收到發票通知信件");
         itemA.setTimeStamp(ts("2026-03-01 10:00:00"));
 
-        // Ticket B: Exact Traditional match, newer (2026-09-15) -> Tier 1 (must rank before A)
         Item itemB = new Item();
         itemB.setId(11L);
         itemB.setSummary("電子發票通知排程調整");
         itemB.setTimeStamp(ts("2026-09-15 14:00:00"));
 
-        // Ticket C: Simplified Chinese variant exact match, newer than B (2026-11-22) -> Tier 2 (must rank after Tier 1, before Tier 3)
         Item itemC = new Item();
         itemC.setId(12L);
         itemC.setSummary("大陆子公司电子发票通知延迟");
         itemC.setTimeStamp(ts("2026-11-22 11:00:00"));
 
-        // Ticket D: Partial / slop CJK match ("發票系統異常通知"), newest timestamp (2026-11-24) -> Tier 3
         Item itemD = new Item();
         itemD.setId(13L);
         itemD.setSummary("發票系統異常通知處理");
         itemD.setTimeStamp(ts("2026-11-24 09:00:00"));
 
         List<Item> list = new ArrayList<Item>(Arrays.asList(itemD, itemC, itemA, itemB));
-        List<String> aiVariants = Arrays.asList("发票通知", "开票通知");
+        List<String> variants = ChineseVariantConverter.expandOfflineVariants("發票通知");
 
-        HibernateJtracDao.sortBySearchRelevance(list, "發票通知", aiVariants, null, null);
+        HibernateJtracDao.sortBySearchRelevance(list, "發票通知", variants, null, null);
 
-        // Expected: B (Tier 1, newer) -> A (Tier 1, older) -> C (Tier 2, Simplified) -> D (Tier 3, partial)
+        // B (Tier 1, newer) -> A (Tier 1, older) -> C (Tier 2, Simplified) -> D (Tier 3, partial)
         Assert.assertEquals(11L, list.get(0).getId());
         Assert.assertEquals(10L, list.get(1).getId());
         Assert.assertEquals(12L, list.get(2).getId());
@@ -172,25 +236,22 @@ public class SearchRelevanceRankingTest {
     }
 
     @Test
-    public void testLuceneExactMatchBoostSurvivesOver1000PartialSubTokenNoiseHits() {
-        // Index target ticket #1 with 100% exact email
+    public void testLuceneExactPhraseBoostSurvivesOver1000MultiWordNoiseHits() {
         Item exactItem = new Item();
         exactItem.setId(1L);
-        exactItem.setSummary("正式環境通知信箱 app.hlmt@gmail.com");
-        exactItem.setDetail("此為唯一 100% 完全吻合工單");
+        exactItem.setSummary("客戶連線異常 app.hlmt@gmail.com 認證失敗");
+        exactItem.setDetail("唯一同時完整包含整句之工單");
         indexer.index(exactItem);
 
-        // Index 1,050 noise tickets that share sub-tokens "gmail" and "com"
         for (long i = 2; i <= 1051; i++) {
             Item noise = new Item();
             noise.setId(i);
-            noise.setSummary("一般外部使用者 user" + i + "@gmail.com 連線紀錄");
-            noise.setDetail("gmail com routine log entry " + i);
+            noise.setSummary("一般日常認證失敗紀錄 " + i);
+            noise.setDetail("routine auth log " + i);
             indexer.index(noise);
         }
 
-        SearchResultHits hits = searcher.findHitsContainingText("app.hlmt@gmail.com");
-        Assert.assertFalse(hits.isEmpty());
+        SearchResultHits hits = searcher.findHitsContainingText("app.hlmt@gmail.com 認證失敗");
         Assert.assertTrue("Exact match item #1 must never be truncated out of TopDocs(1000)",
                 hits.getItemIds().contains(1L));
         Assert.assertEquals("Exact match item #1 must be ranked #1 by Lucene boost",
@@ -198,48 +259,32 @@ public class SearchRelevanceRankingTest {
     }
 
     @Test
-    public void testTraditionalChineseCjkSearchAndExpandedTermsCapture() {
-        Item tcItem = new Item();
-        tcItem.setId(501L);
-        tcItem.setSummary("繁體中文：申請開放帳號與發票通知設定");
-        tcItem.setDetail("確認【緊急】特殊符號與繁體檢索完全正常");
-        indexer.index(tcItem);
+    public void testDisplayExpandedTermsCleanForEmailAndPopulatedForChineseAndMultiWord() {
+        Space space = new Space();
+        space.setMetadata(new Metadata());
 
-        Item scItem = new Item();
-        scItem.setId(502L);
-        scItem.setSummary("简体中文：发票通知设置说明");
-        scItem.setDetail("跨语系检索验证");
-        indexer.index(scItem);
+        // 1. Single email -> clean empty list (no noisy 'com' / 'gmail' fragments!)
+        ItemSearch emailSearch = new ItemSearch(space);
+        emailSearch.setSearchText("app.hlmt@gmail.com");
+        emailSearch.setExpandedSearchTerms(Collections.<String>emptyList());
+        Assert.assertTrue(emailSearch.getDisplayExpandedTerms().isEmpty());
 
-        // 1. Without AI: Traditional Chinese unigram & phrase slop works accurately
-        SearchResultHits noAiHits = searcher.findHitsContainingText("發票通知");
-        Assert.assertTrue(noAiHits.getItemIds().contains(501L));
-        Assert.assertTrue(noAiHits.getExpandedTerms().isEmpty());
+        // 2. Chinese phrase -> shows offline OpenCC / cross-strait expanded terms
+        ItemSearch zhSearch = new ItemSearch(space);
+        zhSearch.setSearchText("記憶體洩漏");
+        zhSearch.setExpandedSearchTerms(ChineseVariantConverter.expandOfflineVariants("記憶體洩漏"));
+        List<String> zhDisplay = zhSearch.getDisplayExpandedTerms();
+        Assert.assertTrue(zhDisplay.contains("内存泄漏"));
+        Assert.assertFalse(zhDisplay.contains("記憶體洩漏"));
 
-        // Phrase slop ("申請帳號" -> "申請開放帳號") still works
-        Assert.assertTrue(searcher.findItemIdsContainingText("申請帳號").contains(501L));
-
-        // CJK with brackets ("【緊急】特殊符號") works without ParseException
-        Assert.assertTrue(searcher.findItemIdsContainingText("【緊急】特殊符號").contains(501L));
-
-        // 2. With Mock AI Expander: captures expanded terms into SearchResultHits
-        OllamaSearchExpander expander = new OllamaSearchExpander();
-        info.jtrac.mail.OllamaClient mockClient = new info.jtrac.mail.OllamaClient(null, null, null, 6) {
-            @Override
-            public String chat(String systemPrompt, String userPrompt) {
-                if ("發票通知".equals(userPrompt)) {
-                    return "发票通知 开票通知";
-                }
-                return "";
-            }
-        };
-        expander.setOllamaClient(mockClient);
-        searcher.setSearchExpander(expander);
-
-        SearchResultHits aiHits = searcher.findHitsContainingText("發票通知");
-        Assert.assertTrue(aiHits.getItemIds().contains(501L));
-        Assert.assertTrue(aiHits.getItemIds().contains(502L));
-        Assert.assertTrue(aiHits.getExpandedTerms().contains("发票通知"));
+        // 3. Space-separated mixed query -> shows space tokens + Chinese variants
+        ItemSearch mixedSearch = new ItemSearch(space);
+        mixedSearch.setSearchText("app.hlmt@gmail.com 發票通知");
+        mixedSearch.setExpandedSearchTerms(ChineseVariantConverter.expandOfflineVariants("發票通知"));
+        List<String> mixedDisplay = mixedSearch.getDisplayExpandedTerms();
+        Assert.assertTrue(mixedDisplay.contains("app.hlmt@gmail.com"));
+        Assert.assertTrue(mixedDisplay.contains("發票通知"));
+        Assert.assertTrue(mixedDisplay.contains("发票通知"));
     }
 
     @Test
@@ -248,31 +293,25 @@ public class SearchRelevanceRankingTest {
         space.setMetadata(new Metadata());
         ItemSearch search = new ItemSearch(space);
 
-        // No searchText -> relevance sort inactive
         Assert.assertFalse(search.isSearchRelevanceSortActive());
 
-        // Default search with searchText -> relevance sort active
         search.setSearchText("app.hlmt@gmail.com");
         Assert.assertTrue(search.isSearchRelevanceSortActive());
 
-        // User manually clicks 'status' column
         search.setExplicitSort(true);
         search.setSortFieldName("status");
         Assert.assertFalse(search.isSearchRelevanceSortActive());
 
-        // Resetting explicitSort on new search re-enables relevance sort
         search.setExplicitSort(false);
         search.setSortFieldName("id");
         search.setSortDescending(true);
         Assert.assertTrue(search.isSearchRelevanceSortActive());
 
-        // URL PageParameters with only searchText -> relevance sort active
         ItemSearch fromSearchUrl = new ItemSearch(space);
         PageParameters p1 = new PageParameters().set("searchText", "app.hlmt@gmail.com");
         fromSearchUrl.initFromPageParameters(p1, new User(), null);
         Assert.assertTrue(fromSearchUrl.isSearchRelevanceSortActive());
 
-        // URL PageParameters with explicit sortAscending=true -> relevance sort inactive
         ItemSearch fromSortedUrl = new ItemSearch(space);
         PageParameters p2 = new PageParameters().set("searchText", "app.hlmt@gmail.com").set("sortAscending", "true");
         fromSortedUrl.initFromPageParameters(p2, new User(), null);

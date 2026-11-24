@@ -197,6 +197,11 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
 17. **Masquage des conteneurs de recherche vides en l'absence d'espaces projet** :
     - Encapsulation de la recherche rapide bureau (`nav-tab-quicksearch`, `nav-search-divider`) et du bouton/tiroir mobile dans `<wicket:enclosure>` au sein de `HeaderPanel`, supprimant l'affichage de deux boutons vides à côté du Tableau de bord lorsqu'aucun espace n'existe.
 
+18. **Conversion phraséologique chinois traditionnel-simplifié hors ligne via OpenCC (sans IA), recherche précise d'e-mails et badges de termes étendus** :
+    - **Conversion phraséologique bidirectionnelle hors ligne en < 1 ms (sans IA)** : Intégration d'`opencc4j:1.14.0` (`tw2sp` / `s2twp`) et d'un dictionnaire métier/IT (`ChineseVariantConverter`) permettant la conversion d'expressions (`記憶體洩漏 ⇄ 内存泄漏`, `軟體預設設定 ⇄ 软件默认设置`, `專案程式碼 ⇄ 项目代码`) sans nécessiter Ollama IA, tout en fusionnant les synonymes sémantiques IA lorsqu'elle est disponible.
+    - **Découpage en sous-jetons uniquement à l'indexation (suppression du bruit `.com` / `gmail`)** : Désactivation de l'éclatement `@ . _ -` au moment de la requête tout en conservant `SubTokenFilter` à l'indexation (y compris l'identifiant local `app.hlmt`), garantissant une recherche exacte sur `app.hlmt@gmail.com` tout en préservant les recherches courtes (`hlmt`, `gmail`).
+    - **Badges capsules des termes étendus** : Mise à niveau de la bannière de résultats (`ItemListPanel`) en 8 langues pour afficher clairement les mots-clés divisés et étendus.
+
 ---
 
 ## 7. Guide de mise à niveau et de compatibilité

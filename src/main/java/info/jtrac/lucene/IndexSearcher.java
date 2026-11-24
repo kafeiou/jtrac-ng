@@ -19,8 +19,10 @@ package info.jtrac.lucene;
 import info.jtrac.exception.SearchQueryParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
@@ -47,6 +49,7 @@ public class IndexSearcher {
 
     private Directory indexDirectory;
     private Analyzer analyzer;
+    private final Analyzer defaultQueryAnalyzer = new JtracAnalyzer(false);
     private OllamaSearchExpander searchExpander;
 
     public void setIndexDirectory(Directory indexDirectory) {
@@ -55,6 +58,19 @@ public class IndexSearcher {
 
     public void setAnalyzer(Analyzer analyzer) {
         this.analyzer = analyzer;
+    }
+
+    /**
+     * Returns the query-time analyzer. For JtracAnalyzer, sub-token splitting (@ . _ -) is disabled
+     * at query time so full email addresses / filenames (e.g. app.hlmt@gmail.com) match precisely
+     * without exploding into noisy sub-tokens like 'com' or 'gmail', while short single-word queries
+     * (e.g. 'hlmt' or 'gmail') still match sub-tokens emitted at index time.
+     */
+    protected Analyzer getQueryAnalyzer() {
+        if (analyzer == null || analyzer.getClass() == JtracAnalyzer.class) {
+            return defaultQueryAnalyzer;
+        }
+        return analyzer;
     }
 
     public void setSearchExpander(OllamaSearchExpander searchExpander) {
@@ -69,7 +85,7 @@ public class IndexSearcher {
         if (text == null || text.trim().length() == 0) {
             return true;
         }
-        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", analyzer);
+        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
         parser.setDefaultOperator(QueryParser.Operator.OR);
         try {
             parser.parse(text);
@@ -94,7 +110,7 @@ public class IndexSearcher {
             return emptyHits;
         }
 
-        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", analyzer);
+        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
         parser.setDefaultOperator(QueryParser.Operator.OR);
         parser.setAllowLeadingWildcard(true);
         parser.setPhraseSlop(2);
@@ -257,19 +273,16 @@ public class IndexSearcher {
         // If quoted phrase
         if (trimmed.startsWith("\"") && trimmed.endsWith("\"") && trimmed.length() > 2) {
             String inner = trimmed.substring(1, trimmed.length() - 1).trim();
-            if (searchExpander != null && OllamaSearchExpander.containsChinese(inner)) {
-                List<String> variants = searchExpander.expandChineseVariants(inner);
-                if (variants != null && !variants.isEmpty()) {
+            if (OllamaSearchExpander.containsChinese(inner)) {
+                List<String> variants = collectAllChineseVariants(inner);
+                if (!variants.isEmpty()) {
                     StringBuilder sb = new StringBuilder("(");
                     sb.append(trimmed);
                     for (String variant : variants) {
-                        if (variant != null && !variant.trim().isEmpty()) {
-                            String cleanVariant = variant.trim();
-                            if (collectedVariants != null && !cleanVariant.equalsIgnoreCase(inner) && !collectedVariants.contains(cleanVariant)) {
-                                collectedVariants.add(cleanVariant);
-                            }
-                            sb.append(" OR \"").append(cleanVariant).append("\"");
+                        if (collectedVariants != null && !collectedVariants.contains(variant)) {
+                            collectedVariants.add(variant);
                         }
+                        sb.append(" OR \"").append(escapeQuotedPhrase(variant)).append("\"");
                     }
                     sb.append(")");
                     return sb.toString();
@@ -283,23 +296,34 @@ public class IndexSearcher {
             return trimmed;
         }
 
-        // Chinese variant and synonym expansion via Ollama
-        if (searchExpander != null && OllamaSearchExpander.containsChinese(trimmed)) {
-            List<String> variants = searchExpander.expandChineseVariants(trimmed);
-            if (variants != null && !variants.isEmpty()) {
+        // Chinese variant and cross-strait phrase expansion (Offline OpenCC + optional Ollama AI)
+        if (OllamaSearchExpander.containsChinese(trimmed)) {
+            List<String> variants = new ArrayList<String>();
+            String[] spaceParts = trimmed.split("[\\s\\u3000]+");
+            if (spaceParts.length > 1) {
+                // Multi-word query (e.g. "app.hlmt@gmail.com 發票通知"): expand Chinese tokens cleanly without duplicating email
+                Set<String> tokenVariants = new LinkedHashSet<String>();
+                for (String part : spaceParts) {
+                    if (OllamaSearchExpander.containsChinese(part)) {
+                        tokenVariants.addAll(collectAllChineseVariants(part));
+                    }
+                }
+                variants.addAll(tokenVariants);
+            } else {
+                variants.addAll(collectAllChineseVariants(trimmed));
+            }
+
+            if (!variants.isEmpty()) {
                 String originalExpanded = expandSingleText(trimmed);
                 StringBuilder sb = new StringBuilder();
                 sb.append("(").append(originalExpanded).append(")");
                 for (String variant : variants) {
-                    if (variant != null && !variant.trim().isEmpty()) {
-                        String cleanVariant = variant.trim();
-                        if (collectedVariants != null && !cleanVariant.equalsIgnoreCase(trimmed) && !collectedVariants.contains(cleanVariant)) {
-                            collectedVariants.add(cleanVariant);
-                        }
-                        String vExpanded = expandSingleText(cleanVariant);
-                        if (!vExpanded.isEmpty()) {
-                            sb.append(" OR (").append(vExpanded).append(")");
-                        }
+                    if (collectedVariants != null && !variant.equalsIgnoreCase(trimmed) && !collectedVariants.contains(variant)) {
+                        collectedVariants.add(variant);
+                    }
+                    String vExpanded = expandSingleText(variant);
+                    if (!vExpanded.isEmpty()) {
+                        sb.append(" OR (").append(vExpanded).append(")");
                     }
                 }
                 return sb.toString();
@@ -307,6 +331,24 @@ public class IndexSearcher {
         }
 
         return expandSingleText(trimmed);
+    }
+
+    private List<String> collectAllChineseVariants(String chineseQuery) {
+        Set<String> merged = new LinkedHashSet<String>();
+        // 1. Offline sub-millisecond OpenCC tw2sp / s2twp + cross-strait dictionary (always active even without AI)
+        merged.addAll(ChineseVariantConverter.expandOfflineVariants(chineseQuery));
+        // 2. Optional Ollama AI semantic synonym expansion when configured & online
+        if (searchExpander != null) {
+            List<String> aiVariants = searchExpander.expandChineseVariants(chineseQuery);
+            if (aiVariants != null) {
+                for (String v : aiVariants) {
+                    if (v != null && !v.trim().isEmpty() && !v.trim().equalsIgnoreCase(chineseQuery)) {
+                        merged.add(v.trim());
+                    }
+                }
+            }
+        }
+        return new ArrayList<String>(merged);
     }
 
     /**
@@ -335,7 +377,7 @@ public class IndexSearcher {
             boosted.add(exactTermQuery, BooleanClause.Occur.SHOULD);
 
             // 2. Exact contiguous phrase boost (slop = 0, works for CJK unigrams and multi-word sentences)
-            QueryParser exactPhraseParser = new QueryParser(Version.LUCENE_29, "text", analyzer);
+            QueryParser exactPhraseParser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
             exactPhraseParser.setPhraseSlop(0);
             try {
                 Query exactPhrase = exactPhraseParser.parse("\"" + escapeQuotedPhrase(clean) + "\"");

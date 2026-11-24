@@ -248,6 +248,18 @@ public class ItemListPanel extends BasePanel {
         final String currentSearchText = itemSearch.getSearchText();
         if (currentSearchText != null && currentSearchText.trim().length() > 0) {
             searchKeywordAlert.add(new Label("searchKeywordValue", currentSearchText));
+            List<String> displayExpandedTerms = itemSearch.getDisplayExpandedTerms();
+            WebMarkupContainer expandedTermsGroup = new WebMarkupContainer("expandedTermsGroup");
+            expandedTermsGroup.setVisible(!displayExpandedTerms.isEmpty());
+            expandedTermsGroup.add(new ListView<String>("expandedTermItem", displayExpandedTerms) {
+                @Override
+                protected void populateItem(ListItem<String> listItem) {
+                    Label termLabel = new Label("termText", listItem.getModelObject());
+                    termLabel.setRenderBodyOnly(true);
+                    listItem.add(termLabel);
+                }
+            });
+            searchKeywordAlert.add(expandedTermsGroup);
             searchKeywordAlert.add(new Link("clearSearchLink") {
                 @Override
                 public void onClick() {
@@ -262,6 +274,10 @@ public class ItemListPanel extends BasePanel {
         } else {
             searchKeywordAlert.setVisible(false);
             searchKeywordAlert.add(new WebMarkupContainer("searchKeywordValue"));
+            WebMarkupContainer emptyExpandedGroup = new WebMarkupContainer("expandedTermsGroup");
+            emptyExpandedGroup.setVisible(false);
+            emptyExpandedGroup.add(new WebMarkupContainer("expandedTermItem"));
+            searchKeywordAlert.add(emptyExpandedGroup);
             searchKeywordAlert.add(new WebMarkupContainer("clearSearchLink"));
         }
         add(searchKeywordAlert);

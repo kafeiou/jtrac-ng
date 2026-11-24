@@ -56,9 +56,16 @@ public class SubTokenFilter extends TokenFilter {
                 String[] parts = DELIMITERS.split(term);
                 if (parts.length > 1) {
                     savedState = captureState();
+                    int atIdx = term.indexOf('@');
+                    if (atIdx > 1) {
+                        String localPart = term.substring(0, atIdx).trim();
+                        if (localPart.length() >= 2 && !localPart.equalsIgnoreCase(term)) {
+                            subTokens.add(localPart);
+                        }
+                    }
                     for (String part : parts) {
                         String clean = part.trim();
-                        if (clean.length() >= 2 && !clean.equalsIgnoreCase(term)) {
+                        if (clean.length() >= 2 && !clean.equalsIgnoreCase(term) && !subTokens.contains(clean)) {
                             subTokens.add(clean);
                         }
                     }

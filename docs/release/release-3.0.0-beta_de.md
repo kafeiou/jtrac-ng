@@ -197,6 +197,11 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
 17. **Ausblenden leerer Suchschaltflächen ohne Projektbereiche**:
     - Desktop-Schnellsuche (`nav-tab-quicksearch`, `nav-search-divider`) sowie mobile Suchschaltfläche in `HeaderPanel` wurden in `<wicket:enclosure>` eingefasst, sodass ohne angelegte Projektbereiche keine leeren Schaltflächen neben dem Dashboard erscheinen.
 
+18. **Offline-OpenCC-Phrasenkonvertierung ohne KI, präzise E-Mail-Suche & Badges für erweiterte Suchbegriffe**:
+    - **Offline-Phrasenkonvertierung im Sub-Millisekundenbereich (ohne KI)**: Integration von `opencc4j:1.14.0` (`tw2sp` / `s2twp`) und einem Fachwörterbuch (`ChineseVariantConverter`) für bidirektionale Traditionell-/Vereinfacht-Chinesisch-Phrasenkonvertierung (`< 1ms`, z. B. `記憶體洩漏 ⇄ 内存泄漏`, `軟體預設設定 ⇄ 软件默认设置`) völlig ohne Ollama-KI, kombiniert mit KI-Synonymen bei aktiver Verbindung.
+    - **Sub-Token-Splitting nur zur Indexierungszeit (kein `.com`-/`gmail`-Rauschen)**: Deaktiviert `@ . _ -`-Aufspaltung zur Suchzeit bei beibehaltener Index-Zerlegung (inkl. lokalem E-Mail-Teil `app.hlmt`), sodass vollständige Suchen nach `app.hlmt@gmail.com` exakt treffen, während Kurzsuchen wie `hlmt` oder `gmail` weiterhin funktionieren.
+    - **Transparente Kapsel-Badges im Suchbanner**: Zeigt aktive aufgeteilte und erweiterte Suchbegriffe im Ergebnisbanner (`ItemListPanel`) übersichtlich als Badges an.
+
 ---
 
 ## 7. Upgrade- und Kompatibilitätshinweise

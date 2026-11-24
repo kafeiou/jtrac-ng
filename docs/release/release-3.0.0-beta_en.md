@@ -216,6 +216,11 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
 17. **Header Search Bar Empty-Workspace Guardrail**:
     - Wrapped desktop quick-search container (`nav-tab-quicksearch` and `nav-search-divider`) and mobile search button/drawer in Wicket visibility enclosures within `HeaderPanel`, eliminating empty button shells next to Dashboard when zero project spaces exist.
 
+18. **Offline OpenCC Phrase-Level Chinese Conversion, Precision Email Querying & Expanded Keyword Badges**:
+    - **Sub-Millisecond Offline Phrase Conversion (Zero AI Required)**: Integrated `opencc4j:1.14.0` (`ZhTwConverterUtil` tw2sp/s2twp + `ZhConverterUtil`) and a built-in cross-strait enterprise/IT phrase dictionary (`ChineseVariantConverter`), enabling `< 1ms` bidirectional phrase-level conversion (e.g. `記憶體洩漏 ⇄ 内存泄漏`, `軟體預設設定 ⇄ 软件默认设置`, `專案程式碼 ⇄ 项目代码`) even when Ollama AI is disabled or offline, while seamlessly merging AI semantic synonyms when online.
+    - **Index-Time Only Sub-Token Splitting (Eliminating `.com` / `gmail` Query Noise)**: Configured `IndexSearcher` to disable `@ . _ -` sub-token explosion at query time while preserving `SubTokenFilter` (including email local-part indexing) at index time — searching full `app.hlmt@gmail.com` matches precisely without pulling unrelated `.com` / `@gmail.com` tickets, while short queries like `hlmt`, `app.hlmt`, or `gmail` continue to match.
+    - **Transparent Expanded Search Badges**: Upgraded the search results banner (`ItemListPanel`) across 8 languages to display active split and expanded terms as theme-aware capsule badges.
+
 ---
 
 ## 7. Upgrade & Compatibility Guidance

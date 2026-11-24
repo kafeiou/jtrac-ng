@@ -41,13 +41,23 @@ import java.util.Set;
 public class JtracAnalyzer extends Analyzer {
 
     private final Set<?> stopWords;
+    private final boolean splitSubTokens;
 
     public JtracAnalyzer() {
-        this(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
+        this(StopAnalyzer.ENGLISH_STOP_WORDS_SET, true);
+    }
+
+    public JtracAnalyzer(boolean splitSubTokens) {
+        this(StopAnalyzer.ENGLISH_STOP_WORDS_SET, splitSubTokens);
     }
 
     public JtracAnalyzer(Set<?> stopWords) {
+        this(stopWords, true);
+    }
+
+    public JtracAnalyzer(Set<?> stopWords, boolean splitSubTokens) {
         this.stopWords = stopWords;
+        this.splitSubTokens = splitSubTokens;
     }
 
     @Override
@@ -55,7 +65,9 @@ public class JtracAnalyzer extends Analyzer {
         StandardTokenizer tokenizer = new StandardTokenizer(Version.LUCENE_29, reader);
         TokenStream result = new StandardFilter(tokenizer);
         result = new LowerCaseFilter(result);
-        result = new SubTokenFilter(result);
+        if (splitSubTokens) {
+            result = new SubTokenFilter(result);
+        }
         if (stopWords != null) {
             result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
         }
@@ -77,7 +89,9 @@ public class JtracAnalyzer extends Analyzer {
             streams.tokenStream = new StandardTokenizer(Version.LUCENE_29, reader);
             TokenStream result = new StandardFilter(streams.tokenStream);
             result = new LowerCaseFilter(result);
-            result = new SubTokenFilter(result);
+            if (splitSubTokens) {
+                result = new SubTokenFilter(result);
+            }
             if (stopWords != null) {
                 result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
             }

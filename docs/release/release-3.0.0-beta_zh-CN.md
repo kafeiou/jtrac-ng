@@ -209,6 +209,11 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
 17. **无项目空间时顶部导航栏搜索空壳隐藏防呆 (Empty-Spaces Header Search Guardrail)**：
     - 修复系统尚未创建任何项目空间（`spaces.size() == 0`）时，`HeaderPanel` 未将桌面端搜索外框（`nav-tab-quicksearch` 与分隔线 `nav-search-divider`）及移动端搜索按钮纳入 `<wicket:enclosure>` 导致“仪表盘”旁出现两个空白按钮的问题。
 
+18. **无 AI 离线 OpenCC“词语级”两岸繁简转换、Email 精准检索去噪与扩展词胶囊标签**：
+    - **离线毫秒级两岸惯用词双向转换（无需 AI 即可运作）**：集成 `opencc4j:1.14.0`（台湾繁简词组模式 `tw2sp` / `s2twp`）与内置商务／IT 术语词库（`ChineseVariantConverter`），即使完全未安装 Ollama AI 或断网，也能在 `< 1ms` 内自动双向扩展词语（如 `記憶體洩漏 ⇄ 内存泄漏`、`軟體預設設定 ⇄ 软件默认设置`、`專案程式碼 ⇄ 项目代码`）；启用 AI 时则自动叠加语义联想同义词。
+    - **索引时分词、搜索时不乱拆 Email／文件名（彻底消除 `.com` 噪声）**：搜索端停用 `@ . _ -` 符号拆解，保留索引端 `SubTokenFilter`（并新增索引 `@` 前账号本体如 `app.hlmt`），使搜索完整 `app.hlmt@gmail.com` 时仅精准命中该邮箱，不再捞出无关的 `.com` 或 `@gmail.com` 工单，同时单搜片段 `hlmt`、`app.hlmt` 或 `gmail` 依然精准命中。
+    - **搜索结果横幅扩展词胶囊标签呈现**：升级 `ItemListPanel` 搜索提示栏与多语系资源文件，自动以深浅色自适应胶囊标签透明展示实际参与检索的拆分与扩展词汇（单纯 Email 无额外扩展时自动隐藏保持利落）。
+
 ---
 
 ## 七、版本升级与兼容性指引

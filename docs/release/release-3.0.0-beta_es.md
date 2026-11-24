@@ -197,6 +197,11 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
 17. **Ocultación de contenedores vacíos de búsqueda sin espacios de proyecto**:
     - Se envolvieron el buscador rápido de escritorio (`nav-tab-quicksearch`, `nav-search-divider`) y el botón/panel móvil en `<wicket:enclosure>` dentro de `HeaderPanel`, eliminando los dos botones vacíos junto al Panel de control cuando aún no existen espacios creados.
 
+18. **Conversión de frases chino tradicional-simplificado sin conexión con OpenCC (sin IA), búsqueda precisa de correos e insignias de términos expandidos**:
+    - **Conversión bidireccional de frases en menos de 1 ms sin IA**: Integración de `opencc4j:1.14.0` (`tw2sp` / `s2twp`) y diccionario técnico/empresarial (`ChineseVariantConverter`) para expandir frases regionales (`記憶體洩漏 ⇄ 内存泄漏`, `軟體預設設定 ⇄ 软件默认设置`, `專案程式碼 ⇄ 项目代码`) sin depender de Ollama IA, fusionando sinónimos semánticos cuando la IA está activa.
+    - **División de sub-tokens solo al indexar (eliminando ruido de `.com` / `gmail`)**: Se desactivó la fragmentación por `@ . _ -` en tiempo de consulta manteniendo `SubTokenFilter` al indexar (incluyendo la parte local `app.hlmt`), logrando coincidencias exactas al buscar `app.hlmt@gmail.com` sin arrastrar tickets ajenos con `.com` o `@gmail.com`.
+    - **Insignias transparentes de búsqueda expandida**: El banner de resultados (`ItemListPanel`) muestra ahora los términos divididos y expandidos mediante etiquetas tipo cápsula en 8 idiomas.
+
 ---
 
 ## 7. Guía de actualización y compatibilidad

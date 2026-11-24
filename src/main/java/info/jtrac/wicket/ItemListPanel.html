@@ -30,6 +30,11 @@
                 <span class="search-keyword-icon">🔍</span>
                 <span class="search-keyword-label"><wicket:message key="item_search.searchingFor"/>:</span>
                 <strong wicket:id="searchKeywordValue" class="search-keyword-text"></strong>
+                <span wicket:id="expandedTermsGroup" class="search-expanded-group">
+                    <span class="search-expanded-sep">|</span>
+                    <span class="search-expanded-label"><wicket:message key="item_search.expandedTerms"/>:</span>
+                    <span wicket:id="expandedTermItem" class="search-expanded-badge"><span wicket:id="termText"></span></span>
+                </span>
                 <a href="#" wicket:id="clearSearchLink" class="search-keyword-clear" wicket:message="title:item_search.clear">✕</a>
             </div>
             <div class="table-responsive item-list-table-container">

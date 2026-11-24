@@ -276,14 +276,35 @@ if (Test-Path $FinalZip) {
 
 Compress-Archive -Path "$BundleDir\*" -DestinationPath $FinalZip -Force
 
-# Also sync to unzipped directory in output directory for immediate local use
+# Also sync to unzipped directory in output directory for immediate local use (preserving existing ./data if present!)
 $UnzippedTarget = "$OutputDirectory\jtrac-ng-3.0.0-beta-portable"
 Write-Host "       Updating extracted folder: $UnzippedTarget..." -ForegroundColor Gray
-if (Test-Path $UnzippedTarget) {
-    Remove-Item -Path $UnzippedTarget -Recurse -Force -ErrorAction SilentlyContinue
+try {
+    if (-not (Test-Path $UnzippedTarget)) {
+        New-Item -ItemType Directory -Path $UnzippedTarget -Force | Out-Null
+        Copy-Item -Path "$BundleDir\*" -Destination $UnzippedTarget -Recurse -Force
+    } else {
+        # Update webapps/ROOT.war and scripts without wiping existing ./data or locked jetty runtime jars
+        if (-not (Test-Path "$UnzippedTarget\webapps")) {
+            New-Item -ItemType Directory -Path "$UnzippedTarget\webapps" -Force | Out-Null
+        }
+        Copy-Item -Path "$BundleDir\webapps\ROOT.war" -Destination "$UnzippedTarget\webapps\ROOT.war" -Force
+        Get-ChildItem -Path $BundleDir -File | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination "$UnzippedTarget\$($_.Name)" -Force -ErrorAction SilentlyContinue
+        }
+        if (-not (Test-Path "$UnzippedTarget\jetty-home")) {
+            Copy-Item -Path "$BundleDir\jetty-home" -Destination "$UnzippedTarget\jetty-home" -Recurse -Force
+        }
+        if (-not (Test-Path "$UnzippedTarget\start.d")) {
+            Copy-Item -Path "$BundleDir\start.d" -Destination "$UnzippedTarget\start.d" -Recurse -Force
+        }
+        if (-not (Test-Path "$UnzippedTarget\data")) {
+            New-Item -ItemType Directory -Path "$UnzippedTarget\data" -Force | Out-Null
+        }
+    }
+} catch {
+    Write-Host "       [Note] Extracted folder is currently locked by a running instance ($($_.Exception.Message)); ZIP archive is still updated." -ForegroundColor Yellow
 }
-New-Item -ItemType Directory -Path $UnzippedTarget -Force | Out-Null
-Copy-Item -Path "$BundleDir\*" -Destination $UnzippedTarget -Recurse -Force
 
 # Clean up staging directory
 Remove-Item -Path $StagingRoot -Recurse -Force

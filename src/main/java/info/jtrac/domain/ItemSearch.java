@@ -557,6 +557,57 @@ public class ItemSearch implements Serializable {
                 && sortDescending;
     }
 
+    /**
+     * Returns distinct split/expanded keywords (excluding the raw searchText itself)
+     * for transparent badge display in the search results banner.
+     */
+    public List<String> getDisplayExpandedTerms() {
+        String raw = getSearchText();
+        if (raw == null || raw.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        String cleanRaw = raw.trim();
+        if (cleanRaw.length() >= 2 && cleanRaw.startsWith("\"") && cleanRaw.endsWith("\"")) {
+            cleanRaw = cleanRaw.substring(1, cleanRaw.length() - 1).trim();
+        }
+
+        List<String> display = new ArrayList<String>();
+        // 1. Space-separated distinct tokens (only when user entered multiple space-delimited words)
+        if (!raw.trim().startsWith("\"") || !raw.trim().endsWith("\"")) {
+            String[] spaceParts = cleanRaw.split("[\\s\\u3000]+");
+            if (spaceParts.length > 1) {
+                for (String p : spaceParts) {
+                    String cp = p.trim();
+                    if (!cp.isEmpty() && !cp.equalsIgnoreCase(cleanRaw) && !containsIgnoreCase(display, cp)) {
+                        display.add(cp);
+                    }
+                }
+            }
+        }
+
+        // 2. Offline OpenCC / Cross-Strait & Ollama AI expanded terms
+        if (expandedSearchTerms != null) {
+            for (String term : expandedSearchTerms) {
+                if (term != null) {
+                    String ct = term.trim();
+                    if (!ct.isEmpty() && !ct.equalsIgnoreCase(cleanRaw) && !containsIgnoreCase(display, ct)) {
+                        display.add(ct);
+                    }
+                }
+            }
+        }
+        return display;
+    }
+
+    private static boolean containsIgnoreCase(List<String> list, String candidate) {
+        for (String s : list) {
+            if (s.equalsIgnoreCase(candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<ColumnHeading> getColumnHeadings() {
         return columnHeadings;
     }
