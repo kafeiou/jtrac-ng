@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Index;
-import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 
 /**
  * This object represents a generic item which can be an issue, defect, task etc.
@@ -86,10 +87,10 @@ public class Item extends AbstractItem {
      * Lucene DocumentCreator implementation
      */
     public Document createDocument() {
-        Document d = new Document();        
-        d.add(new org.apache.lucene.document.Field("docId", "item:" + getId(), Store.YES, Index.NOT_ANALYZED));
-        d.add(new org.apache.lucene.document.Field("id", getId() + "", Store.YES, Index.NO));            
-        d.add(new org.apache.lucene.document.Field("type", "item", Store.YES, Index.NO));        
+        Document d = new Document();
+        d.add(new StringField("docId", "item:" + getId(), org.apache.lucene.document.Field.Store.YES));
+        d.add(new StoredField("id", getId() + ""));
+        d.add(new StoredField("type", "item"));
         StringBuffer sb = new StringBuffer();
         if (getSpace() != null && getSpace().getPrefixCode() != null && sequenceNum > 0) {
             sb.append(getRefId());
@@ -106,7 +107,7 @@ public class Item extends AbstractItem {
             }
             sb.append(getDetail());
         }
-        d.add(new org.apache.lucene.document.Field("text", sb.toString(), Store.NO, Index.TOKENIZED));
+        d.add(new TextField("text", sb.toString(), org.apache.lucene.document.Field.Store.NO));
         return d;
     }    
     

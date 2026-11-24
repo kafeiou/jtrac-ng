@@ -46,7 +46,8 @@ public class SpaceListPage extends BasePage {
         this.selectedSpaceId = selectedSpaceId;
     }
       
-    public SpaceListPage() {            
+    public SpaceListPage() {
+        addOptionsBreadcrumb();
         String configured = getJtrac().loadConfig("spaces.list.pageSize");
         if (configured != null) {
             try {

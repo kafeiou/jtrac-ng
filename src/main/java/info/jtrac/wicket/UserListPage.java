@@ -52,6 +52,7 @@ public class UserListPage extends BasePage {
     }
 
     public UserListPage() {
+        addOptionsBreadcrumb();
         String configured = getJtrac().loadConfig("users.list.pageSize");
         if (configured != null) {
             try {

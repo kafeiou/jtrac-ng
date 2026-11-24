@@ -21,6 +21,7 @@ public class StoredSearchListPage extends BasePage {
      * @param selectedParam
      */
     public StoredSearchListPage(final String selectedParam) {
+        addOptionsBreadcrumb();
 
         add(new Link("create") {
             public void onClick() {

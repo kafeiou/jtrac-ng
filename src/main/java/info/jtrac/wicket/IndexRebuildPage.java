@@ -32,7 +32,8 @@ import java.time.Duration;
  */
 public class IndexRebuildPage extends BasePage {      
     
-    public IndexRebuildPage(boolean success) {                    
+    public IndexRebuildPage(boolean success) {
+        addOptionsBreadcrumb();
         if(success) {
             add(new Label("heading", localize("index_rebuild_success.message")));
             add(new WebMarkupContainer("form").setVisible(false));

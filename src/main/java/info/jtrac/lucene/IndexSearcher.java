@@ -18,31 +18,31 @@ package info.jtrac.lucene;
 
 import info.jtrac.exception.SearchQueryParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Lucene Index Searching implementation using native Lucene API
+ * Lucene 10 Index Searching implementation using native Lucene API
  */
 public class IndexSearcher {
 
@@ -82,12 +82,21 @@ public class IndexSearcher {
         return searchExpander;
     }
 
+    private QueryParser createQueryParser(int phraseSlop) {
+        QueryParser parser = new QueryParser("text", getQueryAnalyzer());
+        parser.setDefaultOperator(QueryParser.Operator.OR);
+        parser.setAllowLeadingWildcard(true);
+        parser.setSplitOnWhitespace(true);
+        parser.setAutoGeneratePhraseQueries(true);
+        parser.setPhraseSlop(phraseSlop);
+        return parser;
+    }
+
     public boolean validateQuery(String text) {
         if (text == null || text.trim().length() == 0) {
             return true;
         }
-        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
-        parser.setDefaultOperator(QueryParser.Operator.OR);
+        QueryParser parser = createQueryParser(2);
         try {
             parser.parse(text);
             return true;
@@ -111,10 +120,7 @@ public class IndexSearcher {
             return emptyHits;
         }
 
-        QueryParser parser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
-        parser.setDefaultOperator(QueryParser.Operator.OR);
-        parser.setAllowLeadingWildcard(true);
-        parser.setPhraseSlop(2);
+        QueryParser parser = createQueryParser(2);
 
         Query query;
         List<String> collectedVariants = new ArrayList<String>();
@@ -137,7 +143,7 @@ public class IndexSearcher {
         }
 
         try {
-            if (!IndexReader.indexExists(indexDirectory)) {
+            if (!DirectoryReader.indexExists(indexDirectory)) {
                 return emptyHits;
             }
         } catch (Exception e) {
@@ -145,15 +151,11 @@ public class IndexSearcher {
             return emptyHits;
         }
 
-        IndexReader reader = null;
-        org.apache.lucene.search.IndexSearcher searcher = null;
-        try {
-            reader = IndexReader.open(indexDirectory, true);
-            searcher = new org.apache.lucene.search.IndexSearcher(reader);
+        try (DirectoryReader reader = DirectoryReader.open(indexDirectory)) {
+            org.apache.lucene.search.IndexSearcher searcher = new org.apache.lucene.search.IndexSearcher(reader);
             Query searchQuery = buildBoostedQuery(query, text, collectedVariants);
             TopDocs topDocs = searcher.search(searchQuery, 1000);
 
-            // If no hits found and query text contains special characters (e.g. Service:Auth), attempt escaped query fallback
             if (topDocs.scoreDocs.length == 0 && containsLuceneSpecialChars(text)) {
                 try {
                     Query escapedQuery = parser.parse(QueryParser.escape(text));
@@ -166,7 +168,6 @@ public class IndexSearcher {
                 }
             }
 
-            // If no hits found for a simple single word, attempt automatic prefix wildcard fallback (e.g. win -> win*)
             if (topDocs.scoreDocs.length == 0 && isEligibleForPrefixFallback(text)) {
                 try {
                     Query fallbackQuery = parser.parse(text.trim() + "*");
@@ -179,10 +180,11 @@ public class IndexSearcher {
                 }
             }
 
+            StoredFields storedFields = searcher.storedFields();
             SearchResultHits hits = new SearchResultHits();
             hits.getExpandedTerms().addAll(collectedVariants);
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-                Document doc = searcher.doc(scoreDoc.doc);
+                Document doc = storedFields.document(scoreDoc.doc);
                 String type = doc.get("type");
                 Long itemId = ItemIdHitExtractor.extractItemId(doc);
                 if (itemId != null && !hits.getItemIds().contains(itemId)) {
@@ -208,21 +210,6 @@ public class IndexSearcher {
         } catch (Exception e) {
             logger.error("Error searching index for query: " + text, e);
             throw new RuntimeException("Error searching index for query: " + text, e);
-        } finally {
-            if (searcher != null) {
-                try {
-                    searcher.close();
-                } catch (Exception e) {
-                    logger.error("Error closing Lucene IndexSearcher", e);
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    logger.error("Error closing Lucene IndexReader", e);
-                }
-            }
         }
     }
 
@@ -303,7 +290,6 @@ public class IndexSearcher {
             List<String> variants = new ArrayList<String>();
             String[] spaceParts = trimmed.split("[\\s\\u3000]+");
             if (spaceParts.length > 1) {
-                // Multi-word query (e.g. "app.hlmt@gmail.com 發票通知"): expand Chinese tokens cleanly without duplicating email
                 Set<String> tokenVariants = new LinkedHashSet<String>();
                 for (String part : spaceParts) {
                     if (OllamaSearchExpander.containsChinese(part)) {
@@ -337,9 +323,7 @@ public class IndexSearcher {
 
     private List<String> collectAllChineseVariants(String chineseQuery) {
         Set<String> merged = new LinkedHashSet<String>();
-        // 1. Offline sub-millisecond OpenCC tw2sp / s2twp + cross-strait dictionary (always active even without AI)
         merged.addAll(ChineseVariantConverter.expandOfflineVariants(chineseQuery));
-        // 2. Optional Ollama AI semantic synonym expansion when configured & online
         if (searchExpander != null) {
             List<String> aiVariants = searchExpander.expandChineseVariants(chineseQuery);
             if (aiVariants != null) {
@@ -353,11 +337,6 @@ public class IndexSearcher {
         return new ArrayList<String>(merged);
     }
 
-    /**
-     * Wraps the base query with optional SHOULD boost clauses for exact token and exact contiguous phrase matches.
-     * Because baseQuery is MUST, the matched document set is strictly unchanged while exact matches are boosted
-     * to the top of Lucene's TopDocs(1000) window so they are never truncated by partial/sub-token noise.
-     */
     private Query buildBoostedQuery(Query baseQuery, String rawText, List<String> variants) {
         if (baseQuery == null || rawText == null) {
             return baseQuery;
@@ -370,20 +349,17 @@ public class IndexSearcher {
             return baseQuery;
         }
         try {
-            BooleanQuery boosted = new BooleanQuery();
+            BooleanQuery.Builder boosted = new BooleanQuery.Builder();
             boosted.add(baseQuery, BooleanClause.Occur.MUST);
 
             // 1. Exact full token boost (e.g. full email address app.hlmt@gmail.com indexed prior to SubTokenFilter)
-            TermQuery exactTermQuery = new TermQuery(new Term("text", clean.toLowerCase(Locale.ROOT)));
-            exactTermQuery.setBoost(20.0f);
+            Query exactTermQuery = new BoostQuery(new TermQuery(new Term("text", clean.toLowerCase(Locale.ROOT))), 20.0f);
             boosted.add(exactTermQuery, BooleanClause.Occur.SHOULD);
 
             // 2. Exact contiguous phrase boost (slop = 0, works for CJK unigrams and multi-word sentences)
-            QueryParser exactPhraseParser = new QueryParser(Version.LUCENE_29, "text", getQueryAnalyzer());
-            exactPhraseParser.setPhraseSlop(0);
+            QueryParser exactPhraseParser = createQueryParser(0);
             try {
-                Query exactPhrase = exactPhraseParser.parse("\"" + escapeQuotedPhrase(clean) + "\"");
-                exactPhrase.setBoost(10.0f);
+                Query exactPhrase = new BoostQuery(exactPhraseParser.parse("\"" + escapeQuotedPhrase(clean) + "\""), 10.0f);
                 boosted.add(exactPhrase, BooleanClause.Occur.SHOULD);
             } catch (Exception ignored) {
             }
@@ -393,15 +369,14 @@ public class IndexSearcher {
                 for (String v : variants) {
                     if (v != null && !v.trim().isEmpty()) {
                         try {
-                            Query variantPhrase = exactPhraseParser.parse("\"" + escapeQuotedPhrase(v.trim()) + "\"");
-                            variantPhrase.setBoost(5.0f);
+                            Query variantPhrase = new BoostQuery(exactPhraseParser.parse("\"" + escapeQuotedPhrase(v.trim()) + "\""), 5.0f);
                             boosted.add(variantPhrase, BooleanClause.Occur.SHOULD);
                         } catch (Exception ignored) {
                         }
                     }
                 }
             }
-            return boosted;
+            return boosted.build();
         } catch (Exception e) {
             return baseQuery;
         }
@@ -441,14 +416,6 @@ public class IndexSearcher {
         return sb.length() > 0 ? sb.toString() : QueryParser.escape(trimmed);
     }
 
-    /**
-     * Translates a single whitespace-delimited token into a safe, noise-free Lucene query clause:
-     * - Pure letter/digit word (e.g. "win", "測試"): "(token OR token*)"
-     * - Standalone punctuation (e.g. "-" in "Error - timeout"): skipped ("") so it never triggers NOT
-     * - Symbol-connected compound token (., @, _, -, /, \, :, brackets, GUIDs, paths, URLs, C++):
-     *   Splits on non-letter/digit symbols into sub-parts and combines them with AND ("+part1 +part2"),
-     *   paired with exact atomic token match for HOST/EMAIL tokens (e.g. "(app\\.hlmt OR (+app +hlmt))").
-     */
     private String buildTokenClause(String token) {
         if (isPureLetterOrDigit(token)) {
             if (token.length() >= 2) {
@@ -465,7 +432,7 @@ public class IndexSearcher {
                 continue;
             }
             String lower = rp.toLowerCase(Locale.ROOT);
-            if (StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(lower)) {
+            if (EnglishAnalyzer.ENGLISH_STOP_WORDS_SET.contains(lower)) {
                 continue;
             }
             if (rp.length() >= 2 || OllamaSearchExpander.containsChinese(rp)) {
@@ -483,7 +450,6 @@ public class IndexSearcher {
             meaningfulParts = singleCharFallbacks;
         }
         if (meaningfulParts.isEmpty()) {
-            // Pure punctuation / operator token (e.g. "-", "|", "==>")
             return "";
         }
 
@@ -522,10 +488,6 @@ public class IndexSearcher {
         return true;
     }
 
-    /**
-     * Checks if Lucene StandardTokenizer keeps this token as a single atomic HOST or EMAIL token
-     * (either dotted host/identifier like "app.hlmt" or full email "app.hlmt@gmail.com" with dot after '@').
-     */
     private boolean isAtomicHostOrEmailToken(String token) {
         if (token == null || token.length() < 3) {
             return false;

@@ -38,6 +38,7 @@ public class ConfigListPage extends BasePage {
 	private static final SimpleAttributeModifier SAM_SEL = new SimpleAttributeModifier("class", "selected");
 
     public ConfigListPage(final String selectedParam) {
+        addOptionsBreadcrumb();
 
         final Map<String, String> configMap = getJtrac().loadAllConfig();
 

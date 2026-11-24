@@ -1,7 +1,11 @@
 <html>
     <body>
         <wicket:extend>
-            <div class="heading"><wicket:message key="config_list.configurationSettings"/></div>
+            <div class="heading">
+                <a href="#" wicket:id="optionsLink" class="heading-breadcrumb"><wicket:message key="options.optionsMenu"/></a>
+                <span class="heading-sep">&rsaquo;</span>
+                <wicket:message key="config_list.configurationSettings"/>
+            </div>
             <table class="jtrac">
                 <tr>
                     <th><wicket:message key="config_list.parameter"/></th>

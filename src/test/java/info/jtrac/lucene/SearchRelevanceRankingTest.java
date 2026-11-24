@@ -103,35 +103,29 @@ public class SearchRelevanceRankingTest {
         // Simulate a LEGACY v1 index entry where ONLY full email + individual sub-tokens (app, hlmt, gmail, com)
         // were indexed (WITHOUT the new 'app.hlmt' localPart token!)
         org.apache.lucene.store.Directory dir = (org.apache.lucene.store.Directory) context.getBean("indexDirectory");
-        org.apache.lucene.index.IndexWriter legacyWriter = new org.apache.lucene.index.IndexWriter(
-                dir, new org.apache.lucene.analysis.WhitespaceAnalyzer(),
-                !org.apache.lucene.index.IndexReader.indexExists(dir),
-                org.apache.lucene.index.IndexWriter.MaxFieldLength.UNLIMITED);
-        try {
+        org.apache.lucene.index.IndexWriterConfig legacyCfg = new org.apache.lucene.index.IndexWriterConfig(
+                new org.apache.lucene.analysis.core.WhitespaceAnalyzer());
+        legacyCfg.setOpenMode(org.apache.lucene.index.IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        try (org.apache.lucene.index.IndexWriter legacyWriter = new org.apache.lucene.index.IndexWriter(dir, legacyCfg)) {
             org.apache.lucene.document.Document legacyDoc = new org.apache.lucene.document.Document();
-            legacyDoc.add(new org.apache.lucene.document.Field("docId", "item:901",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NOT_ANALYZED));
-            legacyDoc.add(new org.apache.lucene.document.Field("id", "901",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
-            legacyDoc.add(new org.apache.lucene.document.Field("type", "item",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
+            legacyDoc.add(new org.apache.lucene.document.StringField("docId", "item:901",
+                    org.apache.lucene.document.Field.Store.YES));
+            legacyDoc.add(new org.apache.lucene.document.StoredField("id", "901"));
+            legacyDoc.add(new org.apache.lucene.document.StoredField("type", "item"));
             // Legacy tokens: NO 'app.hlmt' token!
-            legacyDoc.add(new org.apache.lucene.document.Field("text", "app.hlmt@gmail.com app hlmt gmail com",
-                    org.apache.lucene.document.Field.Store.NO, org.apache.lucene.document.Field.Index.TOKENIZED));
+            legacyDoc.add(new org.apache.lucene.document.TextField("text", "app.hlmt@gmail.com app hlmt gmail com",
+                    org.apache.lucene.document.Field.Store.NO));
             legacyWriter.addDocument(legacyDoc);
 
             org.apache.lucene.document.Document noiseDoc = new org.apache.lucene.document.Document();
-            noiseDoc.add(new org.apache.lucene.document.Field("docId", "item:902",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NOT_ANALYZED));
-            noiseDoc.add(new org.apache.lucene.document.Field("id", "902",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
-            noiseDoc.add(new org.apache.lucene.document.Field("type", "item",
-                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
-            noiseDoc.add(new org.apache.lucene.document.Field("text", "other@gmail.com other gmail com app",
-                    org.apache.lucene.document.Field.Store.NO, org.apache.lucene.document.Field.Index.TOKENIZED));
+            noiseDoc.add(new org.apache.lucene.document.StringField("docId", "item:902",
+                    org.apache.lucene.document.Field.Store.YES));
+            noiseDoc.add(new org.apache.lucene.document.StoredField("id", "902"));
+            noiseDoc.add(new org.apache.lucene.document.StoredField("type", "item"));
+            noiseDoc.add(new org.apache.lucene.document.TextField("text", "other@gmail.com other gmail com app",
+                    org.apache.lucene.document.Field.Store.NO));
             legacyWriter.addDocument(noiseDoc);
-        } finally {
-            legacyWriter.close();
+            legacyWriter.commit();
         }
 
         // Plain "app.hlmt" (NO '*' wildcard!) MUST hit 901 even on the legacy un-rebuilt index, and NOT hit 902!

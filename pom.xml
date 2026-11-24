@@ -213,7 +213,17 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>2.9.4</version>
+            <version>${lucene.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analysis-common</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>${lucene.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.wicket</groupId>
@@ -453,6 +463,7 @@
 		<bouncycastle.version>1.86</bouncycastle.version>
 		<commons.io.version>2.21.0</commons.io.version>
 		<opencc4j.version>1.14.0</opencc4j.version>
+		<lucene.version>10.6.0</lucene.version>
 	</properties>
 
 	<profiles>

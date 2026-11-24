@@ -206,6 +206,15 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
     - **Teilbezeichner-Suche ohne Wildcard `*`**: Übersetzt durch Symbole verbundene Tokens (`.`, `@`, `_`, `-`, `/`, `\`, `:`) in `Exakt OR (+Teil1 +Teil2)`, sodass `app.hlmt` oder `hlmt@gmail` sofort `app.hlmt@gmail.com` ohne Rauschen findet.
     - **Sichere Verarbeitung von Pfaden, Ports & Logs**: Unterstützt Windows-UNC-Pfade (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUIDs (`{9CECF8CB-...}`), `ERROR: connection - timeout` und `C++`.
 
+20. **Upgrade auf Apache Lucene `10.6.0` (Java 21) & automatische Index-Migration**:
+    - Volltextsuche von Lucene `2.9.4` auf **Apache Lucene `10.6.0`** aktualisiert; veraltete Lucene-2.9-Indexdateien (`segments.gen`) werden beim Start automatisch bereinigt und synchron neu aufgebaut.
+
+21. **SuperUser-Laufzeit-SBOM & Export als CycloneDX 1.5 JSON / UTF-8-BOM-CSV**:
+    - Neue SuperUser-Seite **Software-Stückliste (SBOM)** in 8 Sprachen zur dynamischen Inventarisierung von Laufzeitumgebung, Kernkomponenten, eingebetteten Frontend-JS-Dateien (`jQuery`, `YUI`, `Mermaid.js`) und allen `WEB-INF/lib/*.jar`-Bibliotheken inkl. PURL, Cache (`sbom-cache.json`), Live-Filter sowie **CycloneDX 1.5 JSON**- und **CSV**-Export.
+
+22. **Einheitliche Options-Breadcrumbs, leere Ollama-Standardwerte & Konfigurations-Bereinigung**:
+    - Einheitliche native Breadcrumbs (`Optionen › Seite`) für alle 7 Options-Unterseiten ergänzt; `llm.ollama.url`/`llm.ollama.model` standardmäßig leer gesetzt; internen Marker `lucene.analyzer.version` aus den Einstellungen ausgeblendet und Encoding-Fehler in `config.llm.retrieval.stopwords` behoben.
+
 ---
 
 ## 7. Upgrade- und Kompatibilitätshinweise

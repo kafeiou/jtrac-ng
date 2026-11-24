@@ -89,7 +89,6 @@ public class Config implements Serializable {
         PARAMS.add("llm.retrieval.stopwords");
         PARAMS.add("llm.search.expansion.enabled");
         PARAMS.add("llm.search.expansion.timeout");
-        PARAMS.add("lucene.analyzer.version");
 
         BOOLEAN_PARAMS = new LinkedHashSet<String>();
         BOOLEAN_PARAMS.add("mail.server.starttls.enable");

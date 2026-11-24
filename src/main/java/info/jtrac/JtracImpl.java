@@ -131,8 +131,8 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         if (event.getApplicationContext().getParent() == null) {
             if (needsIndexRebuildAfterStartup) {
                 needsIndexRebuildAfterStartup = false;
-                logger.info("Application context fully refreshed. Launching background Lucene index rebuild for migrated legacy data...");
-                startRebuildIndexes();
+                logger.info("Application context refreshed. Running synchronous Lucene 10 index rebuild before opening web connections...");
+                runSynchronousIndexRebuildOnStartup();
             }
         }
     }
@@ -218,6 +218,10 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         return jtracHome;
     }
 
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     public int getAttachmentMaxSizeInMb() {
         return attachmentMaxSizeInMb;
     }
@@ -267,8 +271,11 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         if (!isAttachmentOcrEnabled()) {
             return null;
         }
-        String url = loadConfig("llm.ollama.url", "http://localhost:11434");
-        String model = loadConfig("llm.ollama.model", "llama3.2");
+        String url = loadConfig("llm.ollama.url", "");
+        String model = loadConfig("llm.ollama.model", "");
+        if (url == null || url.trim().isEmpty() || model == null || model.trim().isEmpty()) {
+            return null;
+        }
         String apiKey = loadConfig("llm.ollama.api.key", null);
         int timeout = 60;
         try {
@@ -277,7 +284,7 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
                 timeout = Integer.parseInt(t.trim());
             }
         } catch (Exception ignore) {}
-        return new OllamaClient(url, model, apiKey, timeout);
+        return new OllamaClient(url.trim(), model.trim(), apiKey, timeout);
     }
 
     public void setAttachmentIndexExecutor(ExecutorService attachmentIndexExecutor) {
@@ -387,9 +394,9 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         // Proactively rebuild Lucene indexes in background if legacy data was migrated or analyzer upgraded
         boolean dbMigrated = HsqldbDatabaseMigrator.isDatabaseMigrated();
         String analyzerVersion = config.get("lucene.analyzer.version");
-        boolean analyzerUpgraded = !"3.0.0-subtoken-v2".equals(analyzerVersion);
+        boolean analyzerUpgraded = !"3.0.0-lucene10-v1".equals(analyzerVersion);
         if (attachmentsMigrated || dbMigrated || analyzerUpgraded) {
-            logger.info("Lucene index rebuild required (attachmentsMigrated={}, dbMigrated={}, analyzerUpgraded={}). Rebuild will be scheduled upon container startup completion.",
+            logger.info("Lucene 10 index rebuild required (attachmentsMigrated={}, dbMigrated={}, analyzerUpgraded={}). Synchronous rebuild will run prior to accepting web requests.",
                     attachmentsMigrated, dbMigrated, analyzerUpgraded);
             this.needsIndexRebuildAfterStartup = true;
         }
@@ -1147,6 +1154,25 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         return indexRebuildStatus;
     }
 
+    public void runSynchronousIndexRebuildOnStartup() {
+        synchronized (indexRebuildLock) {
+            if (indexRebuildStatus != null && !indexRebuildStatus.isComplete()) {
+                logger.warn("rebuildIndexes is already in progress");
+                return;
+            }
+            final BatchInfo batchInfo = new BatchInfo();
+            indexRebuildStatus = batchInfo;
+            try {
+                rebuildIndexes(batchInfo);
+            } catch (Exception e) {
+                logger.error("Synchronous startup Lucene index rebuild error", e);
+                batchInfo.setErrorMessage(e.getMessage());
+            } finally {
+                batchInfo.setComplete(true);
+            }
+        }
+    }
+
     public void startRebuildIndexes() {
         synchronized (indexRebuildLock) {
             if (indexRebuildStatus != null && !indexRebuildStatus.isComplete()) {
@@ -1227,8 +1253,8 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         batchInfo.setComplete(true);
         logger.info("indexing completed successfully, total indexed: " + batchInfo.getCurrentPosition());
         try {
-            storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v2"));
-            logger.info("updated lucene.analyzer.version to 3.0.0-subtoken-v2 upon successful index rebuild");
+            storeConfig(new Config("lucene.analyzer.version", "3.0.0-lucene10-v1"));
+            logger.info("updated lucene.analyzer.version to 3.0.0-lucene10-v1 upon successful index rebuild");
         } catch (Exception e) {
             logger.warn("failed to update lucene.analyzer.version config after rebuild: " + e.getMessage(), e);
         }

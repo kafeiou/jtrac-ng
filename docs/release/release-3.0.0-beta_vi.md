@@ -207,6 +207,15 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
     - **Khớp từ ghép không cần ký tự đại diện `*`**: Chuyển đổi chuỗi nối bằng ký hiệu (`.`, `@`, `_`, `-`, `/`, `\`, `:`) thành `từ gốc OR (giao hội AND các từ phụ)`, giúp gõ trực tiếp `app.hlmt` hoặc `hlmt@gmail` tìm thấy ngay `app.hlmt@gmail.com` mà không gây nhiễu.
     - **An toàn với đường dẫn, dấu hai chấm và nhật ký lỗi**: Hỗ trợ dán trực tiếp đường dẫn UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUID `{9CECF8CB-...}`, `ERROR: connection - timeout` và `C++`.
 
+20. **Nâng cấp Apache Lucene `10.6.0` (Java 21) & Tự động chuyển đổi chỉ mục cũ**:
+    - Nâng cấp công cụ tìm kiếm từ Lucene `2.9.4` lên **Apache Lucene `10.6.0`**, tự động dọn dẹp các tệp chỉ mục Lucene 2.9 không tương thích (`segments.gen`) khi khởi động và xây dựng lại chỉ mục đồng bộ.
+
+21. **Danh mục thành phần phần mềm (Runtime SBOM) dành riêng cho SuperUser & Xuất CycloneDX 1.5 / CSV**:
+    - Bổ sung trang quản trị **Thành phần phần mềm (SBOM)** hỗ trợ 8 ngôn ngữ, tự động kiểm kê môi trường thực thi, phân hệ lõi, tài nguyên JS giao diện (`jQuery`, `YUI`, `Mermaid.js`) và toàn bộ thư viện `WEB-INF/lib/*.jar` kèm PURL, lưu cache `sbom-cache.json`, lọc trực tiếp và xuất **CycloneDX 1.5 JSON** / **CSV UTF-8 BOM**.
+
+22. **Thanh điều hướng Breadcrumb đồng nhất cho Options, để trống mặc định Ollama & Dọn dẹp cấu hình**:
+    - Bổ sung thanh breadcrumb `Tùy chọn › Tên trang` trên cả 7 trang con quản trị; đặt mặc định trống cho `llm.ollama.url` và `llm.ollama.model`; ẩn tham số nội bộ `lucene.analyzer.version` khỏi trang cấu hình và sửa lỗi mã hóa ký tự của `config.llm.retrieval.stopwords`.
+
 ---
 
 ## 7. Hướng dẫn nâng cấp và tính tương thích

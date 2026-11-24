@@ -167,6 +167,9 @@ div.error-input select { border: none; }
 .error-back { background: var(--errorbg); }
 .info { color: var(--darkblue); font-weight: bold; }
 .heading { color: var(--darkblue); font-weight: bold; margin-bottom: 1em; }
+.heading-breadcrumb { color: var(--darkblue); font-weight: normal; text-decoration: none; }
+.heading-breadcrumb:hover { text-decoration: underline; }
+.heading-sep { margin: 0 5px; color: var(--text-muted); font-weight: normal; }
 .alt { background: var(--lightblue); }
 .header { background: var(--header); }
 
@@ -2271,4 +2274,168 @@ code {
 
 [data-theme="dark"] .search-loading-subtitle {
 	color: #94A3B8;
+}
+
+/* --- Software Bill of Materials (SBOM) Page --- */
+.sbom-heading {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	max-width: 1180px;
+	margin-bottom: 6px;
+}
+.sbom-container {
+	max-width: 1180px;
+	margin: 4px 0 24px 0;
+}
+.sbom-subtitle {
+	font-size: 0.9em;
+	color: var(--text-muted);
+	margin-bottom: 12px;
+}
+.sbom-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+.sbom-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 12px;
+	border-radius: 6px;
+	font-size: 0.92em;
+	font-weight: 600;
+	text-decoration: none !important;
+	border: 1px solid var(--border-color);
+	transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+.sbom-btn-primary {
+	background: #2563EB;
+	border-color: #1D4ED8;
+	color: #FFFFFF !important;
+}
+.sbom-btn-primary:hover {
+	background: #1D4ED8;
+}
+.sbom-btn-secondary {
+	background: var(--header);
+	color: var(--text-color) !important;
+}
+.sbom-btn-secondary:hover {
+	background: var(--mediumblue);
+}
+.sbom-card {
+	background: var(--bg-color);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	margin-bottom: 14px;
+	overflow: hidden;
+}
+.sbom-card-header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	background: var(--header);
+	border-bottom: 1px solid var(--border-color);
+}
+.sbom-clickable {
+	cursor: pointer;
+	user-select: none;
+}
+.sbom-chevron {
+	display: inline-block;
+	width: 16px;
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+.sbom-timestamp {
+	font-size: 0.86em;
+	color: var(--text-muted);
+}
+.sbom-env-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 10px 18px;
+	padding: 12px 14px;
+}
+.sbom-env-item {
+	line-height: 1.5;
+}
+.sbom-env-label {
+	font-weight: 600;
+	margin-right: 4px;
+}
+.sbom-muted {
+	font-size: 0.88em;
+	color: var(--text-muted);
+}
+.sbom-search-box {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 7px 12px;
+	margin-bottom: 14px;
+	background: var(--header);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+}
+.sbom-search-input {
+	flex: 1;
+	border: none;
+	background: transparent;
+	color: var(--text-color);
+	font-size: 0.98em;
+	outline: none;
+}
+.sbom-count-pill {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border-radius: 12px;
+	font-size: 0.82em;
+	font-weight: 600;
+	background: rgba(59, 130, 246, 0.15);
+	color: var(--darkblue);
+}
+[data-theme="dark"] .sbom-count-pill {
+	background: rgba(96, 165, 250, 0.2);
+	color: #93C5FD;
+}
+.sbom-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 10px;
+	font-size: 0.82em;
+	font-weight: 600;
+}
+.sbom-badge-ok {
+	background: rgba(16, 185, 129, 0.16);
+	color: #047857;
+	border: 1px solid rgba(16, 185, 129, 0.35);
+}
+[data-theme="dark"] .sbom-badge-ok {
+	background: rgba(16, 185, 129, 0.22);
+	color: #6EE7B7;
+}
+.sbom-badge-muted {
+	background: rgba(148, 163, 184, 0.18);
+	color: var(--text-muted);
+	border: 1px solid var(--border-color);
+}
+.sbom-table {
+	margin: 0 !important;
+	border: none !important;
+}
+.sbom-purl {
+	font-size: 0.8em;
+	color: var(--text-muted);
+	font-family: monospace;
+	word-break: break-all;
 }

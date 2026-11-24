@@ -17,38 +17,37 @@
 package info.jtrac.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.PorterStemFilter;
-import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardFilter;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.classic.ClassicFilter;
+import org.apache.lucene.analysis.classic.ClassicTokenizer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.en.PorterStemFilter;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Set;
 
 /**
- * Custom Lucene analyzer for JTrac combining:
- * 1. StandardTokenizer (word splitting & CJK unigram tokenization)
- * 2. StandardFilter (normalizing tokens)
+ * Custom Lucene 10 analyzer for JTrac combining:
+ * 1. ClassicTokenizer (preserves emails & dotted hosts while splitting CJK into unigrams)
+ * 2. ClassicFilter (normalizing acronyms/possessives)
  * 3. LowerCaseFilter (case-insensitive indexing and search)
- * 4. StopFilter (common English stop-words filtering)
- * 5. PorterStemFilter (English stemming: window <-> windows, test <-> testing)
+ * 4. SubTokenFilter (index-time sub-token splitting for emails, filenames, URLs & paths)
+ * 5. StopFilter (common English stop-words filtering)
+ * 6. PorterStemFilter (English stemming: window <-> windows, test <-> testing)
  */
 public class JtracAnalyzer extends Analyzer {
 
-    private final Set<?> stopWords;
+    private final CharArraySet stopWords;
     private final boolean splitSubTokens;
 
     public JtracAnalyzer() {
-        this(StopAnalyzer.ENGLISH_STOP_WORDS_SET, true);
+        this(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET, true);
     }
 
     public JtracAnalyzer(boolean splitSubTokens) {
-        this(StopAnalyzer.ENGLISH_STOP_WORDS_SET, splitSubTokens);
+        this(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET, splitSubTokens);
     }
 
     public JtracAnalyzer(Set<?> stopWords) {
@@ -56,50 +55,33 @@ public class JtracAnalyzer extends Analyzer {
     }
 
     public JtracAnalyzer(Set<?> stopWords, boolean splitSubTokens) {
-        this.stopWords = stopWords;
+        if (stopWords instanceof CharArraySet) {
+            this.stopWords = (CharArraySet) stopWords;
+        } else if (stopWords != null) {
+            this.stopWords = new CharArraySet(stopWords, true);
+        } else {
+            this.stopWords = CharArraySet.EMPTY_SET;
+        }
         this.splitSubTokens = splitSubTokens;
     }
 
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-        StandardTokenizer tokenizer = new StandardTokenizer(Version.LUCENE_29, reader);
-        TokenStream result = new StandardFilter(tokenizer);
+    protected TokenStreamComponents createComponents(String fieldName) {
+        ClassicTokenizer tokenizer = new ClassicTokenizer();
+        TokenStream result = new ClassicFilter(tokenizer);
         result = new LowerCaseFilter(result);
         if (splitSubTokens) {
             result = new SubTokenFilter(result);
         }
-        if (stopWords != null) {
-            result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
+        if (stopWords != null && !stopWords.isEmpty()) {
+            result = new StopFilter(result, stopWords);
         }
         result = new PorterStemFilter(result);
-        return result;
-    }
-
-    private static final class SavedStreams {
-        StandardTokenizer tokenStream;
-        TokenStream filteredTokenStream;
+        return new TokenStreamComponents(tokenizer, result);
     }
 
     @Override
-    public TokenStream reusableTokenStream(String fieldName, Reader reader) throws IOException {
-        SavedStreams streams = (SavedStreams) getPreviousTokenStream();
-        if (streams == null) {
-            streams = new SavedStreams();
-            setPreviousTokenStream(streams);
-            streams.tokenStream = new StandardTokenizer(Version.LUCENE_29, reader);
-            TokenStream result = new StandardFilter(streams.tokenStream);
-            result = new LowerCaseFilter(result);
-            if (splitSubTokens) {
-                result = new SubTokenFilter(result);
-            }
-            if (stopWords != null) {
-                result = new StopFilter(StopFilter.getEnablePositionIncrementsVersionDefault(Version.LUCENE_29), result, stopWords);
-            }
-            result = new PorterStemFilter(result);
-            streams.filteredTokenStream = result;
-        } else {
-            streams.tokenStream.reset(reader);
-        }
-        return streams.filteredTokenStream;
+    protected TokenStream normalize(String fieldName, TokenStream in) {
+        return new LowerCaseFilter(in);
     }
 }

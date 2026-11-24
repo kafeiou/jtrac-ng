@@ -1,7 +1,11 @@
 <html>
     <body>
         <wicket:extend>
-            <div wicket:id="heading" class="heading"></div>             
+            <div class="heading">
+                <a href="#" wicket:id="optionsLink" class="heading-breadcrumb"><wicket:message key="options.optionsMenu"/></a>
+                <span class="heading-sep">&rsaquo;</span>
+                <span wicket:id="heading"></span>
+            </div>
             <form wicket:id="form">
                 <p>
                     <img src="resources/warning.gif" class="nav-link"/>

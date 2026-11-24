@@ -137,6 +137,7 @@ public interface Jtrac extends UserDetailsService {
     //========================================================
     String getReleaseVersion();
     String getReleaseTimestamp();
+    default javax.sql.DataSource getDataSource() { return null; }
     //========================================================
     List<StoredSearch> loadAllStoredSearch();
     void storeStoredSearch(StoredSearch storedSearch);

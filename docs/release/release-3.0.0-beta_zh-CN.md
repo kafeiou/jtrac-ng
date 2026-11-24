@@ -218,6 +218,19 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
     - **免通配符 `*` 的复合词交集命中**：升级 `IndexSearcher` 将符号串连字符串（`.`、`@`、`_`、`-`、`/`、`\`、`:`）自动转换为 `完整词元 OR (各段子词全部 AND 交集)`，直接输入 `app.hlmt` 或 `hlmt@gmail` 即可精准命中 `app.hlmt@gmail.com`（兼容尚未重建的旧索引且零噪声）。
     - **全方位路径、冒号与 Log 符号安全防呆**：完整支持直接粘贴搜索 Windows UNC 网络路径（`\\hlmt.com.tw\SysVol`）、本地路径（`C:\Users\admin\`）、IP:Port（`192.168.1.10:8080`，不再将 `:` 误判为字段语法）、网址路径（`/app/item/form`）、GPO GUID（`{9CECF8CB-...}`）、含独立减号的日志（`ERROR: connection - timeout`）及 `C++`。
 
+20. **Apache Lucene `10.6.0` Java 21 原生升级与旧版索引无痛自动迁移**：
+    - 将全文检索引擎从旧版 Lucene `2.9.4` 全面升级至 Java 21 原生 **Apache Lucene `10.6.0`**（`lucene-core`、`lucene-analysis-common`、`lucene-queryparser`），重构 `JtracAnalyzer`、`SubTokenFilter`、`Indexer`、`IndexSearcher`、`Item` 与 `History`，零废弃 API 警告。
+    - 容器启动时自动检测并清理不兼容的旧版 Lucene 2.9 索引文件（`segments.gen` / `IndexFormatTooOldException`），并在接受连接前同步完成全库 Lucene 10 索引重建（`lucene.analyzer.version = 3.0.0-lucene10-v1`）。
+
+21. **SuperUser 专属运行时软件组成清单 (Runtime SBOM) 与 CycloneDX 1.5 / CSV 导出**：
+    - 新增最高管理员专属的 **“选项菜单 → 软件组成清单 (SBOM)”** 页面（完整支持 8 国语言），严格拦截非 SuperUser 访问且不开放任何未认证 REST 接口。
+    - 真实动态盘点运行环境（JTrac NG 版本、Jetty/Servlet 容器、Java/JVM、OS/架构、JDBC `DatabaseMetaData`、Ollama 启用状态与模型）、核心子系统（Lucene、OpenCC、CommonMark、Ollama）、实际打包前端 JS 资源（`jQuery`、`YUI`、`Mermaid.js`、`jquery.enhanced-switch.js`）与 `WEB-INF/lib/*.jar` 一对一完整后端 Java 依赖包与 PURL，支持 `${jtrac.home}/sbom-cache.json` 缓存、实时筛选、**导出 CycloneDX 1.5 JSON** 与 **UTF-8 BOM CSV**。
+
+22. **选项子页统一原生面包屑、Ollama 空白默认值与系统设置页清理**：
+    - 为“选项菜单”下全部 7 个管理子页（用户、空间、已保存搜索、系统设置、重建索引、备份还原、SBOM）添加 JTrac NG 原生 `<div class="heading">` 风格的 **`选项菜单 › 页面名称`** 面包屑，桌面与移动端均可一键返回。
+    - 新数据库初始化的 `llm.ollama.url` 与 `llm.ollama.model` 改为默认空白 `""`（移除自动回退 `localhost:11434` / `llama3.2`），避免未配置 AI 的环境被误判为已启用。
+    - 从设置页可编辑清单移除内部标记 `lucene.analyzer.version`，并修复英文资源文件中 `config.llm.retrieval.stopwords` 未转义中文字符乱码。
+
 ---
 
 ## 七、版本升级与兼容性指引

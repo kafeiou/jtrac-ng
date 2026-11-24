@@ -17,8 +17,9 @@
 package info.jtrac.domain;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Index;
-import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 
 /**
  * Any updates to an Item (even a new insert) causes a snapshot of
@@ -70,12 +71,12 @@ public class History extends AbstractItem {
      */
     public Document createDocument() {
         Document d = new Document();
-        d.add(new org.apache.lucene.document.Field("docId", "history:" + getId(), Store.YES, Index.NOT_ANALYZED));
-        d.add(new org.apache.lucene.document.Field("id", getId() + "", Store.YES, Index.NO));
+        d.add(new StringField("docId", "history:" + getId(), org.apache.lucene.document.Field.Store.YES));
+        d.add(new StoredField("id", getId() + ""));
         if (getParent() != null) {
-            d.add(new org.apache.lucene.document.Field("itemId", getParent().getId() + "", Store.YES, Index.NO));
+            d.add(new StoredField("itemId", getParent().getId() + ""));
         }
-        d.add(new org.apache.lucene.document.Field("type", "history", Store.YES, Index.NO));
+        d.add(new StoredField("type", "history"));
         StringBuffer sb = new StringBuffer();
         if (getParent() != null && getParent().getSpace() != null && getParent().getSpace().getPrefixCode() != null && getParent().getSequenceNum() > 0) {
             sb.append(getParent().getRefId());
@@ -110,7 +111,7 @@ public class History extends AbstractItem {
             }
             sb.append(attachmentText);
         }
-        d.add(new org.apache.lucene.document.Field("text", sb.toString(), Store.NO, Index.TOKENIZED));
+        d.add(new TextField("text", sb.toString(), org.apache.lucene.document.Field.Store.NO));
         return d;
     }
     

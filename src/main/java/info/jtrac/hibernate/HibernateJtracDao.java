@@ -1059,15 +1059,15 @@ public class HibernateJtracDao implements JtracDao {
             ensureDefaultConfig(session, "mail.inbound.ssl.enable", "false");
             ensureDefaultConfig(session, "mail.inbound.starttls.enable", "false");
             ensureDefaultConfig(session, "mail.inbound.ssl.trust.all", "false");
-            ensureDefaultConfig(session, "llm.ollama.url", "http://localhost:11434");
-            ensureDefaultConfig(session, "llm.ollama.model", "llama3.2");
+            ensureDefaultConfig(session, "llm.ollama.url", "");
+            ensureDefaultConfig(session, "llm.ollama.model", "");
             ensureDefaultConfig(session, "llm.ollama.timeout", "60");
             ensureDefaultConfig(session, "llm.retrieval.max_tickets", "50");
             ensureDefaultConfig(session, "llm.retrieval.max_age_days", "365");
             ensureDefaultConfig(session, "llm.retrieval.stopwords", "通知,工單");
             ensureDefaultConfig(session, "llm.search.expansion.enabled", "true");
             ensureDefaultConfig(session, "llm.search.expansion.timeout", "6");
-            ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-subtoken-v2");
+            ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-lucene10-v1");
 
             List<SpaceSequence> ssList = session.createQuery("from SpaceSequence", SpaceSequence.class).getResultList();
             Map<Long, SpaceSequence> ssMap = new HashMap<Long, SpaceSequence>(ssList.size());

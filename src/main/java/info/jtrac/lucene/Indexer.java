@@ -18,14 +18,16 @@ package info.jtrac.lucene;
 
 import info.jtrac.domain.AbstractItem;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Lucene Indexing implementation using native Lucene API
+ * Lucene 10 Indexing implementation using native Lucene API
  */
 public class Indexer {
 
@@ -43,27 +45,30 @@ public class Indexer {
     }
 
     public synchronized void index(AbstractItem item) {
-        IndexWriter writer = null;
+        String docIdPrefix = (item instanceof info.jtrac.domain.History) ? "history:" : "item:";
+        Term docTerm = new Term("docId", docIdPrefix + item.getId());
         try {
-            if (IndexWriter.isLocked(indexDirectory)) {
-                logger.warn("Forced unlocking of Lucene index directory: {}", indexDirectory);
-                IndexWriter.unlock(indexDirectory);
+            writeDocument(docTerm, item, IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        } catch (IndexFormatTooOldException legacyEx) {
+            logger.warn("Legacy Lucene index format detected during indexing; recreating index with Lucene 10 codec...");
+            try {
+                writeDocument(docTerm, item, IndexWriterConfig.OpenMode.CREATE);
+            } catch (Exception e) {
+                logger.error("Error recreating index for item: " + item, e);
+                throw new RuntimeException("Error indexing item: " + item, e);
             }
-            boolean create = !IndexReader.indexExists(indexDirectory);
-            writer = new IndexWriter(indexDirectory, analyzer, create, IndexWriter.MaxFieldLength.UNLIMITED);
-            String docIdPrefix = (item instanceof info.jtrac.domain.History) ? "history:" : "item:";
-            writer.updateDocument(new org.apache.lucene.index.Term("docId", docIdPrefix + item.getId()), item.createDocument());
         } catch (Exception e) {
             logger.error("Error indexing item: " + item, e);
             throw new RuntimeException("Error indexing item: " + item, e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (Exception e) {
-                    logger.error("Error closing Lucene IndexWriter", e);
-                }
-            }
+        }
+    }
+
+    private void writeDocument(Term docTerm, AbstractItem item, IndexWriterConfig.OpenMode openMode) throws Exception {
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        config.setOpenMode(openMode);
+        try (IndexWriter writer = new IndexWriter(indexDirectory, config)) {
+            writer.updateDocument(docTerm, item.createDocument());
+            writer.commit();
         }
     }
 }

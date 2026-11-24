@@ -1,0 +1,213 @@
+<html>
+    <body>
+        <wicket:extend>
+            <div class="heading sbom-heading">
+                <div class="sbom-heading-left">
+                    <a href="#" wicket:id="optionsLink" class="heading-breadcrumb"><wicket:message key="options.optionsMenu"/></a>
+                    <span class="heading-sep">&rsaquo;</span>
+                    <wicket:message key="sbom.title"/>
+                </div>
+                <div class="sbom-actions">
+                    <a href="#" wicket:id="refreshBtn" class="sbom-btn sbom-btn-secondary">&#x21bb; <wicket:message key="sbom.refresh"/></a>
+                    <a href="#" wicket:id="exportCycloneDxBtn" class="sbom-btn sbom-btn-primary">&#x2B07; <wicket:message key="sbom.export.cyclonedx"/></a>
+                    <a href="#" wicket:id="exportCsvBtn" class="sbom-btn sbom-btn-secondary">&#x1F4C4; <wicket:message key="sbom.export.csv"/></a>
+                </div>
+            </div>
+            <div class="sbom-container">
+                <div class="sbom-subtitle"><wicket:message key="sbom.subtitle"/></div>
+
+                <!-- 1. Runtime Environment Summary -->
+                <div class="sbom-card">
+                    <div class="sbom-card-header">
+                        <strong>&#x1F5A5; <wicket:message key="sbom.env.title"/></strong>
+                        <span class="sbom-timestamp"><wicket:message key="sbom.generatedAt"/>: <span wicket:id="generatedAt"></span></span>
+                    </div>
+                    <div class="sbom-env-grid">
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.app"/>:</span>
+                            <code wicket:id="envApp"></code>
+                        </div>
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.server"/>:</span>
+                            <code wicket:id="envServer"></code>
+                        </div>
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.java"/>:</span>
+                            <code wicket:id="envJava"></code>
+                            <span class="sbom-muted" wicket:id="envJavaVendor"></span>
+                        </div>
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.os"/>:</span>
+                            <code wicket:id="envOs"></code>
+                        </div>
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.db"/>:</span>
+                            <code wicket:id="envDb"></code>
+                            <div class="sbom-muted" wicket:id="envJdbc"></div>
+                        </div>
+                        <div class="sbom-env-item">
+                            <span class="sbom-env-label"><wicket:message key="sbom.env.ollama"/>:</span>
+                            <span class="sbom-badge" wicket:id="envOllamaStatus"></span>
+                            <code wicket:id="envOllamaModel"></code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Component Search Filter -->
+                <div class="sbom-search-box">
+                    <span class="sbom-search-icon">&#x1F50D;</span>
+                    <input type="search" id="sbom-search-input" class="sbom-search-input"
+                           wicket:message="placeholder:sbom.search.placeholder"
+                           oninput="window.jtracFilterSbom && window.jtracFilterSbom(this.value)"/>
+                </div>
+
+                <!-- 2. Core Subsystems & AI Modules -->
+                <div class="sbom-card sbom-section" data-section="subsystems">
+                    <div class="sbom-card-header sbom-clickable" onclick="window.jtracToggleSbomSection('subsystems')">
+                        <div>
+                            <span class="sbom-chevron" id="sbom-chevron-subsystems">&#x25BC;</span>
+                            <strong><wicket:message key="sbom.section.subsystems"/></strong>
+                            <span class="sbom-count-pill" id="sbom-count-subsystems" wicket:id="subsystemsCount"></span>
+                        </div>
+                    </div>
+                    <div class="sbom-section-body table-responsive" id="sbom-body-subsystems">
+                        <table class="jtrac jtrac-list sbom-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th><wicket:message key="sbom.col.group"/></th>
+                                    <th><wicket:message key="sbom.col.name"/></th>
+                                    <th><wicket:message key="sbom.col.version"/></th>
+                                    <th><wicket:message key="sbom.col.status"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr wicket:id="subsystemsList" class="sbom-row">
+                                    <td><code wicket:id="group"></code></td>
+                                    <td wicket:id="name"></td>
+                                    <td><code wicket:id="version"></code></td>
+                                    <td><span class="sbom-badge" wicket:id="status"></span></td>
+                                </tr>
+                                <tr class="sbom-empty-row" style="display:none;">
+                                    <td colspan="4" class="sbom-muted"><wicket:message key="sbom.empty"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Frontend & Bundled Assets -->
+                <div class="sbom-card sbom-section" data-section="frontend">
+                    <div class="sbom-card-header sbom-clickable" onclick="window.jtracToggleSbomSection('frontend')">
+                        <div>
+                            <span class="sbom-chevron" id="sbom-chevron-frontend">&#x25BC;</span>
+                            <strong><wicket:message key="sbom.section.frontend"/></strong>
+                            <span class="sbom-count-pill" id="sbom-count-frontend" wicket:id="frontendCount"></span>
+                        </div>
+                    </div>
+                    <div class="sbom-section-body table-responsive" id="sbom-body-frontend">
+                        <table class="jtrac jtrac-list sbom-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th><wicket:message key="sbom.col.group"/></th>
+                                    <th><wicket:message key="sbom.col.name"/></th>
+                                    <th><wicket:message key="sbom.col.version"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr wicket:id="frontendList" class="sbom-row">
+                                    <td><code wicket:id="group"></code></td>
+                                    <td wicket:id="name"></td>
+                                    <td><code wicket:id="version"></code></td>
+                                </tr>
+                                <tr class="sbom-empty-row" style="display:none;">
+                                    <td colspan="3" class="sbom-muted"><wicket:message key="sbom.empty"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. Backend Java Libraries -->
+                <div class="sbom-card sbom-section" data-section="backend">
+                    <div class="sbom-card-header sbom-clickable" onclick="window.jtracToggleSbomSection('backend')">
+                        <div>
+                            <span class="sbom-chevron" id="sbom-chevron-backend">&#x25BC;</span>
+                            <strong><wicket:message key="sbom.section.backend"/></strong>
+                            <span class="sbom-count-pill" id="sbom-count-backend" wicket:id="backendCount"></span>
+                        </div>
+                    </div>
+                    <div class="sbom-section-body table-responsive" id="sbom-body-backend">
+                        <table class="jtrac jtrac-list sbom-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th><wicket:message key="sbom.col.group"/></th>
+                                    <th><wicket:message key="sbom.col.name"/></th>
+                                    <th><wicket:message key="sbom.col.version"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr wicket:id="backendList" class="sbom-row">
+                                    <td><code wicket:id="group"></code></td>
+                                    <td>
+                                        <span wicket:id="name"></span>
+                                        <div wicket:id="purlWrap" class="sbom-purl"><span wicket:id="purl"></span></div>
+                                    </td>
+                                    <td><code wicket:id="version"></code></td>
+                                </tr>
+                                <tr class="sbom-empty-row" style="display:none;">
+                                    <td colspan="3" class="sbom-muted"><wicket:message key="sbom.empty"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                //<![CDATA[
+                (function() {
+                    var collapsed = {};
+                    window.jtracToggleSbomSection = function(key) {
+                        collapsed[key] = !collapsed[key];
+                        var body = document.getElementById('sbom-body-' + key);
+                        var chev = document.getElementById('sbom-chevron-' + key);
+                        if (body) {
+                            body.style.display = collapsed[key] ? 'none' : '';
+                        }
+                        if (chev) {
+                            chev.textContent = collapsed[key] ? '\u25B6' : '\u25BC';
+                        }
+                    };
+                    window.jtracFilterSbom = function(rawQuery) {
+                        var q = (rawQuery || '').toLowerCase().replace(/^\s+|\s+$/g, '');
+                        var sections = document.querySelectorAll('.sbom-section');
+                        for (var i = 0; i < sections.length; i++) {
+                            var sec = sections[i];
+                            var key = sec.getAttribute('data-section');
+                            var rows = sec.querySelectorAll('tr.sbom-row');
+                            var visibleCount = 0;
+                            for (var j = 0; j < rows.length; j++) {
+                                var text = (rows[j].textContent || '').toLowerCase();
+                                var match = !q || text.indexOf(q) !== -1;
+                                rows[j].style.display = match ? '' : 'none';
+                                if (match) visibleCount++;
+                            }
+                            var emptyRow = sec.querySelector('tr.sbom-empty-row');
+                            if (emptyRow) {
+                                emptyRow.style.display = (visibleCount === 0) ? '' : 'none';
+                            }
+                            var pill = document.getElementById('sbom-count-' + key);
+                            if (pill) {
+                                pill.textContent = String(visibleCount);
+                            }
+                            if (q && visibleCount > 0 && collapsed[key]) {
+                                window.jtracToggleSbomSection(key);
+                            }
+                        }
+                    };
+                })();
+                //]]>
+            </script>
+        </wicket:extend>
+    </body>
+</html>

@@ -225,6 +225,19 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
     - **Wildcard-Free Partial Identifier & Legacy Index Compatibility**: Upgraded `IndexSearcher` to translate symbol-connected identifiers (`.`, `@`, `_`, `-`, `/`, `\`, `:`) into atomic-or-conjunction clauses (`exact OR (+part1 +part2)`), ensuring queries like `app.hlmt` or `hlmt@gmail` match `app.hlmt@gmail.com` immediately without typing `*` and without pulling `.com` / `@gmail.com` noise.
     - **Comprehensive IT Path, Port, Log & GUID Escaping**: Safely handles Windows UNC paths (`\\server\share`), drive paths (`C:\Users\admin\`), IP:Port (`192.168.1.10:8080` without misinterpreting `:` as a Lucene field), servlet routes (`/app/item/form`), GPO GUIDs (`{9CECF8CB-...}`), standalone minus signs (`ERROR: connection - timeout`), and `C++`.
 
+20. **Apache Lucene 10.6.0 Native Upgrade & Automatic Legacy Index Migration**:
+    - Upgraded full-text search engine from legacy Lucene `2.9.4` to Java 21-native **Apache Lucene `10.6.0`** (`lucene-core`, `lucene-analysis-common`, `lucene-queryparser`), migrating `JtracAnalyzer`, `SubTokenFilter`, `Indexer`, `IndexSearcher`, `Item`, and `History` with zero Lucene deprecation warnings.
+    - Automatically detects and purges incompatible legacy Lucene 2.9 index files (`segments.gen` / `IndexFormatTooOldException`) on startup and runs a synchronous full index rebuild (`lucene.analyzer.version = 3.0.0-lucene10-v1`) before accepting web requests.
+
+21. **SuperUser-Only Runtime Software Bill of Materials (SBOM) & CycloneDX 1.5 / CSV Export**:
+    - Added a dedicated SuperUser-only **Software Composition (SBOM)** administration page (`Options → Software Composition (SBOM)`) across all 8 languages, strictly blocking non-SuperUsers and exposing zero unauthenticated REST endpoints.
+    - Dynamically inspects the real runtime environment (JTrac NG version, Jetty/Servlet container, Java/JVM, OS/arch, JDBC `DatabaseMetaData`, Ollama status/model), core subsystems (Lucene, OpenCC, CommonMark, Ollama), real bundled frontend JavaScript assets (`jQuery`, `YUI`, `Mermaid.js`, `jquery.enhanced-switch.js`), and 1-to-1 backend JAR inventory (`WEB-INF/lib/*.jar` with Maven `pom.properties` & PURL resolution), with persistent `${jtrac.home}/sbom-cache.json` caching, live filtering, **CycloneDX 1.5 JSON**, and **UTF-8 BOM CSV** export.
+
+22. **Unified Options Menu Breadcrumbs, Blank Default Ollama Config & Configuration Settings Cleanup**:
+    - Added native `<div class="heading">` **`Options Menu › Page Name`** breadcrumbs across all 7 Options administration sub-pages (Users, Spaces, Stored Searches, Configuration Settings, Rebuild Indexes, Backup & Restore, SBOM) for consistent desktop and mobile navigation.
+    - Changed fresh-database defaults for `llm.ollama.url` and `llm.ollama.model` to blank `""` (removing hardcoded `localhost:11434` / `llama3.2` fallbacks) so SBOM and background services accurately treat unconfigured environments as AI-disabled.
+    - Removed internal index marker `lucene.analyzer.version` from user-editable `Config.PARAMS` and escaped Unicode examples in `config.llm.retrieval.stopwords` to eliminate mojibake.
+
 ---
 
 ## 7. Upgrade & Compatibility Guidance

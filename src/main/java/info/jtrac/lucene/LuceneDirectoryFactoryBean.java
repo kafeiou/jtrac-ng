@@ -17,14 +17,21 @@
 package info.jtrac.lucene;
 
 import java.io.File;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Spring FactoryBean to initialize a native Lucene FSDirectory
+ * Spring FactoryBean to initialize a native Lucene 10 FSDirectory,
+ * automatically purging incompatible legacy Lucene 2.x index files if detected.
  */
 public class LuceneDirectoryFactoryBean implements FactoryBean<Directory> {
+
+    private static final Logger logger = LoggerFactory.getLogger(LuceneDirectoryFactoryBean.class);
 
     private String path;
 
@@ -45,7 +52,36 @@ public class LuceneDirectoryFactoryBean implements FactoryBean<Directory> {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        return FSDirectory.open(dir);
+        Directory fsDir = FSDirectory.open(dir.toPath());
+        purgeLegacyIncompatibleIndexIfPresent(dir, fsDir);
+        return fsDir;
+    }
+
+    private void purgeLegacyIncompatibleIndexIfPresent(File dir, Directory fsDir) {
+        try {
+            File legacySegmentsGen = new File(dir, "segments.gen");
+            boolean purgeNeeded = legacySegmentsGen.isFile();
+            if (!purgeNeeded) {
+                try {
+                    DirectoryReader.indexExists(fsDir);
+                } catch (IndexFormatTooOldException e) {
+                    purgeNeeded = true;
+                }
+            }
+            if (purgeNeeded) {
+                logger.info("Detected legacy pre-Lucene-10 index files in '{}'. Cleaning directory for automatic synchronous Lucene 10 rebuild...", dir.getAbsolutePath());
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        if (f.isFile()) {
+                            f.delete();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Non-fatal check on index directory '{}': {}", dir.getAbsolutePath(), e.getMessage());
+        }
     }
 
     @Override

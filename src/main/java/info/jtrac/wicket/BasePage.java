@@ -73,7 +73,16 @@ public abstract class BasePage extends WebPage {
     
     protected String localize(String key, Object... params) {
         return new StringResourceModel(key, this).setParameters(params).getString();
-    } 
+    }
+
+    protected void addOptionsBreadcrumb() {
+        add(new org.apache.wicket.markup.html.link.Link<Void>("optionsLink") {
+            @Override
+            public void onClick() {
+                setResponsePage(OptionsPage.class);
+            }
+        });
+    }
 
     public BasePage() { 
         add(new IndividualHeadPanel().setRenderBodyOnly(true));

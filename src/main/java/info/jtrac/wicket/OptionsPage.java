@@ -77,6 +77,12 @@ public class OptionsPage extends BasePage {
             }
         }.setVisible(isSuperUser));
 
+        add(new Link("sbom") {
+            public void onClick() {
+                setResponsePage(new SbomPage());
+            }
+        }.setVisible(isSuperUser));
+
     }
 
 }

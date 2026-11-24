@@ -988,17 +988,19 @@ public class InboundMailReceiver {
         } catch (Throwable ignored) {}
 
         if (ocrEnabled) {
-            String ollamaUrl = jtrac.loadConfig("llm.ollama.url", "http://localhost:11434");
-            String ollamaModel = jtrac.loadConfig("llm.ollama.model", "llama3.2");
-            String ollamaApiKey = jtrac.loadConfig("llm.ollama.api.key");
-            int timeout = 60;
-            String timeoutStr = jtrac.loadConfig("llm.ollama.timeout");
-            if (StringUtils.hasText(timeoutStr)) {
-                try {
-                    timeout = Integer.parseInt(timeoutStr.trim());
-                } catch (NumberFormatException ignored) {}
+            String ollamaUrl = jtrac.loadConfig("llm.ollama.url", "");
+            String ollamaModel = jtrac.loadConfig("llm.ollama.model", "");
+            if (StringUtils.hasText(ollamaUrl) && StringUtils.hasText(ollamaModel)) {
+                String ollamaApiKey = jtrac.loadConfig("llm.ollama.api.key");
+                int timeout = 60;
+                String timeoutStr = jtrac.loadConfig("llm.ollama.timeout");
+                if (StringUtils.hasText(timeoutStr)) {
+                    try {
+                        timeout = Integer.parseInt(timeoutStr.trim());
+                    } catch (NumberFormatException ignored) {}
+                }
+                ocrClient = new OllamaClient(ollamaUrl.trim(), ollamaModel.trim(), ollamaApiKey, timeout);
             }
-            ocrClient = new OllamaClient(ollamaUrl, ollamaModel, ollamaApiKey, timeout);
         }
         for (History h : item.getHistory()) {
             if (h.getAttachment() != null && (!StringUtils.hasText(h.getAttachmentText()))) {

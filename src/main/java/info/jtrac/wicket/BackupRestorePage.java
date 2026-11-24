@@ -34,6 +34,7 @@ public class BackupRestorePage extends BasePage {
             throw new RestartResponseAtInterceptPageException(DashboardPage.class);
         }
 
+        addOptionsBreadcrumb();
         add(new FeedbackPanel("feedback"));
 
         // 1. Export Form
