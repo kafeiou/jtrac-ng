@@ -39,7 +39,7 @@ A ready-to-run container image based on Eclipse Temurin 21+, Jetty 12.1 (EE10), 
 
 Run directly with Docker:
 ```bash
-docker run -d -p 8888:8080 -v jtrac_data:/jtrac-data --name jtrac-ng jtrac-ng:latest
+docker run -d --restart=always -p 8080:8080 -v jtrac_data:/jtrac-data --name jtrac-ng kafeiou/jtrac-ng:3.0.0-beta
 ```
 
 Access the application at `http://localhost:8888/`.
