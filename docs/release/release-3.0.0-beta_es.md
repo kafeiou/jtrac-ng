@@ -206,8 +206,8 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
     - **Búsqueda parcial sin comodín `*`**: Convierte identificadores unidos por símbolos (`.`, `@`, `_`, `-`, `/`, `\`, `:`) en `exacto OR (+parte1 +parte2)`, permitiendo que `app.hlmt` o `hlmt@gmail` encuentren `app.hlmt@gmail.com` sin ruido.
     - **Soporte seguro para rutas, puertos y registros**: Compatible con rutas UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUIDs (`{9CECF8CB-...}`), `ERROR: connection - timeout` y `C++`.
 
-20. **Actualización nativa a Apache Lucene `10.6.0` (Java 21) y migración automática de índices**:
-    - Motor de búsqueda actualizado de Lucene `2.9.4` a **Apache Lucene `10.6.0`**; limpia automáticamente índices antiguos incompatibles (`segments.gen`) al iniciar y reconstruye el índice de forma síncrona.
+20. **Actualización nativa a Apache Lucene `10.6.0` (Java 21) y página web de progreso de actualización**:
+    - Motor de búsqueda actualizado de Lucene `2.9.4` a **Apache Lucene `10.6.0`**; limpia automáticamente índices antiguos (`segments.gen`) y los reconstruye en segundo plano mientras `StartupUpgradeFilter` muestra una página de progreso en vivo (HTTP 503, `/startup-upgrade-status`) y redirige automáticamente a `/app/login` al finalizar.
 
 21. **SBOM en tiempo de ejecución exclusivo para SuperUser y exportación CycloneDX 1.5 / CSV**:
     - Nueva página de administración **Composición de software (SBOM)** en 8 idiomas con inspección real del entorno, subsistemas, activos JS frontend (`jQuery`, `YUI`, `Mermaid.js`) y todos los JAR de `WEB-INF/lib/*.jar` con PURL, caché (`sbom-cache.json`), filtro en vivo y exportación **CycloneDX 1.5 JSON** y **CSV UTF-8 BOM**.

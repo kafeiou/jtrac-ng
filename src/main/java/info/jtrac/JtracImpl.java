@@ -112,6 +112,12 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
     private org.springframework.context.ApplicationContext applicationContext;
     private PlatformTransactionManager transactionManager;
     private volatile boolean needsIndexRebuildAfterStartup;
+    private volatile boolean startupUpgradeInProgress;
+
+    @Override
+    public boolean isStartupUpgradeInProgress() {
+        return startupUpgradeInProgress;
+    }
 
     @Override
     public void setApplicationContext(org.springframework.context.ApplicationContext applicationContext) {
@@ -131,8 +137,8 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         if (event.getApplicationContext().getParent() == null) {
             if (needsIndexRebuildAfterStartup) {
                 needsIndexRebuildAfterStartup = false;
-                logger.info("Application context refreshed. Running synchronous Lucene 10 index rebuild before opening web connections...");
-                runSynchronousIndexRebuildOnStartup();
+                logger.info("Application context refreshed. Launching background Lucene 10 startup upgrade with web progress gatekeeper...");
+                startStartupIndexUpgrade();
             }
         }
     }
@@ -1154,7 +1160,7 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         return indexRebuildStatus;
     }
 
-    public void runSynchronousIndexRebuildOnStartup() {
+    public void startStartupIndexUpgrade() {
         synchronized (indexRebuildLock) {
             if (indexRebuildStatus != null && !indexRebuildStatus.isComplete()) {
                 logger.warn("rebuildIndexes is already in progress");
@@ -1162,14 +1168,24 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
             }
             final BatchInfo batchInfo = new BatchInfo();
             indexRebuildStatus = batchInfo;
-            try {
-                rebuildIndexes(batchInfo);
-            } catch (Exception e) {
-                logger.error("Synchronous startup Lucene index rebuild error", e);
-                batchInfo.setErrorMessage(e.getMessage());
-            } finally {
-                batchInfo.setComplete(true);
-            }
+            startupUpgradeInProgress = true;
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        rebuildIndexes(batchInfo);
+                    } catch (Exception e) {
+                        logger.error("Startup Lucene 10 index upgrade error", e);
+                        batchInfo.setErrorMessage(e.getMessage());
+                    } finally {
+                        batchInfo.setComplete(true);
+                        startupUpgradeInProgress = false;
+                        logger.info("Startup Lucene 10 index upgrade finished; releasing web login gatekeeper.");
+                    }
+                }
+            }, "JTrac-StartupIndexUpgrade");
+            thread.setDaemon(true);
+            thread.start();
         }
     }
 

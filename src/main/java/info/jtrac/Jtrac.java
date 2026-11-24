@@ -130,6 +130,7 @@ public interface Jtrac extends UserDetailsService {
     void rebuildIndexes(BatchInfo batchInfo);
     BatchInfo getIndexRebuildStatus();
     void startRebuildIndexes();
+    default boolean isStartupUpgradeInProgress() { return false; }
     boolean validateTextSearchQuery(String text);
     //========================================================
     void executeHourlyTask();

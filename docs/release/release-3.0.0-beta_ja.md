@@ -211,8 +211,8 @@ JTrac NG 3.0.0-beta は、2.0.0 のアーキテクチャ刷新を土台として
     - **ワイルドカード `*` 不要の部分識別子検索**：記号連結トークン（`.`、`@`、`_`、`-`、`/`、`\`、`:`）を `完全トークン OR (サブトークンAND交差)` に自動変換し、`app.hlmt` や `hlmt@gmail` の入力だけで `app.hlmt@gmail.com` をノイズなく高精度に検索可能にしました。
     - **パス・コロン・ログ記号の安全なエスケープ**：Windows UNCパス（`\\server\share`）、ドライブパス（`C:\Users\admin\`）、IP:Port（`192.168.1.10:8080`）、URLパス（`/app/item/form`）、GUID（`{9CECF8CB-...}`）、ハイフン付きログ（`ERROR: connection - timeout`）、`C++` に対応しました。
 
-20. **Apache Lucene `10.6.0` Java 21ネイティブ刷新＆旧インデックス自動移行**：
-    - 全文検索エンジンを旧 Lucene `2.9.4` から Java 21 ネイティブの **Apache Lucene `10.6.0`** へ刷新し、起動時に非互換な旧 Lucene 2.9 インデックス（`segments.gen` 等）を自動削除して同期的にフル再構築（`3.0.0-lucene10-v1`）します。
+20. **Apache Lucene `10.6.0` Java 21ネイティブ刷新＆Web進捗ガイド付き自動移行**：
+    - 全文検索エンジンを旧 Lucene `2.9.4` から Java 21 ネイティブの **Apache Lucene `10.6.0`** へ刷新。起動時に非互換な旧インデックスを自動削除してバックグラウンド再構築（`3.0.0-lucene10-v1`）を開始し、`StartupUpgradeFilter` が進捗バー付きアップグレード画面（`/startup-upgrade-status` 監視）を表示、完了後に自動で `/app/login` へ遷移します。
 
 21. **SuperUser専用 ランタイムSBOM（ソフトウェア構成表）＆ CycloneDX 1.5 / CSVエクスポート**：
     - 8言語対応の SuperUser 専用 **SBOM** 画面を追加。実行環境・コアサブシステム（Lucene/OpenCC/CommonMark/Ollama）・同梱フロントエンドJS（`jQuery`/`YUI`/`Mermaid.js`）・`WEB-INF/lib/*.jar` 全JARを1対1で動的スキャンし、`${jtrac.home}/sbom-cache.json` キャッシュ、リアルタイム検索、**CycloneDX 1.5 JSON** および **UTF-8 BOM CSV** エクスポートに対応しました。

@@ -225,9 +225,9 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
     - **Wildcard-Free Partial Identifier & Legacy Index Compatibility**: Upgraded `IndexSearcher` to translate symbol-connected identifiers (`.`, `@`, `_`, `-`, `/`, `\`, `:`) into atomic-or-conjunction clauses (`exact OR (+part1 +part2)`), ensuring queries like `app.hlmt` or `hlmt@gmail` match `app.hlmt@gmail.com` immediately without typing `*` and without pulling `.com` / `@gmail.com` noise.
     - **Comprehensive IT Path, Port, Log & GUID Escaping**: Safely handles Windows UNC paths (`\\server\share`), drive paths (`C:\Users\admin\`), IP:Port (`192.168.1.10:8080` without misinterpreting `:` as a Lucene field), servlet routes (`/app/item/form`), GPO GUIDs (`{9CECF8CB-...}`), standalone minus signs (`ERROR: connection - timeout`), and `C++`.
 
-20. **Apache Lucene 10.6.0 Native Upgrade & Automatic Legacy Index Migration**:
+20. **Apache Lucene 10.6.0 Native Upgrade & Live Web Progress Upgrade Gatekeeper**:
     - Upgraded full-text search engine from legacy Lucene `2.9.4` to Java 21-native **Apache Lucene `10.6.0`** (`lucene-core`, `lucene-analysis-common`, `lucene-queryparser`), migrating `JtracAnalyzer`, `SubTokenFilter`, `Indexer`, `IndexSearcher`, `Item`, and `History` with zero Lucene deprecation warnings.
-    - Automatically detects and purges incompatible legacy Lucene 2.9 index files (`segments.gen` / `IndexFormatTooOldException`) on startup and runs a synchronous full index rebuild (`lucene.analyzer.version = 3.0.0-lucene10-v1`) before accepting web requests.
+    - Automatically detects and purges incompatible legacy Lucene 2.9 index files (`segments.gen` / `IndexFormatTooOldException`) on startup and launches a non-blocking background index rebuild (`lucene.analyzer.version = 3.0.0-lucene10-v1`). While upgrading, `StartupUpgradeFilter` serves an HTTP 503 live-progress upgrade notice page polling `/startup-upgrade-status` and automatically redirects users to `/app/login` once complete.
 
 21. **SuperUser-Only Runtime Software Bill of Materials (SBOM) & CycloneDX 1.5 / CSV Export**:
     - Added a dedicated SuperUser-only **Software Composition (SBOM)** administration page (`Options → Software Composition (SBOM)`) across all 8 languages, strictly blocking non-SuperUsers and exposing zero unauthenticated REST endpoints.

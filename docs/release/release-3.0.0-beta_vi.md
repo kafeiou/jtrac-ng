@@ -207,8 +207,8 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
     - **Khớp từ ghép không cần ký tự đại diện `*`**: Chuyển đổi chuỗi nối bằng ký hiệu (`.`, `@`, `_`, `-`, `/`, `\`, `:`) thành `từ gốc OR (giao hội AND các từ phụ)`, giúp gõ trực tiếp `app.hlmt` hoặc `hlmt@gmail` tìm thấy ngay `app.hlmt@gmail.com` mà không gây nhiễu.
     - **An toàn với đường dẫn, dấu hai chấm và nhật ký lỗi**: Hỗ trợ dán trực tiếp đường dẫn UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUID `{9CECF8CB-...}`, `ERROR: connection - timeout` và `C++`.
 
-20. **Nâng cấp Apache Lucene `10.6.0` (Java 21) & Tự động chuyển đổi chỉ mục cũ**:
-    - Nâng cấp công cụ tìm kiếm từ Lucene `2.9.4` lên **Apache Lucene `10.6.0`**, tự động dọn dẹp các tệp chỉ mục Lucene 2.9 không tương thích (`segments.gen`) khi khởi động và xây dựng lại chỉ mục đồng bộ.
+20. **Nâng cấp Apache Lucene `10.6.0` (Java 21) & Trang web hiển thị tiến độ nâng cấp trực tiếp**:
+    - Nâng cấp công cụ tìm kiếm từ Lucene `2.9.4` lên **Apache Lucene `10.6.0`**, tự động dọn dẹp chỉ mục cũ (`segments.gen`) và xây dựng lại ở nền; trong lúc nâng cấp `StartupUpgradeFilter` hiển thị trang tiến độ trực tiếp (HTTP 503, `/startup-upgrade-status`) và tự động chuyển hướng sang `/app/login` khi hoàn tất.
 
 21. **Danh mục thành phần phần mềm (Runtime SBOM) dành riêng cho SuperUser & Xuất CycloneDX 1.5 / CSV**:
     - Bổ sung trang quản trị **Thành phần phần mềm (SBOM)** hỗ trợ 8 ngôn ngữ, tự động kiểm kê môi trường thực thi, phân hệ lõi, tài nguyên JS giao diện (`jQuery`, `YUI`, `Mermaid.js`) và toàn bộ thư viện `WEB-INF/lib/*.jar` kèm PURL, lưu cache `sbom-cache.json`, lọc trực tiếp và xuất **CycloneDX 1.5 JSON** / **CSV UTF-8 BOM**.

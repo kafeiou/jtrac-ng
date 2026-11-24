@@ -218,9 +218,9 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
     - **免通配符 `*` 的复合词交集命中**：升级 `IndexSearcher` 将符号串连字符串（`.`、`@`、`_`、`-`、`/`、`\`、`:`）自动转换为 `完整词元 OR (各段子词全部 AND 交集)`，直接输入 `app.hlmt` 或 `hlmt@gmail` 即可精准命中 `app.hlmt@gmail.com`（兼容尚未重建的旧索引且零噪声）。
     - **全方位路径、冒号与 Log 符号安全防呆**：完整支持直接粘贴搜索 Windows UNC 网络路径（`\\hlmt.com.tw\SysVol`）、本地路径（`C:\Users\admin\`）、IP:Port（`192.168.1.10:8080`，不再将 `:` 误判为字段语法）、网址路径（`/app/item/form`）、GPO GUID（`{9CECF8CB-...}`）、含独立减号的日志（`ERROR: connection - timeout`）及 `C++`。
 
-20. **Apache Lucene `10.6.0` Java 21 原生升级与旧版索引无痛自动迁移**：
+20. **Apache Lucene `10.6.0` Java 21 原生升级与网页实时升级进度引导页**：
     - 将全文检索引擎从旧版 Lucene `2.9.4` 全面升级至 Java 21 原生 **Apache Lucene `10.6.0`**（`lucene-core`、`lucene-analysis-common`、`lucene-queryparser`），重构 `JtracAnalyzer`、`SubTokenFilter`、`Indexer`、`IndexSearcher`、`Item` 与 `History`，零废弃 API 警告。
-    - 容器启动时自动检测并清理不兼容的旧版 Lucene 2.9 索引文件（`segments.gen` / `IndexFormatTooOldException`），并在接受连接前同步完成全库 Lucene 10 索引重建（`lucene.analyzer.version = 3.0.0-lucene10-v1`）。
+    - 容器启动时自动检测并清理不兼容的旧版 Lucene 2.9 索引文件（`segments.gen` / `IndexFormatTooOldException`），并立即开放端口在后台执行全库 Lucene 10 索引重建（`lucene.analyzer.version = 3.0.0-lucene10-v1`）；重建期间由 `StartupUpgradeFilter` 展示 HTTP 503 升级进度引导页（轮询 `/startup-upgrade-status`），完成后自动跳转进入 `/app/login` 登录页面。
 
 21. **SuperUser 专属运行时软件组成清单 (Runtime SBOM) 与 CycloneDX 1.5 / CSV 导出**：
     - 新增最高管理员专属的 **“选项菜单 → 软件组成清单 (SBOM)”** 页面（完整支持 8 国语言），严格拦截非 SuperUser 访问且不开放任何未认证 REST 接口。
