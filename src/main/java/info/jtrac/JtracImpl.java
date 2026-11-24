@@ -387,7 +387,7 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         // Proactively rebuild Lucene indexes in background if legacy data was migrated or analyzer upgraded
         boolean dbMigrated = HsqldbDatabaseMigrator.isDatabaseMigrated();
         String analyzerVersion = config.get("lucene.analyzer.version");
-        boolean analyzerUpgraded = !"3.0.0-subtoken-v1".equals(analyzerVersion);
+        boolean analyzerUpgraded = !"3.0.0-subtoken-v2".equals(analyzerVersion);
         if (attachmentsMigrated || dbMigrated || analyzerUpgraded) {
             logger.info("Lucene index rebuild required (attachmentsMigrated={}, dbMigrated={}, analyzerUpgraded={}). Rebuild will be scheduled upon container startup completion.",
                     attachmentsMigrated, dbMigrated, analyzerUpgraded);
@@ -1227,8 +1227,8 @@ public class JtracImpl implements Jtrac, org.springframework.context.Application
         batchInfo.setComplete(true);
         logger.info("indexing completed successfully, total indexed: " + batchInfo.getCurrentPosition());
         try {
-            storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v1"));
-            logger.info("updated lucene.analyzer.version to 3.0.0-subtoken-v1 upon successful index rebuild");
+            storeConfig(new Config("lucene.analyzer.version", "3.0.0-subtoken-v2"));
+            logger.info("updated lucene.analyzer.version to 3.0.0-subtoken-v2 upon successful index rebuild");
         } catch (Exception e) {
             logger.warn("failed to update lucene.analyzer.version config after rebuild: " + e.getMessage(), e);
         }

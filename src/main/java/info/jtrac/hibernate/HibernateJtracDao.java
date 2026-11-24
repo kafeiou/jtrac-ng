@@ -1067,7 +1067,7 @@ public class HibernateJtracDao implements JtracDao {
             ensureDefaultConfig(session, "llm.retrieval.stopwords", "通知,工單");
             ensureDefaultConfig(session, "llm.search.expansion.enabled", "true");
             ensureDefaultConfig(session, "llm.search.expansion.timeout", "6");
-            ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-subtoken-v1");
+            ensureDefaultConfig(session, "lucene.analyzer.version", "3.0.0-subtoken-v2");
 
             List<SpaceSequence> ssList = session.createQuery("from SpaceSequence", SpaceSequence.class).getResultList();
             Map<Long, SpaceSequence> ssMap = new HashMap<Long, SpaceSequence>(ssList.size());

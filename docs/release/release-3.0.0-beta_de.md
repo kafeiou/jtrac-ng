@@ -202,6 +202,10 @@ Aufbauend auf der Architekturmodernisierung von Version 2.0.0 führt JTrac NG 3.
     - **Sub-Token-Splitting nur zur Indexierungszeit (kein `.com`-/`gmail`-Rauschen)**: Deaktiviert `@ . _ -`-Aufspaltung zur Suchzeit bei beibehaltener Index-Zerlegung (inkl. lokalem E-Mail-Teil `app.hlmt`), sodass vollständige Suchen nach `app.hlmt@gmail.com` exakt treffen, während Kurzsuchen wie `hlmt` oder `gmail` weiterhin funktionieren.
     - **Transparente Kapsel-Badges im Suchbanner**: Zeigt aktive aufgeteilte und erweiterte Suchbegriffe im Ergebnisbanner (`ItemListPanel`) übersichtlich als Badges an.
 
+19. **UND-Verknüpfung für zusammengesetzte Bezeichner & Schutz für IT-Sonderzeichen (`app.hlmt`, UNC-Pfade, IP:Port, GUIDs)**:
+    - **Teilbezeichner-Suche ohne Wildcard `*`**: Übersetzt durch Symbole verbundene Tokens (`.`, `@`, `_`, `-`, `/`, `\`, `:`) in `Exakt OR (+Teil1 +Teil2)`, sodass `app.hlmt` oder `hlmt@gmail` sofort `app.hlmt@gmail.com` ohne Rauschen findet.
+    - **Sichere Verarbeitung von Pfaden, Ports & Logs**: Unterstützt Windows-UNC-Pfade (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUIDs (`{9CECF8CB-...}`), `ERROR: connection - timeout` und `C++`.
+
 ---
 
 ## 7. Upgrade- und Kompatibilitätshinweise

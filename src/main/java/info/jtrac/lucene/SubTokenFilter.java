@@ -26,7 +26,7 @@ public class SubTokenFilter extends TokenFilter {
     private final Queue<String> subTokens = new ArrayDeque<String>();
     private State savedState;
 
-    private static final Pattern DELIMITERS = Pattern.compile("[@._\\-]+");
+    private static final Pattern DELIMITERS = Pattern.compile("[@._\\-/:\\\\,]+");
 
     public SubTokenFilter(TokenStream input) {
         super(input);
@@ -52,7 +52,7 @@ public class SubTokenFilter extends TokenFilter {
 
         String term = termAtt.term();
         if (term != null && term.length() > 2) {
-            if (term.indexOf('@') != -1 || term.indexOf('.') != -1 || term.indexOf('_') != -1 || term.indexOf('-') != -1) {
+            if (containsSubTokenDelimiter(term)) {
                 String[] parts = DELIMITERS.split(term);
                 if (parts.length > 1) {
                     savedState = captureState();
@@ -80,5 +80,15 @@ public class SubTokenFilter extends TokenFilter {
         super.reset();
         subTokens.clear();
         savedState = null;
+    }
+
+    private static boolean containsSubTokenDelimiter(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '@' || c == '.' || c == '_' || c == '-' || c == '/' || c == '\\' || c == ':' || c == ',') {
+                return true;
+            }
+        }
+        return false;
     }
 }

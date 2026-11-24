@@ -203,6 +203,10 @@ Kế thừa kiến trúc hiện đại từ phiên bản 2.0.0, JTrac NG 3.0.0-b
     - **Chỉ tách từ phụ khi lập chỉ mục (Loại bỏ nhiễu `.com` / `gmail` khi tìm kiếm)**: Tắt tách ký tự `@ . _ -` lúc truy vấn nhưng giữ nguyên `SubTokenFilter` lúc lập chỉ mục (bổ sung phần tên trước `@` như `app.hlmt`), giúp tìm `app.hlmt@gmail.com` khớp chính xác mà không kéo theo các sự vụ `.com` hay `@gmail.com` không liên quan.
     - **Hiển thị huy hiệu từ khóa mở rộng minh bạch**: Nâng cấp thanh thông báo kết quả tìm kiếm (`ItemListPanel`) đa ngôn ngữ để hiển thị các từ khóa tách/mở rộng dưới dạng huy hiệu trực quan.
 
+19. **Tăng cường giao hội từ ghép chứa ký hiệu & Bảo vệ cú pháp CNTT đặc biệt (`app.hlmt`, đường dẫn UNC, IP:Port, GUID)**：
+    - **Khớp từ ghép không cần ký tự đại diện `*`**: Chuyển đổi chuỗi nối bằng ký hiệu (`.`, `@`, `_`, `-`, `/`, `\`, `:`) thành `từ gốc OR (giao hội AND các từ phụ)`, giúp gõ trực tiếp `app.hlmt` hoặc `hlmt@gmail` tìm thấy ngay `app.hlmt@gmail.com` mà không gây nhiễu.
+    - **An toàn với đường dẫn, dấu hai chấm và nhật ký lỗi**: Hỗ trợ dán trực tiếp đường dẫn UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUID `{9CECF8CB-...}`, `ERROR: connection - timeout` và `C++`.
+
 ---
 
 ## 7. Hướng dẫn nâng cấp và tính tương thích

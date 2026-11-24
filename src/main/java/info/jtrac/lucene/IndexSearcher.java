@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -291,8 +292,9 @@ public class IndexSearcher {
             return trimmed;
         }
 
-        // If already contains wildcard or lucene field syntax, preserve as-is
-        if (trimmed.indexOf('*') != -1 || trimmed.indexOf('?') != -1 || trimmed.indexOf(':') != -1) {
+        // If already contains explicit wildcard or explicit Lucene index field prefix, preserve as-is
+        if (trimmed.indexOf('*') != -1 || trimmed.indexOf('?') != -1
+                || trimmed.startsWith("text:") || trimmed.startsWith("docId:")) {
             return trimmed;
         }
 
@@ -420,35 +422,147 @@ public class IndexSearcher {
         if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
             return trimmed;
         }
-        String[] tokens = trimmed.split("\\s+");
+        String[] tokens = trimmed.split("[\\s\\u3000]+");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tokens.length; i++) {
             String token = tokens[i];
             if (token.isEmpty()) {
                 continue;
             }
+            String clause = buildTokenClause(token);
+            if (clause.isEmpty()) {
+                continue;
+            }
             if (sb.length() > 0) {
                 sb.append(" ");
             }
-            if (isEligibleForWildcard(token)) {
-                sb.append("(").append(token).append(" OR ").append(token).append("*)");
-            } else {
-                sb.append(token);
-            }
+            sb.append(clause);
         }
-        return sb.length() > 0 ? sb.toString() : trimmed;
+        return sb.length() > 0 ? sb.toString() : QueryParser.escape(trimmed);
     }
 
-    private boolean isEligibleForWildcard(String token) {
-        if (token == null || token.length() < 2) {
+    /**
+     * Translates a single whitespace-delimited token into a safe, noise-free Lucene query clause:
+     * - Pure letter/digit word (e.g. "win", "測試"): "(token OR token*)"
+     * - Standalone punctuation (e.g. "-" in "Error - timeout"): skipped ("") so it never triggers NOT
+     * - Symbol-connected compound token (., @, _, -, /, \, :, brackets, GUIDs, paths, URLs, C++):
+     *   Splits on non-letter/digit symbols into sub-parts and combines them with AND ("+part1 +part2"),
+     *   paired with exact atomic token match for HOST/EMAIL tokens (e.g. "(app\\.hlmt OR (+app +hlmt))").
+     */
+    private String buildTokenClause(String token) {
+        if (isPureLetterOrDigit(token)) {
+            if (token.length() >= 2) {
+                return "(" + token + " OR " + token + "*)";
+            }
+            return QueryParser.escape(token);
+        }
+
+        String[] rawParts = token.split("[^\\p{L}\\p{N}]+");
+        List<String> meaningfulParts = new ArrayList<String>();
+        List<String> singleCharFallbacks = new ArrayList<String>();
+        for (String rp : rawParts) {
+            if (rp == null || rp.isEmpty()) {
+                continue;
+            }
+            String lower = rp.toLowerCase(Locale.ROOT);
+            if (StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(lower)) {
+                continue;
+            }
+            if (rp.length() >= 2 || OllamaSearchExpander.containsChinese(rp)) {
+                if (!containsIgnoreCase(meaningfulParts, rp)) {
+                    meaningfulParts.add(rp);
+                }
+            } else {
+                if (!containsIgnoreCase(singleCharFallbacks, rp)) {
+                    singleCharFallbacks.add(rp);
+                }
+            }
+        }
+
+        if (meaningfulParts.isEmpty()) {
+            meaningfulParts = singleCharFallbacks;
+        }
+        if (meaningfulParts.isEmpty()) {
+            // Pure punctuation / operator token (e.g. "-", "|", "==>")
+            return "";
+        }
+
+        if (meaningfulParts.size() == 1) {
+            String single = meaningfulParts.get(0);
+            if (single.length() >= 2 && isPureLetterOrDigit(single)) {
+                return "(" + single + " OR " + single + "*)";
+            }
+            return QueryParser.escape(single);
+        }
+
+        StringBuilder conj = new StringBuilder("(");
+        for (int i = 0; i < meaningfulParts.size(); i++) {
+            if (i > 0) {
+                conj.append(" ");
+            }
+            conj.append("+").append(QueryParser.escape(meaningfulParts.get(i)));
+        }
+        conj.append(")");
+
+        if (isAtomicHostOrEmailToken(token)) {
+            return "(" + QueryParser.escape(token) + " OR " + conj.toString() + ")";
+        }
+        return conj.toString();
+    }
+
+    private boolean isPureLetterOrDigit(String s) {
+        if (s == null || s.isEmpty()) {
             return false;
         }
-        for (int i = 0; i < token.length(); i++) {
-            char c = token.charAt(i);
-            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-') {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isLetterOrDigit(s.charAt(i))) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Checks if Lucene StandardTokenizer keeps this token as a single atomic HOST or EMAIL token
+     * (either dotted host/identifier like "app.hlmt" or full email "app.hlmt@gmail.com" with dot after '@').
+     */
+    private boolean isAtomicHostOrEmailToken(String token) {
+        if (token == null || token.length() < 3) {
+            return false;
+        }
+        if (token.charAt(0) == '.' || token.charAt(0) == '@'
+                || token.charAt(token.length() - 1) == '.' || token.charAt(token.length() - 1) == '@') {
+            return false;
+        }
+        int atCount = 0;
+        int atPos = -1;
+        int lastDotPos = -1;
+        for (int i = 0; i < token.length(); i++) {
+            char c = token.charAt(i);
+            if (c == '@') {
+                atCount++;
+                atPos = i;
+                if (atCount > 1) {
+                    return false;
+                }
+            } else if (c == '.') {
+                lastDotPos = i;
+            } else if (!Character.isLetterOrDigit(c)) {
+                return false;
+            }
+        }
+        if (atCount == 1) {
+            return lastDotPos > atPos + 1;
+        }
+        return lastDotPos > 0;
+    }
+
+    private boolean containsIgnoreCase(List<String> list, String target) {
+        for (String item : list) {
+            if (item.equalsIgnoreCase(target)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

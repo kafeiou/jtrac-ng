@@ -214,6 +214,10 @@ JTrac NG 3.0.0-beta 在 2.0.0 核心现代化架构的基础上，引进了革�
     - **索引时分词、搜索时不乱拆 Email／文件名（彻底消除 `.com` 噪声）**：搜索端停用 `@ . _ -` 符号拆解，保留索引端 `SubTokenFilter`（并新增索引 `@` 前账号本体如 `app.hlmt`），使搜索完整 `app.hlmt@gmail.com` 时仅精准命中该邮箱，不再捞出无关的 `.com` 或 `@gmail.com` 工单，同时单搜片段 `hlmt`、`app.hlmt` 或 `gmail` 依然精准命中。
     - **搜索结果横幅扩展词胶囊标签呈现**：升级 `ItemListPanel` 搜索提示栏与多语系资源文件，自动以深浅色自适应胶囊标签透明展示实际参与检索的拆分与扩展词汇（单纯 Email 无额外扩展时自动隐藏保持利落）。
 
+19. **复合符号搜索交集强化与全场景 IT 特殊语法防呆（`app.hlmt`、UNC 路径、IP:Port、GUID）**：
+    - **免通配符 `*` 的复合词交集命中**：升级 `IndexSearcher` 将符号串连字符串（`.`、`@`、`_`、`-`、`/`、`\`、`:`）自动转换为 `完整词元 OR (各段子词全部 AND 交集)`，直接输入 `app.hlmt` 或 `hlmt@gmail` 即可精准命中 `app.hlmt@gmail.com`（兼容尚未重建的旧索引且零噪声）。
+    - **全方位路径、冒号与 Log 符号安全防呆**：完整支持直接粘贴搜索 Windows UNC 网络路径（`\\hlmt.com.tw\SysVol`）、本地路径（`C:\Users\admin\`）、IP:Port（`192.168.1.10:8080`，不再将 `:` 误判为字段语法）、网址路径（`/app/item/form`）、GPO GUID（`{9CECF8CB-...}`）、含独立减号的日志（`ERROR: connection - timeout`）及 `C++`。
+
 ---
 
 ## 七、版本升级与兼容性指引

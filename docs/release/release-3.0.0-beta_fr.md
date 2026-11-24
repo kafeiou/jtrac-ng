@@ -202,6 +202,10 @@ Dans la continuité de la modernisation architecturale 2.0.0, JTrac NG 3.0.0-bet
     - **Découpage en sous-jetons uniquement à l'indexation (suppression du bruit `.com` / `gmail`)** : Désactivation de l'éclatement `@ . _ -` au moment de la requête tout en conservant `SubTokenFilter` à l'indexation (y compris l'identifiant local `app.hlmt`), garantissant une recherche exacte sur `app.hlmt@gmail.com` tout en préservant les recherches courtes (`hlmt`, `gmail`).
     - **Badges capsules des termes étendus** : Mise à niveau de la bannière de résultats (`ItemListPanel`) en 8 langues pour afficher clairement les mots-clés divisés et étendus.
 
+19. **Conjonction de recherche sur identifiants composés et protection syntaxique IT (`app.hlmt`, chemins UNC, IP:Port, GUID)** :
+    - **Recherche partielle sans joker `*`** : Traduit les jetons reliés par symboles (`.`, `@`, `_`, `-`, `/`, `\`, `:`) en `exact OR (+partie1 +partie2)`, permettant à `app.hlmt` ou `hlmt@gmail` de trouver immédiatement `app.hlmt@gmail.com` sans bruit.
+    - **Prise en charge sécurisée des chemins, ports et journaux** : Supporte les chemins UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUID (`{9CECF8CB-...}`), `ERROR: connection - timeout` et `C++`.
+
 ---
 
 ## 7. Guide de mise à niveau et de compatibilité

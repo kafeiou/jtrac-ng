@@ -221,6 +221,10 @@ Building upon the core modernization of 2.0.0, JTrac NG 3.0.0-beta introduces th
     - **Index-Time Only Sub-Token Splitting (Eliminating `.com` / `gmail` Query Noise)**: Configured `IndexSearcher` to disable `@ . _ -` sub-token explosion at query time while preserving `SubTokenFilter` (including email local-part indexing) at index time — searching full `app.hlmt@gmail.com` matches precisely without pulling unrelated `.com` / `@gmail.com` tickets, while short queries like `hlmt`, `app.hlmt`, or `gmail` continue to match.
     - **Transparent Expanded Search Badges**: Upgraded the search results banner (`ItemListPanel`) across 8 languages to display active split and expanded terms as theme-aware capsule badges.
 
+19. **Symbol-Connected Search Conjunction & Special IT Syntax Guardrails (`app.hlmt`, UNC Paths, IP:Port, GUIDs)**:
+    - **Wildcard-Free Partial Identifier & Legacy Index Compatibility**: Upgraded `IndexSearcher` to translate symbol-connected identifiers (`.`, `@`, `_`, `-`, `/`, `\`, `:`) into atomic-or-conjunction clauses (`exact OR (+part1 +part2)`), ensuring queries like `app.hlmt` or `hlmt@gmail` match `app.hlmt@gmail.com` immediately without typing `*` and without pulling `.com` / `@gmail.com` noise.
+    - **Comprehensive IT Path, Port, Log & GUID Escaping**: Safely handles Windows UNC paths (`\\server\share`), drive paths (`C:\Users\admin\`), IP:Port (`192.168.1.10:8080` without misinterpreting `:` as a Lucene field), servlet routes (`/app/item/form`), GPO GUIDs (`{9CECF8CB-...}`), standalone minus signs (`ERROR: connection - timeout`), and `C++`.
+
 ---
 
 ## 7. Upgrade & Compatibility Guidance

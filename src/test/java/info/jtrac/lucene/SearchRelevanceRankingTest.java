@@ -93,6 +93,82 @@ public class SearchRelevanceRankingTest {
         Assert.assertEquals(2, gmailHits.size());
         Assert.assertTrue(gmailHits.contains(1L));
         Assert.assertTrue(gmailHits.contains(2L));
+
+        // 4. Searching partial slice "hlmt@gmail" (no wildcard *) finds ONLY item 1, NOT item 2!
+        Assert.assertEquals(Collections.singletonList(1L), searcher.findItemIdsContainingText("hlmt@gmail"));
+    }
+
+    @Test
+    public void testLegacyUnrebuiltIndexStillFindsAppHlmtWithoutWildcardAndAllSpecialSymbolsWork() throws Exception {
+        // Simulate a LEGACY v1 index entry where ONLY full email + individual sub-tokens (app, hlmt, gmail, com)
+        // were indexed (WITHOUT the new 'app.hlmt' localPart token!)
+        org.apache.lucene.store.Directory dir = (org.apache.lucene.store.Directory) context.getBean("indexDirectory");
+        org.apache.lucene.index.IndexWriter legacyWriter = new org.apache.lucene.index.IndexWriter(
+                dir, new org.apache.lucene.analysis.WhitespaceAnalyzer(),
+                !org.apache.lucene.index.IndexReader.indexExists(dir),
+                org.apache.lucene.index.IndexWriter.MaxFieldLength.UNLIMITED);
+        try {
+            org.apache.lucene.document.Document legacyDoc = new org.apache.lucene.document.Document();
+            legacyDoc.add(new org.apache.lucene.document.Field("docId", "item:901",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NOT_ANALYZED));
+            legacyDoc.add(new org.apache.lucene.document.Field("id", "901",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
+            legacyDoc.add(new org.apache.lucene.document.Field("type", "item",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
+            // Legacy tokens: NO 'app.hlmt' token!
+            legacyDoc.add(new org.apache.lucene.document.Field("text", "app.hlmt@gmail.com app hlmt gmail com",
+                    org.apache.lucene.document.Field.Store.NO, org.apache.lucene.document.Field.Index.TOKENIZED));
+            legacyWriter.addDocument(legacyDoc);
+
+            org.apache.lucene.document.Document noiseDoc = new org.apache.lucene.document.Document();
+            noiseDoc.add(new org.apache.lucene.document.Field("docId", "item:902",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NOT_ANALYZED));
+            noiseDoc.add(new org.apache.lucene.document.Field("id", "902",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
+            noiseDoc.add(new org.apache.lucene.document.Field("type", "item",
+                    org.apache.lucene.document.Field.Store.YES, org.apache.lucene.document.Field.Index.NO));
+            noiseDoc.add(new org.apache.lucene.document.Field("text", "other@gmail.com other gmail com app",
+                    org.apache.lucene.document.Field.Store.NO, org.apache.lucene.document.Field.Index.TOKENIZED));
+            legacyWriter.addDocument(noiseDoc);
+        } finally {
+            legacyWriter.close();
+        }
+
+        // Plain "app.hlmt" (NO '*' wildcard!) MUST hit 901 even on the legacy un-rebuilt index, and NOT hit 902!
+        Assert.assertEquals(Collections.singletonList(901L), searcher.findItemIdsContainingText("app.hlmt"));
+
+        // Now index real items containing tricky IT symbols: UNC paths, C:\ paths, IP:Port, URLs, GUIDs, minus sign, C++
+        Item pathItem = new Item();
+        pathItem.setId(910L);
+        pathItem.setSummary("GPO 路徑 \\\\hlmt.com.tw\\SysVol\\Policies\\{9CECF8CB-B752-4E7C}");
+        pathItem.setDetail("本地日誌 C:\\Users\\admin\\jtrac.log 連線至 https://192.168.1.10:8080/app/item/form 發生 ERROR: connection - timeout (500) C++");
+        indexer.index(pathItem);
+
+        Item unrelatedAppItem = new Item();
+        unrelatedAppItem.setId(911L);
+        unrelatedAppItem.setSummary("一般 app 畫面微調");
+        unrelatedAppItem.setDetail("無關的 http://example.com 測試");
+        indexer.index(unrelatedAppItem);
+
+        // 1. Windows UNC path
+        Assert.assertEquals(Collections.singletonList(910L),
+                searcher.findItemIdsContainingText("\\\\hlmt.com.tw\\SysVol\\Policies"));
+        // 2. Windows drive path (with ':' and trailing '\')
+        Assert.assertEquals(Collections.singletonList(910L),
+                searcher.findItemIdsContainingText("C:\\Users\\admin\\"));
+        // 3. GPO GUID with curly braces '{}' and hyphens '-' (must NOT throw RangeQuery ParseException!)
+        Assert.assertEquals(Collections.singletonList(910L),
+                searcher.findItemIdsContainingText("{9CECF8CB-B752-4E7C}"));
+        // 4. IP:Port (':' must NOT be treated as Lucene field name!)
+        Assert.assertEquals(Collections.singletonList(910L),
+                searcher.findItemIdsContainingText("192.168.1.10:8080"));
+        // 5. URL / Servlet path (must NOT match 911 just because of 'app'!)
+        Assert.assertEquals(Collections.singletonList(910L),
+                searcher.findItemIdsContainingText("/app/item/form"));
+        // 6. Log prefix with ':' and standalone '-' ("ERROR: connection - timeout" must NOT exclude 'timeout'!)
+        Assert.assertTrue(searcher.findItemIdsContainingText("ERROR: connection - timeout").contains(910L));
+        // 7. C++ with trailing '+'
+        Assert.assertTrue(searcher.findItemIdsContainingText("C++").contains(910L));
     }
 
     @Test

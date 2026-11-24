@@ -202,6 +202,10 @@ Sobre la base de la modernización estructural de la versión 2.0.0, JTrac NG 3.
     - **División de sub-tokens solo al indexar (eliminando ruido de `.com` / `gmail`)**: Se desactivó la fragmentación por `@ . _ -` en tiempo de consulta manteniendo `SubTokenFilter` al indexar (incluyendo la parte local `app.hlmt`), logrando coincidencias exactas al buscar `app.hlmt@gmail.com` sin arrastrar tickets ajenos con `.com` o `@gmail.com`.
     - **Insignias transparentes de búsqueda expandida**: El banner de resultados (`ItemListPanel`) muestra ahora los términos divididos y expandidos mediante etiquetas tipo cápsula en 8 idiomas.
 
+19. **Conjunción de búsqueda para identificadores con símbolos y protección de sintaxis TI (`app.hlmt`, rutas UNC, IP:Puerto, GUIDs)**:
+    - **Búsqueda parcial sin comodín `*`**: Convierte identificadores unidos por símbolos (`.`, `@`, `_`, `-`, `/`, `\`, `:`) en `exacto OR (+parte1 +parte2)`, permitiendo que `app.hlmt` o `hlmt@gmail` encuentren `app.hlmt@gmail.com` sin ruido.
+    - **Soporte seguro para rutas, puertos y registros**: Compatible con rutas UNC (`\\server\share`), `C:\Users\admin\`, `192.168.1.10:8080`, `/app/item/form`, GUIDs (`{9CECF8CB-...}`), `ERROR: connection - timeout` y `C++`.
+
 ---
 
 ## 7. Guía de actualización y compatibilidad
